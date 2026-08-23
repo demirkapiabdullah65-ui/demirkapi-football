@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>Demirkapı Football</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    touch-action:none;
+}
+
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:#071b12;
+    color:white;
+}
+
+/* ANA MENÜ */
+#menu{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:linear-gradient(135deg,#06150e,#126b38);
+    z-index:10;
+    text-align:center;
+}
+
+#menu h1{
+    font-size:42px;
+    margin:0 0 10px;
+    text-shadow:0 4px 4px #000;
+}
+
+#menu p{
+    opacity:.8;
+    margin-bottom:25px;
+}
+
+button{
+    border:0;
+    border-radius:14px;
+    padding:15px 30px;
+    margin:7px;
+    font-size:19px;
+    font-weight:bold;
+    background:#20c56a;
+    color:#062b16;
+}
+
+/* TAKIM SEÇME */
+#teams{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#071b12;
+    z-index:9;
+    padding:25px;
+    text-align:center;
+    overflow:auto;
+}
+
+.teamBox{
+    max-width:500px;
+    margin:auto;
+}
+
+.team{
+    display:inline-block;
+    width:140px;
+    padding:15px;
+    margin:7px;
+    border-radius:15px;
+    background:#ffffff12;
+    border:2px solid #ffffff22;
+}
+
+.team.selected{
+    border-color:#20c56a;
+    background:#20c56a33;
+}
+
+.logo{
+    font-size:40px;
+}
+
+/* OYUN */
+#game{
+    display:none;
+    width:100vw;
+    height:100vh;
+}
+
+canvas{
+    width:100vw;
+    height:100vh;
+    display:block;
+    background:#168343;
+}
+
+#score{
+    position:fixed;
+    top:10px;
+    left:50%;
+    transform:translateX(-50%);
+    background:#000c;
+    padding:8px 20px;
+    border-radius:12px;
+    font-size:22px;
+    font-weight:bold;
+    z-index:3;
+}
+
+#timer{
+    position:fixed;
+    top:50px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:14px;
+    z-index:3;
+}
+
+/* TELEFON KONTROLLERİ */
+.controls{
+    position:fixed;
+    bottom:12px;
+    left:0;
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    padding:0 15px;
+    z-index:5;
+}
+
+.pad,
+.actions{
+    display:flex;
+    gap:7px;
+}
+
+.ctrl{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    background:#ffffff35;
+    border:2px solid #ffffff99;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.kick{
+    width:70px;
+    height:70px;
+    background:#20c56acc;
+}
+
+/* BİTİŞ */
+#finish{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#000d;
+    z-index:20;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+}
+
+#finish h1{
+    font-size:38px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ANA MENÜ -->
+<div id="menu">
+
+    <h1>⚽ DEMİRKAPI FOOTBALL</h1>
+
+    <p>2 Kişilik Futbol Oyunu</p>
+
+    <button onclick="openTeams()">
+        👥 2 KİŞİLİK MAÇ
+    </button>
+
+</div>
+
+
+<!-- TAKIM SEÇME -->
+<div id="teams">
+
+    <h1>⚽ TAKIM SEÇ</h1>
+
+    <div class="teamBox">
+
+        <div class="team" onclick="selectTeam(this,'Beşiktaş')">
+            <div class="logo">⚫</div>
+            Beşiktaş
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Galatasaray')">
+            <div class="logo">🟡</div>
+            Galatasaray
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Fenerbahçe')">
+            <div class="logo">🔵</div>
+            Fenerbahçe
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Trabzonspor')">
+            <div class="logo">🔴</div>
+            Trabzonspor
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Barcelona')">
+            <div class="logo">🔵</div>
+            Barcelona
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Real Madrid')">
+            <div class="logo">⚪</div>
+            Real Madrid
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Manchester City')">
+            <div class="logo">🔷</div>
+            Manchester City
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Liverpool')">
+            <div class="logo">🔴</div>
+            Liverpool
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Bayern Münih')">
+            <div class="logo">🔴</div>
+            Bayern Münih
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'PSG')">
+            <div class="logo">🔵</div>
+            PSG
+        </div>
+
+        <div class="team" onclick="selectTeam(this,'Demirkapı FK')">
+            <div class="logo">🟢</div>
+            Demirkapı FK
+        </div>
+
+    </div>
+
+    <p id="selectedText">
+        Önce takım seç
+    </p>
+
+    <button onclick="startGame()">
+        ⚽ MAÇA BAŞLA
+    </button>
+
+</div>
+
+
+<!-- OYUN -->
+<div id="game">
+
+    <canvas id="canvas"></canvas>
+
+    <div id="score">
+        🔵 0 - 0 🔴
+    </div>
+
+    <div id="timer">
+        120
+    </div>
+
+    <div class="controls">
+
+        <!-- OYUNCU 1 -->
+        <div class="pad">
+
+            <div class="ctrl"
+                 data-key="w">
+                ▲
+            </div>
+
+            <div class="ctrl"
+                 data-key="a">
+                ◀
+            </div>
+
+            <div class="ctrl"
+                 data-key="s">
+                ▼
+            </div>
+
+            <div class="ctrl"
+                 data-key="d">
+                ▶
+            </div>
+
+        </div>
+
+        <!-- ŞUTLAR -->
+        <div class="actions">
+
+            <div class="ctrl kick"
+                 data-key="f">
+                ⚽
+            </div>
+
+            <div class="ctrl kick"
+                 data-key="l">
+                ⚽
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MAÇ SONU -->
+<div id="finish">
+
+    <h1>🏆 MAÇ BİTTİ</h1>
+
+    <h2 id="finalScore"></h2>
+
+    <button onclick="location.reload()">
+        🔄 TEKRAR OYNA
+    </button>
+
+</div>
+
+
+<script>
+
+const canvas =
+document.getElementById("canvas");
+
+const ctx =
+canvas.getContext("2d");
+
+let W,H;
+
+let keys={};
+
+let score1=0;
+let score2=0;
+
+let time=120;
+
+let running=false;
+
+let lastTime=0;
+
+let team1="";
+let team2="";
+
+let selectingPlayer=1;
+
+
+/* OYUNCULAR */
+
+let p1={
+    x:0,
+    y:0,
+    r:18,
+    color:"#1476ff",
+    vx:0,
+    vy:0,
+    shot:false
+};
+
+let p2={
+    x:0,
+    y:0,
+    r:18,
+    color:"#ef3340",
+    vx:0,
+    vy:0,
+    shot:false
+};
+
+
+/* TOP */
+
+let ball={
+    x:0,
+    y:0,
+    r:10,
+    vx:0,
+    vy:0
+};
+
+
+/* EKRAN */
+
+function resize(){
+
+    W=window.innerWidth;
+    H=window.innerHeight;
+
+    canvas.width=
+        W*devicePixelRatio;
+
+    canvas.height=
+        H*devicePixelRatio;
+
+    ctx.setTransform(
+        devicePixelRatio,
+        0,
+        0,
+        devicePixelRatio,
+        0,
+        0
+    );
+
+    resetPositions();
+}
+
+window.addEventListener(
+    "resize",
+    resize
+);
+
+
+/* TAKIM EKRANI */
+
+function openTeams(){
+
+    document.getElementById("menu")
+        .style.display="none";
+
+    document.getElementById("teams")
+        .style.display="block";
+
+}
+
+
+/* TAKIM SEÇ */
+
+function selectTeam(element,name){
+
+    let selected =
+        document.querySelectorAll(
+            ".team.selected"
+        );
+
+    if(
+        selectingPlayer===1
+    ){
+
+        document
+        .querySelectorAll(".team")
+        .forEach(t=>
+            t.classList.remove("selected")
+        );
+
+        element.classList.add(
+            "selected"
+        );
+
+        team1=name;
+
+        selectingPlayer=2;
+
+        document.getElementById(
+            "selectedText"
+        ).innerText=
+        "🔵 Oyuncu 1: "+
+        team1+
+        "\n\n🔴 Şimdi Oyuncu 2 takımını seç";
+
+    }else{
+
+        team2=name;
+
+        document.getElementById(
+            "selectedText"
+        ).innerText=
+        "🔵 "+team1+
+        "  VS  "+
+        "🔴 "+team2;
+
+        selectingPlayer=1;
+
+    }
+
+}
+
+
+/* OYUNU BAŞLAT */
+
+function startGame(){
+
+    if(!team1){
+
+        alert(
+            "Önce Oyuncu 1 için takım seç!"
+        );
+
+        return;
+    }
+
+    if(!team2){
+
+        alert(
+            "Önce Oyuncu 2 için takım seç!"
+        );
+
+        return;
+    }
+
+    document.getElementById(
+        "teams"
+    ).style.display="none";
+
+    document.getElementById(
+        "game"
+    ).style.display="block";
+
+    resize();
+
+    running=true;
+
+    lastTime=
+        performance.now();
+
+    requestAnimationFrame(loop);
+
+}
+
+
+/* POZİSYONLARI SIFIRLA */
+
+function resetPositions(){
+
+    if(!W || !H)
+        return;
+
+    p1.x=W*.25;
+    p1.y=H*.5;
+
+    p2.x=W*.75;
+    p2.y=H*.5;
+
+    ball.x=W*.5;
+    ball.y=H*.5;
+
+    ball.vx=0;
+    ball.vy=0;
+
+}
+
+
+/* KLAVYE */
+
+window.addEventListener(
+    "keydown",
+    e=>{
+
+        keys[
+            e.key.toLowerCase()
+        ]=true;
+
+    }
+);
+
+window.addEventListener(
+    "keyup",
+    e=>{
+
+        keys[
+            e.key.toLowerCase()
+        ]=false;
+
+    }
+);
+
+
+/* TELEFON */
+
+document
+.querySelectorAll(".ctrl")
+.forEach(btn=>{
+
+    btn.addEventListener(
+        "pointerdown",
+        ()=>{
+            keys[
+                btn.dataset.key
+            ]=true;
+        }
+    );
+
+    btn.addEventListener(
+        "pointerup",
+        ()=>{
+            keys[
+                btn.dataset.key
+            ]=false;
+        }
+    );
+
+    btn.addEventListener(
+        "pointercancel",
+        ()=>{
+            keys[
+                btn.dataset.key
+            ]=false;
+        }
+    );
+
+});
+
+
+/* OYUNCU HAREKET */
+
+function movePlayer(
+    player,
+    up,
+    down,
+    left,
+    right,
+    dt
+){
+
+    let x=
+        (keys[right]?1:0)-
+        (keys[left]?1:0);
+
+    let y=
+        (keys[down]?1:0)-
+        (keys[up]?1:0);
+
+    let length=
+        Math.hypot(x,y);
+
+    if(length){
+
+        x/=length;
+        y/=length;
+
+        player.vx=
+            x*240;
+
+        player.vy=
+            y*240;
+
+    }else{
+
+        player.vx*=.75;
+        player.vy*=.75;
+
+    }
+
+    player.x+=
+        player.vx*dt;
+
+    player.y+=
+        player.vy*dt;
+
+    player.x=
+        Math.max(
+            player.r+10,
+            Math.min(
+                W-player.r-10,
+                player.x
+            )
+        );
+
+    player.y=
+        Math.max(
+            player.r+45,
+            Math.min(
+                H-player.r-90,
+                player.y
+            )
+        );
+
+}
+
+
+/* ŞUT */
+
+function shoot(
+    player,
+    key
+){
+
+    if(
+        keys[key] &&
+        !player.shot
+    ){
+
+        let dx=
+            ball.x-player.x;
+
+        let dy=
+            ball.y-player.y;
+
+        let distance=
+            Math.hypot(dx,dy);
+
+        if(distance<65){
+
+            let length=
+                distance || 1;
+
+            ball.vx=
+                dx/length*570;
+
+            ball.vy=
+                dy/length*570;
+
+        }
+
+        player.shot=true;
+
+    }
+
+    if(!keys[key]){
+
+        player.shot=false;
+
+    }
+
+}
+
+
+/* TOP OYUNCU ÇARPIŞMASI */
+
+function collide(player){
+
+    let dx=
+        ball.x-player.x;
+
+    let dy=
+        ball.y-player.y;
+
+    let distance=
+        Math.hypot(dx,dy);
+
+    let minimum=
+        player.r+ball.r;
+
+    if(distance<minimum){
+
+        let length=
+            distance || 1;
+
+        let nx=
+            dx/length;
+
+        let ny=
+            dy/length;
+
+        ball.x=
+            player.x+
+            nx*minimum;
+
+        ball.y=
+            player.y+
+            ny*minimum;
+
+        ball.vx=
+            nx*390+
+            player.vx*.3;
+
+        ball.vy=
+            ny*390+
+            player.vy*.3;
+
+    }
+
+}
+
+
+/* GOL */
+
+function goal(team){
+
+    if(team===1){
+
+        score1++;
+
+    }else{
+
+        score2++;
+
+    }
+
+    document.getElementById(
+        "score"
+    ).innerText=
+        "🔵 "+
+        score1+
+        " - "+
+        score2+
+        " 🔴";
+
+    resetPositions();
+
+}
+
+
+/* GÜNCELLE */
+
+function update(dt){
+
+    time-=dt;
+
+    document.getElementById(
+        "timer"
+    ).innerText=
+        Math.ceil(time);
+
+    if(time<=0){
+
+        finishGame();
+
+        return;
+
+    }
+
+
+    movePlayer(
+        p1,
+        "w",
+        "s",
+        "a",
+        "d",
+        dt
+    );
+
+    movePlayer(
+        p2,
+        "arrowup",
+        "arrowdown",
+        "arrowleft",
+        "arrowright",
+        dt
+    );
+
+
+    shoot(p1,"f");
+
+    shoot(p2,"l");
+
+
+    collide(p1);
+
+    collide(p2);
+
+
+    ball.x+=
+        ball.vx*dt;
+
+    ball.y+=
+        ball.vy*dt;
+
+
+    ball.vx*=.987;
+    ball.vy*=.987;
+
+
+    let goalTop=
+        H/2-95;
+
+    let goalBottom=
+        H/2+95;
+
+
+    /* SOL KALE */
+
+    if(ball.x<0){
+
+        if(
+            ball.y>goalTop &&
+            ball.y<goalBottom
+        ){
+
+            goal(2);
+
+        }else{
+
+            ball.x=10;
+
+            ball.vx=
+                Math.abs(ball.vx);
+
+        }
+
+    }
+
+
+    /* SAĞ KALE */
+
+    if(ball.x>W){
+
+        if(
+            ball.y>goalTop &&
+            ball.y<goalBottom
+        ){
+
+            goal(1);
+
+        }else{
+
+            ball.x=
+                W-10;
+
+            ball.vx=
+                -Math.abs(ball.vx);
+
+        }
+
+    }
+
+
+    /* ÜST */
+
+    if(ball.y<45){
+
+        ball.y=45;
+
+        ball.vy=
+            Math.abs(ball.vy);
+
+    }
+
+
+    /* ALT */
+
+    if(
+        ball.y>
+        H-90
+    ){
+
+        ball.y=
+            H-90;
+
+        ball.vy=
+            -Math.abs(ball.vy);
+
+    }
+
+}
+
+
+/* ÇİZ */
+
+function draw(){
+
+    ctx.clearRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* ÇİM */
+
+    ctx.fillStyle=
+        "#168343";
+
+    ctx.fillRect(
+        0,
+        0,
+        W,
+        H
+    );
+
+
+    /* SAHA */
+
+    ctx.strokeStyle=
+        "white";
+
+    ctx.lineWidth=4;
+
+
+    ctx.strokeRect(
+        8,
+        45,
+        W-16,
+        H-135
+    );
+
+
+    /* ORTA ÇİZGİ */
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        W/2,
+        45
+    );
+
+    ctx.lineTo(
+        W/2,
+        H-90
+    );
+
+    ctx.stroke();
+
+
+    /* ORTA DAİRE */
+
+    ctx.beginPath();
+
+    ctx.arc(
+        W/2,
+        (H-45)/2,
+        75,
+        0,
+        Math.PI*2
+    );
+
+    ctx.stroke();
+
+
+    /* KALELER */
+
+    ctx.fillStyle="white";
+
+    ctx.fillRect(
+        0,
+        H/2-95,
+        28,
+        190
+    );
+
+    ctx.fillRect(
+        W-28,
+        H/2-95,
+        28,
+        190
+    );
+
+
+    /* OYUNCULAR */
+
+    drawPlayer(p1);
+
+    drawPlayer(p2);
+
+
+    /* TOP */
+
+    ctx.fillStyle=
+        "white";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        ball.x,
+        ball.y,
+        ball.r,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+}
+
+
+/* OYUNCU ÇİZ */
+
+function drawPlayer(player){
+
+    ctx.fillStyle=
+        player.color;
+
+    ctx.beginPath();
+
+    ctx.arc(
+        player.x,
+        player.y,
+        player.r,
+        0,
+        Math.PI*2
+    );
+
+    ctx.fill();
+
+
+    ctx.strokeStyle=
+        "white";
+
+    ctx.lineWidth=3;
+
+    ctx.stroke();
+
+}
+
+
+/* MAÇ BİTİŞ */
+
+function finishGame(){
+
+    running=false;
+
+    document.getElementById(
+        "finish"
+    ).style.display="flex";
+
+    document.getElementById(
+        "finalScore"
+    ).innerText=
+        team1+
+        " "+
+        score1+
+        " - "+
+        score2+
+        " "+
+        team2;
+
+}
+
+
+/* OYUN DÖNGÜSÜ */
+
+function loop(now){
+
+    if(!running)
+        return;
+
+    let dt=
+        Math.min(
+            (now-lastTime)/1000,
+            .035
+        );
+
+    lastTime=now;
+
+    update(dt);
+
+    draw();
+
+    requestAnimationFrame(loop);
+
+}
+
+</script>
+
+</body>
+</html>
