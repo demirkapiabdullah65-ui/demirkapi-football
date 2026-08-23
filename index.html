@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Demirkapı Super League Pro - Ultimate Edition</title>
+    <title>Demirkapı Super League Pro - Büyük Saha & Büyük Karakterler</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
 
@@ -23,11 +23,11 @@
 
         .main-wrapper {
             width: 100%;
-            max-width: 1150px;
+            max-width: 1300px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 10px;
+            padding: 5px;
         }
 
         .menu-container {
@@ -109,7 +109,7 @@
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1250px;
             animation: fadeIn 0.3s ease;
         }
 
@@ -130,36 +130,36 @@
         #field-container {
             position: relative;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1250px;
             aspect-ratio: 16 / 9;
             border: 4px solid #fff;
             border-top: none;
             border-radius: 0 0 16px 16px;
             overflow: hidden;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9);
-            background: #15803d;
+            background: #16a34a;
         }
 
         canvas {
             display: block;
             width: 100%;
             height: 100%;
-            background: #15803d;
+            background: #16a34a;
         }
 
         .mobile-controls {
             display: none; 
             width: 100%;
-            max-width: 1100px;
+            max-width: 1250px;
             justify-content: space-between;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 10px;
             padding: 0 15px;
         }
 
         #joystick-base {
-            width: 120px;
-            height: 120px;
+            width: 110px;
+            height: 110px;
             background: rgba(255, 255, 255, 0.1);
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -168,18 +168,18 @@
         }
 
         #joystick-knob {
-            width: 50px;
-            height: 50px;
+            width: 45px;
+            height: 45px;
             background: rgba(56, 189, 248, 0.8);
             border: 2px solid #fff;
             border-radius: 50%;
             position: absolute;
-            top: 32px; left: 32px;
+            top: 30px; left: 30px;
             pointer-events: none;
             transition: transform 0.05s linear;
         }
 
-        .action-btns { display: flex; gap: 10px; align-items: center; }
+        .action-btns { display: flex; gap: 8px; align-items: center; }
 
         .mob-btn {
             background: rgba(255, 255, 255, 0.2);
@@ -257,7 +257,7 @@
     <!-- 1. ANA MENÜ -->
     <div id="menu-screen" class="menu-container screen active">
         <div class="game-title">Demirkapı Pro</div>
-        <div class="game-subtitle">Ultimate Edition (Canlı Karakter & Online)</div>
+        <div class="game-subtitle">Büyük Saha & Net Oyuncular Sürümü</div>
         
         <button class="menu-btn green" onclick="switchScreen('single-setup-screen')">🏆 Tek Başına Maç (11v11)</button>
         <button class="menu-btn orange" onclick="switchScreen('online-setup-screen')">🌐 Çevrimiçi Oda Kur / Katıl</button>
@@ -273,7 +273,7 @@
             <div class="team-card" id="t-besiktas" onclick="selectTeam('Beşiktaş', '#ffffff', '#000000')">⚪ Beşiktaş</div>
             <div class="team-card" id="t-trabzonspor" onclick="selectTeam('Trabzonspor', '#1d4ed8', '#991b1b')">🔵 Trabzonspor</div>
         </div>
-        <button class="menu-btn green" style="margin-top:20px;" onclick="startMatch('ai')">Maçı Başlat</button>
+        <button class="menu-btn green" style="margin-top:20px;" onclick="startMatch()">Maçı Başlat</button>
         <button class="menu-btn red" style="background:#475569; margin-top:10px;" onclick="switchScreen('menu-screen')">Geri Dön</button>
     </div>
 
@@ -300,12 +300,12 @@
 
     <!-- 4. KONTROLLER -->
     <div id="controls-screen" class="menu-container screen">
-        <h2 style="margin-bottom: 15px; color:#38bdf8;">Profesyonel Kontroller</h2>
+        <h2 style="margin-bottom: 15px; color:#38bdf8;">Kontroller</h2>
         <p style="text-align: left; line-height: 1.6; color: #cbd5e1; font-size: 0.95rem;">
-            • <b>Joystick / W,A,S,D:</b> Aktif oyuncuyu hareket ettirir.<br>
-            • <b>Q Tuşu / DEĞİŞTİR:</b> Topa en yakın diğer futbolcuya geçiş yapar!<br>
-            • <b>KOŞ (Shift):</b> Sprint atmanı sağlar.<br>
-            • <b>PAS (E):</b> Topu arkadaşına yuvarlar.<br>
+            • <b>Joystick / W,A,S,D:</b> Aktif büyük oyuncuyu hareket ettirir.<br>
+            • <b>Q Tuşu / DEĞİŞTİR:</b> Topa en yakın diğer futbolcuya odaklanır!<br>
+            • <b>KOŞ (Shift):</b> Hızlı sprint atmanı sağlar.<br>
+            • <b>PAS (E):</b> Topu arkadaşına aktarır.<br>
             • <b>ŞUT (Space):</b> Kaleye sert vuruş yapar.
         </p><br>
         <button class="menu-btn red" style="background:#475569;" onclick="switchScreen('menu-screen')">Geri Dön</button>
@@ -315,11 +315,11 @@
     <div id="game-area">
         <div class="scoreboard">
             <span style="color: #ef4444;" id="p1-name-label">Takım: <span id="score1">0</span></span>
-            <span id="match-timer" style="color: #facc15; font-size:1.1rem;">CANLI MAÇ</span>
+            <span id="match-timer" style="color: #facc15; font-size:1.1rem;">BÜYÜK SAHA MAÇI</span>
             <span style="color: #3b82f6;" id="p2-name-label">Rakip: <span id="score2">0</span></span>
         </div>
         <div id="field-container">
-            <canvas id="field" width="1280" height="720"></canvas>
+            <canvas id="field" width="1600" height="900"></canvas>
         </div>
 
         <div class="mobile-controls" id="mobile-controls-bar">
@@ -343,7 +343,7 @@
 <div id="goal-modal">
     <div class="goal-popup-box">
         <div class="goal-title-text">GOL!</div>
-        <div class="goal-sub-text" id="modal-sub-title">Harika bir gol!</div>
+        <div class="goal-sub-text" id="modal-sub-title">Mükemmel bir vuruş!</div>
         <button class="menu-btn green" style="max-width:220px; margin:0 auto;" onclick="closeGoalModal()">Devam Et</button>
     </div>
 </div>
@@ -360,7 +360,7 @@
     let selectedTeamName = "Galatasaray";
     let teamPrimaryColor = "#ef4444";
     let teamSecondaryColor = "#facc15";
-    let gameMode = "ai"; // 'ai', 'online_host', 'online_guest'
+    let gameMode = "ai";
 
     function selectTeam(name, c1, c2) {
         playSound('click');
@@ -380,18 +380,17 @@
         document.getElementById('room-code-text').innerText = code;
         document.getElementById('room-code-box').style.display = 'block';
         gameMode = "online_host";
-        setTimeout(() => { startMatch('online'); }, 2000);
+        setTimeout(() => { startMatch(); }, 2000);
     }
 
     function joinOnlineRoom() {
         const code = document.getElementById('join-code-input').value.trim();
         if(!code) { alert("Lütfen oda kodunu girin!"); return; }
         gameMode = "online_guest";
-        startMatch('online');
+        startMatch();
     }
 
-    function startMatch(mode) {
-        if(mode === 'ai') gameMode = 'ai';
+    function startMatch() {
         document.getElementById('p1-name-label').innerHTML = `${selectedTeamName}: <span id="score1">0</span>`;
         document.getElementById('p2-name-label').innerHTML = gameMode.includes('online') ? `Rakip Oyuncu: <span id="score2">0</span>` : `Yapay Zeka: <span id="score2">0</span>`;
         
@@ -439,39 +438,41 @@
 
     let score1 = 0, score2 = 0;
     let animId, gameActive = true;
-    let ball = { x: 640, y: 360, r: 14, vx: 0, vy: 0, friction: 0.99, rotation: 0 };
+    
+    // BÜYÜK SAHA BOYUTLARI (1600x900) VE BÜYÜK TOP
+    let ball = { x: 800, y: 450, r: 20, vx: 0, vy: 0, friction: 0.99, rotation: 0 };
 
     let team1 = [];
     let team2 = [];
-    let activePlayerIndex = 10; // Başlangıçta Forvet (Kaptan) aktif
+    let activePlayerIndex = 10;
 
     function setupTeams() {
         team1 = [
-            { x: 60, y: 360, bx: 60, by: 360, r: 18, name: 'Muslera', anim: 0 },
-            { x: 200, y: 150, bx: 200, by: 150, r: 18, name: 'Boey', anim: 0 },
-            { x: 200, y: 270, bx: 200, by: 270, r: 18, name: 'Nelsson', anim: 0 },
-            { x: 200, y: 450, bx: 200, by: 450, r: 18, name: 'Abdülkerim', anim: 0 },
-            { x: 200, y: 570, bx: 200, by: 570, r: 18, name: 'Jakobs', anim: 0 },
-            { x: 380, y: 220, bx: 380, by: 220, r: 18, name: 'Torreira', anim: 0 },
-            { x: 380, y: 500, bx: 380, by: 500, r: 18, name: 'Sara', anim: 0 },
-            { x: 450, y: 360, bx: 450, by: 360, r: 18, name: 'Mertens', anim: 0 },
-            { x: 320, y: 100, bx: 320, by: 100, r: 18, name: 'Barış Alper', anim: 0 },
-            { x: 320, y: 620, bx: 320, by: 620, r: 18, name: 'Yunus', anim: 0 },
-            { x: 520, y: 360, bx: 520, by: 360, r: 20, name: 'Osimhen', anim: 0 }
+            { x: 80, y: 450, bx: 80, by: 450, r: 26, name: 'Muslera', anim: 0 },
+            { x: 300, y: 200, bx: 300, by: 200, r: 26, name: 'Boey', anim: 0 },
+            { x: 300, y: 350, bx: 300, by: 350, r: 26, name: 'Nelsson', anim: 0 },
+            { x: 300, y: 550, bx: 300, by: 550, r: 26, name: 'Abdülkerim', anim: 0 },
+            { x: 300, y: 700, bx: 300, by: 700, r: 26, name: 'Jakobs', anim: 0 },
+            { x: 520, y: 280, bx: 520, by: 280, r: 26, name: 'Torreira', anim: 0 },
+            { x: 520, y: 620, bx: 520, by: 620, r: 26, name: 'Sara', anim: 0 },
+            { x: 600, y: 450, bx: 600, by: 450, r: 26, name: 'Mertens', anim: 0 },
+            { x: 440, y: 130, bx: 440, by: 130, r: 26, name: 'Barış Alper', anim: 0 },
+            { x: 440, y: 770, bx: 440, by: 770, r: 26, name: 'Yunus', anim: 0 },
+            { x: 680, y: 450, bx: 680, by: 450, r: 28, name: 'Osimhen', anim: 0 }
         ];
 
         team2 = [
-            { x: 1220, y: 360, bx: 1220, by: 360, r: 18, name: 'Livakovic', anim: 0 },
-            { x: 1080, y: 150, bx: 1080, by: 150, r: 18, name: 'Djiku', anim: 0 },
-            { x: 1080, y: 270, bx: 1080, by: 270, r: 18, name: 'Becao', anim: 0 },
-            { x: 1080, y: 450, bx: 1080, by: 450, r: 18, name: 'Çağlar', anim: 0 },
-            { x: 1080, y: 570, bx: 1080, by: 570, r: 18, name: 'Oosterwolde', anim: 0 },
-            { x: 900, y: 220, bx: 900, by: 220, r: 18, name: 'Amrabat', anim: 0 },
-            { x: 900, y: 500, bx: 900, by: 500, r: 18, name: 'Fred', anim: 0 },
-            { x: 830, y: 360, bx: 830, by: 360, r: 18, name: 'Szymanski', anim: 0 },
-            { x: 960, y: 100, bx: 960, by: 100, r: 18, name: 'Tadic', anim: 0 },
-            { x: 960, y: 620, bx: 960, by: 620, r: 18, name: 'Saint-Maximin', anim: 0 },
-            { x: 760, y: 360, bx: 760, by: 360, r: 20, name: 'Dzeko', anim: 0 }
+            { x: 1520, y: 450, bx: 1520, by: 450, r: 26, name: 'Livakovic', anim: 0 },
+            { x: 1300, y: 200, bx: 1300, by: 200, r: 26, name: 'Djiku', anim: 0 },
+            { x: 1300, y: 350, bx: 1300, by: 350, r: 26, name: 'Becao', anim: 0 },
+            { x: 1300, y: 550, bx: 1300, by: 550, r: 26, name: 'Çağlar', anim: 0 },
+            { x: 1300, y: 700, bx: 1300, by: 700, r: 26, name: 'Oosterwolde', anim: 0 },
+            { x: 1080, y: 280, bx: 1080, by: 280, r: 26, name: 'Amrabat', anim: 0 },
+            { x: 1080, y: 620, bx: 1080, by: 620, r: 26, name: 'Fred', anim: 0 },
+            { x: 1000, y: 450, bx: 1000, by: 450, r: 26, name: 'Szymanski', anim: 0 },
+            { x: 1160, y: 130, bx: 1160, by: 130, r: 26, name: 'Tadic', anim: 0 },
+            { x: 1160, y: 770, bx: 1160, by: 770, r: 26, name: 'Saint-Maximin', anim: 0 },
+            { x: 920, y: 450, bx: 920, by: 450, r: 28, name: 'Dzeko', anim: 0 }
         ];
     }
 
@@ -491,10 +492,8 @@
         if(e.key === "Shift") keys['shift'] = false;
     });
 
-    // OYUNCU DEĞİŞTİRME FONKSİYONU (Q Tuşu veya Buton)
     function switchActivePlayer() {
         playSound('click');
-        // Topa en yakın sonraki oyuncuyu bul ve aktif yap
         let minDist = Infinity;
         let nextIndex = activePlayerIndex;
         for (let i = 0; i < team1.length; i++) {
@@ -507,7 +506,6 @@
         activePlayerIndex = nextIndex;
     }
 
-    // JOYSTICK MANTIĞI
     const joystickBase = document.getElementById('joystick-base');
     const joystickKnob = document.getElementById('joystick-knob');
     let joystickActive = false;
@@ -522,7 +520,7 @@
         let dx = e.clientX - (rect.left + rect.width / 2);
         let dy = e.clientY - (rect.top + rect.height / 2);
         let dist = Math.hypot(dx, dy);
-        let maxRadius = 40;
+        let maxRadius = 35;
         if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; }
         joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
         joystickVector = { x: dx / maxRadius, y: dy / maxRadius };
@@ -540,7 +538,7 @@
     }
 
     function resetBallAndPlayers() {
-        ball.x = 640; ball.y = 360; ball.vx = 0; ball.vy = 0;
+        ball.x = 800; ball.y = 450; ball.vx = 0; ball.vy = 0;
         setupTeams();
         activePlayerIndex = 10;
     }
@@ -549,7 +547,7 @@
         if (!gameActive) return;
 
         let player = team1[activePlayerIndex];
-        let speed = keys['shift'] ? 6.5 : 4.3;
+        let speed = keys['shift'] ? 7.5 : 5.0;
         let isMoving = false;
 
         if (joystickActive) {
@@ -563,51 +561,49 @@
             if (keys['d'] || keys['D']) { player.x += speed; isMoving = true; }
         }
 
-        if (isMoving) player.anim += 0.2; else player.anim = 0;
+        if (isMoving) player.anim += 0.25; else player.anim = 0;
 
         player.x = Math.max(player.r, Math.min(canvas.width - player.r, player.x));
         player.y = Math.max(player.r, Math.min(canvas.height - player.r, player.y));
 
-        // DİĞER TAKIM ARKADAŞLARI YAPAY ZEKASI
         for (let i = 0; i < team1.length; i++) {
             if (i === activePlayerIndex) continue;
             let p = team1[i];
-            let targetX = p.bx + (ball.x - 640) * 0.12;
-            let targetY = p.by + (ball.y - 360) * 0.12;
-            p.x += (targetX - p.x) * 0.04;
-            p.y += (targetY - p.y) * 0.04;
+            let targetX = p.bx + (ball.x - 800) * 0.15;
+            let targetY = p.by + (ball.y - 450) * 0.15;
+            p.x += (targetX - p.x) * 0.05;
+            p.y += (targetY - p.y) * 0.05;
         }
 
-        // RAKİP 11 OYUNCU YAPAY ZEKASI
         for (let i = 0; i < team2.length; i++) {
             let p = team2[i];
-            let targetX = p.bx + (ball.x - 640) * 0.2;
+            let targetX = p.bx + (ball.x - 800) * 0.2;
             let targetY = ball.y;
             if (i === 10) { targetX = ball.x; targetY = ball.y; }
             p.x += (targetX - p.x) * 0.04;
             p.y += (targetY - p.y) * 0.04;
         }
 
-        // TOP HAREKETİ
         ball.x += ball.vx;
         ball.y += ball.vy;
         ball.vx *= ball.friction;
         ball.vy *= ball.friction;
-        ball.rotation += ball.vx * 0.05;
+        ball.rotation += ball.vx * 0.04;
 
         if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy *= -1; playSound('kick'); }
         if (ball.y + ball.r > canvas.height) { ball.y = canvas.height - ball.r; ball.vy *= -1; playSound('kick'); }
 
+        // Kale Sınırları (Genişletilmiş Büyük Saha İçin: Y 270 - 630 arası)
         if (ball.x - ball.r < 0) {
-            if (ball.y >= 220 && ball.y <= 500) {
+            if (ball.y >= 270 && ball.y <= 630) {
                 score2++; document.getElementById('score2').innerText = score2;
                 triggerGoalEvent("Rakip Takım Gol Attı!"); return;
             } else { ball.x = ball.r; ball.vx *= -1; playSound('kick'); }
         }
         if (ball.x + ball.r > canvas.width) {
-            if (ball.y >= 220 && ball.y <= 500) {
+            if (ball.y >= 270 && ball.y <= 630) {
                 score1++; document.getElementById('score1').innerText = score1;
-                triggerGoalEvent(`${selectedTeamName} Harika Gol Attı!`); return;
+                triggerGoalEvent(`${selectedTeamName} Muhteşem Gol Attı!`); return;
             } else { ball.x = canvas.width - ball.r; ball.vx *= -1; playSound('kick'); }
         }
 
@@ -623,11 +619,11 @@
             if (dist < p.r + ball.r) {
                 playSound('kick');
                 let angle = Math.atan2(dy, dx);
-                let power = 7;
+                let power = 8;
                 let isUserActive = team1.includes(p) && team1.indexOf(p) === activePlayerIndex;
 
-                if (isUserActive && keys['space']) power = 17;
-                else if (isUserActive && keys['e']) power = 9;
+                if (isUserActive && keys['space']) power = 19;
+                else if (isUserActive && keys['e']) power = 11;
 
                 ball.vx = Math.cos(angle) * power;
                 ball.vy = Math.sin(angle) * power;
@@ -653,76 +649,73 @@
     function renderField() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Saha Çizgileri
-        ctx.strokeStyle = "rgba(255,255,255,0.4)";
-        ctx.lineWidth = 4;
+        // Genişletilmiş Saha Çizgileri
+        ctx.strokeStyle = "rgba(255,255,255,0.45)";
+        ctx.lineWidth = 5;
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
         ctx.beginPath(); ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height); ctx.stroke();
-        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 110, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 140, 0, Math.PI * 2); ctx.stroke();
 
-        ctx.fillStyle = "rgba(255,255,255,0.85)";
-        ctx.fillRect(0, 220, 14, 280);
-        ctx.fillRect(canvas.width - 14, 220, 14, 280);
+        ctx.fillStyle = "rgba(255,255,255,0.9)";
+        ctx.fillRect(0, 270, 18, 360);
+        ctx.fillRect(canvas.width - 18, 270, 18, 360);
 
-        // TAKIM 1 (Canlı Karakter Animasyonu + Aktif Oyuncu Halkası)
+        // BÜYÜK TAKIM 1 OYUNCULARI
         for (let i = 0; i < team1.length; i++) {
             let p = team1[i];
             let isActive = (i === activePlayerIndex);
 
-            // Aktif Oyuncu Altında Parlayan Seçim Göstergesi
             if (isActive) {
                 ctx.strokeStyle = "#facc15";
-                ctx.lineWidth = 3;
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 6, 0, Math.PI * 2); ctx.stroke();
+                ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 8, 0, Math.PI * 2); ctx.stroke();
             }
 
-            // Vücut / Forma
             ctx.fillStyle = teamPrimaryColor;
             ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-            ctx.lineWidth = 2.5; ctx.strokeStyle = teamSecondaryColor; ctx.stroke();
+            ctx.lineWidth = 3; ctx.strokeStyle = teamSecondaryColor; ctx.stroke();
 
-            // Canlı Ayak / Koşma Efekti (Mini Animasyon Çemberleri)
-            let legOffset = Math.sin(p.anim) * 5;
+            // Ayak Animasyonları
+            let legOffset = Math.sin(p.anim) * 7;
             ctx.fillStyle = "#0f172a";
-            ctx.beginPath(); ctx.arc(p.x - 6, p.y + p.r + legOffset, 4, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(p.x + 6, p.y + p.r - legOffset, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x - 8, p.y + p.r + legOffset, 5.5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x + 8, p.y + p.r - legOffset, 5.5, 0, Math.PI * 2); ctx.fill();
 
-            // İsim Etiketi
             ctx.fillStyle = isActive ? "#facc15" : "#ffffff";
-            ctx.font = isActive ? "bold 12px Montserrat" : "bold 11px Montserrat";
+            ctx.font = isActive ? "bold 14px Montserrat" : "bold 12px Montserrat";
             ctx.textAlign = "center";
-            ctx.fillText(p.name, p.x, p.y - p.r - 6);
+            ctx.fillText(p.name, p.x, p.y - p.r - 8);
         }
 
-        // TAKIM 2 (Rakip)
+        // BÜYÜK TAKIM 2 OYUNCULARI
         for (let p of team2) {
             ctx.fillStyle = "#2563eb";
             ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
-            ctx.lineWidth = 2.5; ctx.strokeStyle = "#93c5fd"; ctx.stroke();
+            ctx.lineWidth = 3; ctx.strokeStyle = "#93c5fd"; ctx.stroke();
 
-            let legOffset = Math.sin(Date.now() * 0.01) * 4;
+            let legOffset = Math.sin(Date.now() * 0.01) * 6;
             ctx.fillStyle = "#0f172a";
-            ctx.beginPath(); ctx.arc(p.x - 6, p.y + p.r + legOffset, 4, 0, Math.PI * 2); ctx.fill();
-            ctx.beginPath(); ctx.arc(p.x + 6, p.y + p.r - legOffset, 4, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x - 8, p.y + p.r + legOffset, 5.5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(p.x + 8, p.y + p.r - legOffset, 5.5, 0, Math.PI * 2); ctx.fill();
 
             ctx.fillStyle = "#ffffff";
-            ctx.font = "bold 11px Montserrat";
+            ctx.font = "bold 12px Montserrat";
             ctx.textAlign = "center";
-            ctx.fillText(p.name, p.x, p.y - p.r - 6);
+            ctx.fillText(p.name, p.x, p.y - p.r - 8);
         }
 
-        // GERÇEKÇİ TOP
+        // BÜYÜK GERÇEKÇİ TOP
         ctx.save();
         ctx.translate(ball.x, ball.y);
         ctx.rotate(ball.rotation);
         ctx.fillStyle = "#f8fafc";
         ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = 1.5; ctx.strokeStyle = "#cbd5e1"; ctx.stroke();
+        ctx.lineWidth = 2; ctx.strokeStyle = "#cbd5e1"; ctx.stroke();
 
         ctx.fillStyle = "#0f172a";
         for (let i = 0; i < 5; i++) {
             let angle = (i * Math.PI * 2) / 5;
-            ctx.beginPath(); ctx.arc(Math.cos(angle) * 5, Math.sin(angle) * 5, 3.5, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(Math.cos(angle) * 7, Math.sin(angle) * 7, 5, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
     }
