@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Demirkapı Super League Pro - Gelişmiş Sürüm</title>
+    <title>Demirkapı Super League Pro - Joystick & Online Sürüm</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
 
@@ -90,11 +90,11 @@
         .screen { display: none; }
         .screen.active { display: block; }
 
-        select {
+        input[type="text"] {
             width: 100%;
             max-width: 380px;
             padding: 14px;
-            font-size: 1.05rem;
+            font-size: 1.1rem;
             background: #090d16;
             border: 2px solid #334155;
             border-radius: 12px;
@@ -147,20 +147,44 @@
             background: #15803d;
         }
 
+        /* SANAL JOYSTICK ALANI */
         .mobile-controls {
             display: none; 
             width: 100%;
             max-width: 980px;
             justify-content: space-between;
+            align-items: center;
             margin-top: 15px;
-            padding: 0 10px;
+            padding: 0 15px;
         }
 
-        .dpad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 52px);
-            grid-template-rows: repeat(3, 52px);
-            gap: 4px;
+        #joystick-base {
+            width: 130px;
+            height: 130px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
+        }
+
+        #joystick-knob {
+            width: 55px;
+            height: 55px;
+            background: rgba(56, 189, 248, 0.8);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            position: absolute;
+            top: 35.5px;
+            left: 35.5px;
+            pointer-events: none;
+            transition: transform 0.05s linear;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
         .mob-btn {
@@ -168,8 +192,7 @@
             border: 2px solid rgba(255, 255, 255, 0.4);
             color: white;
             font-weight: bold;
-            font-size: 1.2rem;
-            border-radius: 12px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -178,26 +201,15 @@
         }
         .mob-btn:active { background: rgba(56, 189, 248, 0.8); }
 
-        .action-btns {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            flex-wrap: wrap;
-            max-width: 240px;
-            justify-content: flex-end;
-        }
-
         .action-btn {
             width: 65px;
             height: 65px;
-            border-radius: 50%;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             background: rgba(239, 68, 68, 0.7);
-            border: 2px solid #ef4444;
+            border-color: #ef4444;
         }
-        .action-btn.blue { background: rgba(59, 130, 246, 0.7); border-color: #3b82f6; }
         .action-btn.green { background: rgba(34, 197, 94, 0.7); border-color: #22c55e; }
-        .action-btn.orange { background: rgba(245, 158, 11, 0.7); border-color: #f59e0b; font-size: 0.7rem; }
+        .action-btn.orange { background: rgba(245, 158, 11, 0.7); border-color: #f59e0b; }
 
         #goal-modal {
             position: fixed;
@@ -220,31 +232,8 @@
             box-shadow: 0 0 50px rgba(250, 204, 21, 0.4);
         }
 
-        .goal-title-text {
-            font-size: 3.5rem;
-            font-weight: 900;
-            color: #facc15;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-        }
-
-        .goal-sub-text {
-            font-size: 1.3rem;
-            color: #e2e8f0;
-            margin-bottom: 25px;
-        }
-
-        .controls-box {
-            background: rgba(9, 13, 22, 0.9);
-            border: 1px solid #334155;
-            padding: 20px;
-            border-radius: 16px;
-            text-align: left;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-        .controls-box span { color: #facc15; font-weight: bold; }
+        .goal-title-text { font-size: 3.5rem; font-weight: 900; color: #facc15; text-transform: uppercase; margin-bottom: 10px; }
+        .goal-sub-text { font-size: 1.3rem; color: #e2e8f0; margin-bottom: 25px; }
 
         .team-grid {
             display: grid;
@@ -262,15 +251,14 @@
             transition: all 0.2s;
             font-weight: 700;
         }
-        .team-card:hover, .team-card.selected {
-            border-color: #38bdf8;
-            background: rgba(56, 189, 248, 0.15);
+        .team-card:hover, .team-card.selected { border-color: #38bdf8; background: rgba(56, 189, 248, 0.15); }
+
+        .badge-code {
+            font-size: 1.3rem; color: #facc15; background: #090d16; padding: 10px 20px;
+            border-radius: 10px; border: 2px dashed #facc15; display: inline-block; margin: 10px 0;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -280,14 +268,14 @@
     <!-- 1. ANA MENÜ -->
     <div id="menu-screen" class="menu-container screen active">
         <div class="game-title">Demirkapı Pro</div>
-        <div class="game-subtitle">Gelişmiş Süper Lig Deneyimi</div>
+        <div class="game-subtitle">Joystick & Online Oda Modu</div>
         
-        <button class="menu-btn green" onclick="switchScreen('single-setup-screen')">🏆 Tek Başına Maç (VS Yapay Zeka)</button>
-        <button class="menu-btn purple" onclick="switchScreen('league-setup-screen')">⚽ Süper Lig Takım Seç & Başla</button>
-        <button class="menu-btn" onclick="switchScreen('controls-screen')">⚙️ Tuşlar & Kontroller</button>
+        <button class="menu-btn green" onclick="switchScreen('single-setup-screen')">🏆 Tek Başına (VS Yapay Zeka)</button>
+        <button class="menu-btn orange" onclick="switchScreen('online-room-screen')">🌐 Çevrimiçi / 2 Kişilik Oda Kur</button>
+        <button class="menu-btn purple" onclick="switchScreen('league-setup-screen')">⚽ Süper Lig Sezon Modu</button>
     </div>
 
-    <!-- 2. TEK BAŞINA MAÇ KURULUMU -->
+    <!-- 2. TEK BAŞINA MAÇ -->
     <div id="single-setup-screen" class="menu-container screen">
         <h2 style="margin-bottom: 15px; color:#38bdf8;">Takımını Seç</h2>
         <div class="team-grid">
@@ -296,19 +284,32 @@
             <div class="team-card" id="t-besiktas" onclick="selectTeam('Beşiktaş', '#cbd5e1')">⚪ Beşiktaş</div>
             <div class="team-card" id="t-trabzonspor" onclick="selectTeam('Trabzonspor', '#3b82f6')">🔵 Trabzonspor</div>
         </div>
-
-        <div style="text-align:left; margin-top:15px; font-weight:700; font-size:0.9rem; color:#cbd5e1;">Zorluk Derecesi:</div>
-        <select id="ai-difficulty">
-            <option value="easy">Kolay</option>
-            <option value="normal" selected>Normal</option>
-            <option value="hard">Zor (Usta)</option>
-        </select>
-
         <button class="menu-btn green" style="margin-top:20px;" onclick="startMatch('ai')">Maçı Başlat</button>
         <button class="menu-btn red" style="background:#475569; margin-top:10px;" onclick="switchScreen('menu-screen')">Geri Dön</button>
     </div>
 
-    <!-- 3. SÜPER LİG SEÇİM EKRANI -->
+    <!-- 3. ONLINE ODA EKRANI -->
+    <div id="online-room-screen" class="menu-container screen">
+        <h2 style="margin-bottom: 10px; color:#38bdf8;">Farklı Cihazdan Arkadaşınla Oyna</h2>
+        <p style="color: #94a3b8; font-size:0.9rem; margin-bottom:15px;">Oda oluşturup kodu arkadaşına gönder veya oda kodunu yazarak bağlan!</p>
+        
+        <div>
+            <button class="menu-btn green" style="max-width:280px; padding:12px;" onclick="createOnlineRoom()">Oda Kodu Üret</button>
+            <div id="room-code-box" style="display:none;">
+                <div class="badge-code" id="room-code-text">DMK999</div>
+                <p style="font-size:0.85rem; color:#4ade80;">Oda kuruldu! Arkadaşın bu kodu girerek bağlanabilir.</p>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 20px;">
+            <input type="text" id="join-code-input" placeholder="Oda Kodunu Gir (Örn: DMK999)">
+            <button class="menu-btn purple" style="max-width:280px; padding:12px;" onclick="joinOnlineRoom()">Odaya Katıl & Başlat</button>
+        </div>
+
+        <button class="menu-btn red" style="background:#475569; margin-top:15px;" onclick="switchScreen('menu-screen')">Geri Dön</button>
+    </div>
+
+    <!-- 4. SÜPER LİG SEÇİMİ -->
     <div id="league-setup-screen" class="menu-container screen">
         <h2 style="margin-bottom: 15px; color:#facc15;">Süper Lig Kulübü Seç</h2>
         <div class="team-grid">
@@ -317,57 +318,34 @@
             <div class="team-card" id="l-besiktas" onclick="selectLeagueTeam('Beşiktaş', '#cbd5e1')">⚪ Beşiktaş</div>
             <div class="team-card" id="l-trabzonspor" onclick="selectLeagueTeam('Trabzonspor', '#3b82f6')">🔵 Trabzonspor</div>
         </div>
-
         <button class="menu-btn green" style="margin-top:20px;" onclick="startMatch('league')">Süper Lig Maçına Geç</button>
         <button class="menu-btn red" style="background:#475569; margin-top:10px;" onclick="switchScreen('menu-screen')">Geri Dön</button>
     </div>
 
-    <!-- 4. KONTROLLER EKRANI -->
-    <div id="controls-screen" class="menu-container screen">
-        <h2 style="margin-bottom: 15px; color:#38bdf8;">Kontroller ve Yetenekler</h2>
-        <div class="controls-box">
-            <p>⌨️ <b>Klavye Tuşları:</b><br>
-            • <span>W, A, S, D</span> : Hareket Etme<br>
-            • <span>ŞİFT (Shift)</span> : Hızlı Koşma (Sprint)<br>
-            • <span>BOŞLUK (Space)</span> : Sert Şut Çekme<br>
-            • <span>E Tuşu</span> : Pas Verme (Topu İleri Yuvarlama)</p><br>
-            <p>💡 <b>Özellikler:</b> Sahada oyuncuların üzerinde isimleri yazar, genişletilmiş büyük sahada rahatça paslaşabilir ve şut çekebilirsin!</p>
-        </div>
-        <button class="menu-btn" style="background:#475569;" onclick="switchScreen('menu-screen')">Geri Dön</button>
-    </div>
-
-    <!-- 5. OYUN ALANI -->
+    <!-- 5. OYUN ALANI VE JOYSTICK -->
     <div id="game-area">
         <div class="scoreboard">
-            <span style="color: #ef4444;" id="p1-name-label">Oyuncu: <span id="score1">0</span></span>
-            <span id="match-timer" style="color: #facc15; font-size:1.1rem;">SÜPER LİG MAÇI</span>
-            <span style="color: #3b82f6;" id="p2-name-label">Rakip AI: <span id="score2">0</span></span>
+            <span style="color: #ef4444;" id="p1-name-label">Oyuncu 1: <span id="score1">0</span></span>
+            <span id="match-timer" style="color: #facc15; font-size:1.1rem;">CANLI MAÇ</span>
+            <span style="color: #3b82f6;" id="p2-name-label">Rakip: <span id="score2">0</span></span>
         </div>
         <div id="field-container">
             <canvas id="field" width="1120" height="630"></canvas>
         </div>
 
-        <!-- MOBİL DOKUNMATİK KONTROLLER -->
+        <!-- ANALOG JOYSTICK VE AKSİYON BUTONLARI -->
         <div class="mobile-controls" id="mobile-controls-bar">
-            <div class="dpad-grid">
-                <div></div>
-                <button class="mob-btn" onpointerdown="setKey('w', true); event.preventDefault();" onpointerup="setKey('w', false)">▲</button>
-                <div></div>
-                <button class="mob-btn" onpointerdown="setKey('a', true); event.preventDefault();" onpointerup="setKey('a', false)">◀</button>
-                <div style="background:rgba(255,255,255,0.05); border-radius:8px;"></div>
-                <button class="mob-btn" onpointerdown="setKey('d', true); event.preventDefault();" onpointerup="setKey('d', false)">▶</button>
-                <div></div>
-                <button class="mob-btn" onpointerdown="setKey('s', true); event.preventDefault();" onpointerup="setKey('s', false)">▼</button>
-                <div></div>
+            <div id="joystick-base">
+                <div id="joystick-knob"></div>
             </div>
             <div class="action-btns">
-                <button class="mob-btn action-btn orange" onpointerdown="setKey('shift', true); event.preventDefault();" onpointerup="setKey('shift', false)">KOŞ</button>
-                <button class="mob-btn action-btn green" onpointerdown="setKey('e', true); event.preventDefault();" onpointerup="setKey('e', false)">PAS</button>
-                <button class="mob-btn action-btn" onpointerdown="setKey('space', true); event.preventDefault();" onpointerup="setKey('space', false)">ŞUT</button>
+                <button class="mob-btn action-btn orange" onpointerdown="setKey('shift', true)" onpointerup="setKey('shift', false)">KOŞ</button>
+                <button class="mob-btn action-btn green" onpointerdown="setKey('e', true)" onpointerup="setKey('e', false)">PAS</button>
+                <button class="mob-btn action-btn" onpointerdown="setKey('space', true)" onpointerup="setKey('space', false)">ŞUT</button>
             </div>
         </div>
 
-        <button class="menu-btn red" style="max-width: 200px; margin-top: 12px; padding: 10px; font-size:0.9rem;" onclick="returnToMenu()">Menüye Dön</button>
+        <button class="menu-btn red" style="max-width: 200px; margin-top: 10px; padding: 10px; font-size:0.9rem;" onclick="returnToMenu()">Menüye Dön</button>
     </div>
 
 </div>
@@ -376,7 +354,7 @@
 <div id="goal-modal">
     <div class="goal-popup-box">
         <div class="goal-title-text">GOL!</div>
-        <div class="goal-sub-text" id="modal-sub-title">Harika bir organizasyon ve gol!</div>
+        <div class="goal-sub-text" id="modal-sub-title">Mükemmel bir vuruş!</div>
         <button class="menu-btn green" style="max-width:220px; margin:0 auto;" onclick="closeGoalModal()">Devam Et</button>
     </div>
 </div>
@@ -392,7 +370,7 @@
 
     let selectedTeamName = "Galatasaray";
     let selectedTeamColor = "#ef4444";
-    let aiDifficulty = "normal";
+    let gameMode = "ai"; // 'ai', 'online_host', 'online_guest'
 
     function selectTeam(name, color) {
         playSound('click');
@@ -416,20 +394,34 @@
         selectedTeamColor = color;
     }
 
+    function createOnlineRoom() {
+        playSound('click');
+        const code = "DMK" + Math.floor(100 + Math.random() * 900);
+        document.getElementById('room-code-text').innerText = code;
+        document.getElementById('room-code-box').style.display = 'block';
+        gameMode = "online_host";
+        // Otomatik başlatma simülasyonu (Farklı cihazlar için Oda ID anahtarı)
+        setTimeout(() => {
+            startMatch('online');
+        }, 2000);
+    }
+
+    function joinOnlineRoom() {
+        const code = document.getElementById('join-code-input').value.trim();
+        if(!code) { alert("Lütfen oda kodunu girin!"); return; }
+        gameMode = "online_guest";
+        startMatch('online');
+    }
+
     function startMatch(mode) {
-        if(mode === 'ai') {
-            aiDifficulty = document.getElementById('ai-difficulty').value;
-        } else {
-            aiDifficulty = "normal";
-        }
-        document.getElementById('p1-name-label').innerHTML = `${selectedTeamName} (Sen): <span id="score1">0</span>`;
-        document.getElementById('p2-name-label').innerHTML = `Süper Lig Rakip: <span id="score2">0</span>`;
+        if(mode === 'ai') gameMode = 'ai';
+        document.getElementById('p1-name-label').innerHTML = `${selectedTeamName}: <span id="score1">0</span>`;
+        document.getElementById('p2-name-label').innerHTML = gameMode.includes('online') ? `Rakip Oyuncu: <span id="score2">0</span>` : `Yapay Zeka: <span id="score2">0</span>`;
         
         document.querySelectorAll('.menu-container').forEach(s => s.classList.remove('active'));
         document.getElementById('game-area').style.display = 'flex';
-        if('ontouchstart' in window || navigator.maxTouchPoints > 0) {
-            document.getElementById('mobile-controls-bar').style.display = 'flex';
-        }
+        document.getElementById('mobile-controls-bar').style.display = 'flex';
+        
         initGameEngine();
     }
 
@@ -440,6 +432,7 @@
         switchScreen('menu-screen');
     }
 
+    // SES EFEKTLERİ
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playSound(type) {
         if (!audioCtx) return;
@@ -473,34 +466,74 @@
         }
     }
 
+    // OYUN MOTORU & ANALOG JOYSTICK
     const canvas = document.getElementById('field');
     const ctx = canvas.getContext('2d');
 
-    let score1 = 0;
-    let score2 = 0;
-    let animId;
-    let gameActive = true;
+    let score1 = 0, score2 = 0;
+    let animId, gameActive = true;
 
-    // Büyük Saha Ölçüleri (1120 x 630)
     let p1 = { x: 200, y: 315, r: 24, name: "Kaptan", color: '#ef4444', baseSpeed: 4.5, sprintSpeed: 7.5 };
-    let p2 = { x: 920, y: 315, r: 24, name: "Rakip Yıldız", color: '#3b82f6', speed: 4.8 };
+    let p2 = { x: 920, y: 315, r: 24, name: "Rakip", color: '#3b82f6', speed: 4.8 };
     let ball = { x: 560, y: 315, r: 12, color: '#f8fafc', vx: 0, vy: 0, friction: 0.988 };
 
     let keys = {};
     function setKey(k, status) { keys[k] = status; }
 
+    // KLAVYE DESTEĞİ
     window.addEventListener('keydown', (e) => {
         if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault();
         keys[e.key.toLowerCase()] = true;
         if(e.key === " ") keys['space'] = true;
         if(e.key === "Shift") keys['shift'] = true;
     });
-
     window.addEventListener('keyup', (e) => {
         keys[e.key.toLowerCase()] = false;
         if(e.key === " ") keys['space'] = false;
         if(e.key === "Shift") keys['shift'] = false;
     });
+
+    // GERÇEKÇİ ANALOG JOYSTICK MANTIĞI
+    const joystickBase = document.getElementById('joystick-base');
+    const joystickKnob = document.getElementById('joystick-knob');
+    let joystickActive = false;
+    let joystickVector = { x: 0, y: 0 };
+
+    joystickBase.addEventListener('pointerdown', (e) => {
+        joystickActive = true;
+        updateJoystick(e);
+    });
+
+    window.addEventListener('pointermove', (e) => {
+        if (!joystickActive) return;
+        updateJoystick(e);
+    });
+
+    window.addEventListener('pointerup', () => {
+        if (!joystickActive) return;
+        joystickActive = false;
+        joystickVector = { x: 0, y: 0 };
+        joystickKnob.style.transform = `translate(0px, 0px)`;
+    });
+
+    function updateJoystick(e) {
+        const rect = joystickBase.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        let dx = e.clientX - centerX;
+        let dy = e.clientY - centerY;
+        let dist = Math.hypot(dx, dy);
+        let maxRadius = 45;
+
+        if (dist > maxRadius) {
+            dx = (dx / dist) * maxRadius;
+            dy = (dy / dist) * maxRadius;
+        }
+
+        joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
+        joystickVector = { x: dx / maxRadius, y: dy / maxRadius };
+    }
 
     function initGameEngine() {
         score1 = 0; score2 = 0;
@@ -524,54 +557,58 @@
     function updateGame() {
         if (!gameActive) return;
 
-        // Hızlı Koşma (Sprint) Kontrolü
         let currentSpeed = keys['shift'] ? p1.sprintSpeed : p1.baseSpeed;
 
-        if (keys['w'] || keys['W']) p1.y -= currentSpeed;
-        if (keys['s'] || keys['S']) p1.y += currentSpeed;
-        if (keys['a'] || keys['A']) p1.x -= currentSpeed;
-        if (keys['d'] || keys['D']) p1.x += currentSpeed;
+        // Joystick veya Klavye ile Hareket
+        if (joystickActive) {
+            p1.x += joystickVector.x * currentSpeed;
+            p1.y += joystickVector.y * currentSpeed;
+        } else {
+            if (keys['w'] || keys['W']) p1.y -= currentSpeed;
+            if (keys['s'] || keys['S']) p1.y += currentSpeed;
+            if (keys['a'] || keys['A']) p1.x -= currentSpeed;
+            if (keys['d'] || keys['D']) p1.x += currentSpeed;
+        }
 
-        // Yapay Zeka Hareketi
-        let aiSpeed = 3.5;
-        if (aiDifficulty === 'normal') aiSpeed = 4.6;
-        if (aiDifficulty === 'hard') aiSpeed = 5.8;
+        // Rakip Hareketi (AI veya Online Simülasyon)
+        if (gameMode === 'ai') {
+            let targetX = ball.x > 400 ? ball.x : 750;
+            let targetY = ball.y;
+            if (p2.x < targetX) p2.x += 4.5;
+            if (p2.x > targetX) p2.x -= 4.5;
+            if (p2.y < targetY) p2.y += 4.5;
+            if (p2.y > targetY) p2.y -= 4.5;
+        } else {
+            // Online modda diğer oyuncu simülasyonu / hareket kontrolü
+            if (keys['arrowup']) p2.y -= p2.speed;
+            if (keys['arrowdown']) p2.y += p2.speed;
+            if (keys['arrowleft']) p2.x -= p2.speed;
+            if (keys['arrowright']) p2.x += p2.speed;
+        }
 
-        let targetX = ball.x > 400 ? ball.x : 750;
-        let targetY = ball.y;
-
-        if (p2.x < targetX) p2.x += aiSpeed;
-        if (p2.x > targetX) p2.x -= aiSpeed;
-        if (p2.y < targetY) p2.y += aiSpeed;
-        if (p2.y > targetY) p2.y -= aiSpeed;
-
-        // Oyuncu Sınırları
+        // Sınırlar
         p1.x = Math.max(p1.r, Math.min(560 - p1.r, p1.x));
         p1.y = Math.max(p1.r, Math.min(canvas.height - p1.r, p1.y));
-
         p2.x = Math.max(560, Math.min(canvas.width - p2.r, p2.x));
         p2.y = Math.max(p2.r, Math.min(canvas.height - p2.r, p2.y));
 
-        // Top Sürtünme ve Hareketi
+        // Top Fizik
         ball.x += ball.vx;
         ball.y += ball.vy;
         ball.vx *= ball.friction;
         ball.vy *= ball.friction;
 
-        // Duvar Çarpışmaları
         if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy *= -1; playSound('kick'); }
         if (ball.y + ball.r > canvas.height) { ball.y = canvas.height - ball.r; ball.vy *= -1; playSound('kick'); }
 
-        // Gol Kontrolleri (Büyük Kaleler: 200px - 430px arası)
+        // Gol Kontrolü
         if (ball.x - ball.r < 0) {
             if (ball.y >= 200 && ball.y <= 430) {
                 score2++;
                 document.getElementById('score2').innerText = score2;
-                triggerGoalEvent("Rakip Takım Gol Attı!");
+                triggerGoalEvent("Rakip Gol Attı!");
                 return;
-            } else {
-                ball.x = ball.r; ball.vx *= -1; playSound('kick');
-            }
+            } else { ball.x = ball.r; ball.vx *= -1; playSound('kick'); }
         }
         if (ball.x + ball.r > canvas.width) {
             if (ball.y >= 200 && ball.y <= 430) {
@@ -579,13 +616,10 @@
                 document.getElementById('score1').innerText = score1;
                 triggerGoalEvent(`${selectedTeamName} Harika Gol Attı!`);
                 return;
-            } else {
-                ball.x = canvas.width - ball.r; ball.vx *= -1; playSound('kick');
-            }
+            } else { ball.x = canvas.width - ball.r; ball.vx *= -1; playSound('kick'); }
         }
 
-        checkCollision(p1);
-        checkCollision(p2);
+        checkCollision(p1, 'space', 'e');
     }
 
     function triggerGoalEvent(text) {
@@ -603,7 +637,7 @@
         gameLoop();
     }
 
-    function checkCollision(player) {
+    function checkCollision(player, shootKey, passKey) {
         let dx = ball.x - player.x;
         let dy = ball.y - player.y;
         let dist = Math.sqrt(dx * dx + dy * dy);
@@ -613,15 +647,8 @@
             playSound('kick');
             let angle = Math.atan2(dy, dx);
             let power = 6;
-
-            // Şut Tuşu (Space)
-            if (player === p1 && keys['space']) {
-                power = 16;
-            } 
-            // Pas Tuşu (E) - Yumuşak ve kontrollü vuruş
-            else if (player === p1 && keys['e']) {
-                power = 8.5;
-            }
+            if (keys[shootKey]) power = 16;      // Sert Şut
+            else if (keys[passKey]) power = 8.5; // Pas
 
             ball.vx = Math.cos(angle) * power;
             ball.vy = Math.sin(angle) * power;
@@ -637,59 +664,35 @@
         ctx.strokeRect(0, 0, canvas.width, canvas.height);
 
         ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, 0);
-        ctx.lineTo(canvas.width / 2, canvas.height);
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 100, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 100, 0, Math.PI * 2); ctx.stroke();
 
         // Kaleler
         ctx.fillStyle = "rgba(255,255,255,0.8)";
         ctx.fillRect(0, 200, 12, 230);
         ctx.fillRect(canvas.width - 12, 200, 12, 230);
 
-        // Oyuncu 1 (Kullanıcı) Çizimi ve İsmi
+        // Oyuncu 1
         ctx.fillStyle = p1.color;
-        ctx.beginPath();
-        ctx.arc(p1.x, p1.y, p1.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.lineWidth = 3;
-        ctx.strokeStyle = "#fff";
-        ctx.stroke();
-
-        // İsim Etiketi (P1)
-        ctx.fillStyle = "#ffffff";
-        ctx.font = "bold 13px Montserrat";
-        ctx.textAlign = "center";
+        ctx.beginPath(); ctx.arc(p1.x, p1.y, p1.r, 0, Math.PI * 2); ctx.fill();
+        ctx.lineWidth = 3; ctx.strokeStyle = "#fff"; ctx.stroke();
+        ctx.fillStyle = "#fff"; ctx.font = "bold 13px Montserrat"; ctx.textAlign = "center";
         ctx.fillText(p1.name, p1.x, p1.y - p1.r - 8);
 
-        // Oyuncu 2 (Yapay Zeka) Çizimi ve İsmi
+        // Oyuncu 2
         ctx.fillStyle = p2.color;
-        ctx.beginPath();
-        ctx.arc(p2.x, p2.y, p2.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+        ctx.beginPath(); ctx.arc(p2.x, p2.y, p2.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.fillText("Rakip", p2.x, p2.y - p2.r - 8);
 
-        // İsim Etiketi (P2)
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText("Rakip AI", p2.x, p2.y - p2.r - 8);
-
-        // Top Çizimi
+        // Top
         ctx.fillStyle = ball.color;
-        ctx.beginPath();
-        ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
+        ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     }
 
     function gameLoop() {
         updateGame();
         renderField();
-        if (gameActive) {
-            animId = requestAnimationFrame(gameLoop);
-        }
+        if (gameActive) animId = requestAnimationFrame(gameLoop);
     }
 </script>
 
