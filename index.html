@@ -65,7 +65,7 @@
                 </div>
 
                 <div id="isimAlani" class="hidden">
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Çalışan Adı Soyadı</label>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Çalışan Adı Soyadı (Zorunlu)</label>
                     <input type="text" id="kayitAdSoyad" placeholder="Adınızı ve soyadınızı girin..." class="w-full px-4 py-3 border rounded-xl outline-none">
                 </div>
 
@@ -80,7 +80,7 @@
                 </div>
 
                 <div id="kayitMesaj" class="hidden text-center text-emerald-600 font-bold text-lg py-2">
-                    Kayıt girdi
+                    Kayıt başarıyla oluşturuldu! Girişe yönlendiriliyorsunuz...
                 </div>
 
                 <button type="submit" id="girisKayitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer shadow-lg shadow-indigo-200">Sisteme Giriş Yap</button>
@@ -530,7 +530,7 @@
                 kayitSifreAlani.classList.remove("hidden");
                 sifreAlani.classList.add("hidden");
                 btn.innerText = "Kayıt Ol";
-                altBaslik.innerText = "Adınızı ve kendi belirleyeceğiniz şifreyi girin";
+                altBaslik.innerText = "Adınızı, soyadınızı ve şifrenizi belirleyin";
             } else {
                 isimAlani.classList.add("hidden");
                 kayitSifreAlani.classList.add("hidden");
@@ -550,7 +550,7 @@
                 const sifre = document.getElementById("kayitSifre").value.trim();
                 
                 if(!adSoyad || !sifre) {
-                    alert("Lütfen adınızı ve belirlemek istediğiniz şifreyi eksiksiz girin.");
+                    alert("Lütfen ad-soyad ve şifre alanlarını eksiksiz doldurun.");
                     return;
                 }
 
@@ -578,21 +578,20 @@
                     localStorage.setItem("tarim_user_role", "patron");
                     localStorage.setItem("tarim_aktif_kullanici", "Yönetici (Patron)");
                 } else {
-                    alert("Hatalı patron şifresi!");
+                    alert("Hatalı patron şifresi! Şifre: 995425");
                     return;
                 }
             } else if(role === "calisan") {
                 let calisanlar = getData("kayitli_calisanlar");
-                // Eğer daha önce kayıt olmamışsa varsayılan çalışan şifresiz/serbest geçebilir veya kayıtlı şifresini sorgularız
                 let bulunan = calisanlar.find(c => c.sifre === pass);
                 
-                if(calisanlar.length > 0 && !bulunan) {
-                    alert("Girdiğiniz şifre kayıtlı çalışan şifreleriyle eşleşmedi! Lütfen önce 'Yeni Çalışan Kayıt Ol' sekmesinden şifrenizi oluşturun.");
+                if(!bulunan) {
+                    alert("Girdiğiniz şifre eşleşmedi! Lütfen önce 'Yeni Çalışan Kayıt Ol' seçeneğinden adınız ve şifrenizle kayıt olun.");
                     return;
                 }
 
                 localStorage.setItem("tarim_user_role", "calisan");
-                localStorage.setItem("tarim_aktif_kullanici", bulunan ? bulunan.ad : "Çalışan");
+                localStorage.setItem("tarim_aktif_kullanici", bulunan.ad);
             }
 
             checkAuthSession();
