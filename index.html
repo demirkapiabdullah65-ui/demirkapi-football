@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesyonel Tarım ve Ticari Cari Hesap Otomasyonu (Bulut Senkronize)</title>
+    <title>Demirkapı Tarım Ürünleri - Ticari Cari Hesap Otomasyonu</title>
     <!-- PWA Manifest & Service Worker Desteği İçin Meta -->
     <meta name="theme-color" content="#312e81">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Tar%C4%B1m%20Otomasyonu%22%2C%22short_name%22%3A%22Tar%C4%B1mApp%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%23312e81%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Demirkap%C4%B1%20Tar%C4%B1m%20Otomasyonu%22%2C%22short_name%22%3A%22Demirkap%C4%B1App%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%23312e81%22%7D">
 
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -45,7 +45,7 @@
     <div id="musteriPortalModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex justify-center items-center p-4 z-50 hidden">
         <div class="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl space-y-6">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-xl font-bold text-slate-800">🌾 Çiftçi / Müşteri Portalı</h3>
+                <h3 class="text-xl font-bold text-slate-800">🌾 Demirkapı Tarım - Çiftçi Portalı</h3>
                 <button onclick="kapatMusteriPortal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
             </div>
             <div id="musteriPortalGirisEkrani" class="space-y-4">
@@ -79,7 +79,7 @@
         <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-4">
             <div class="text-center mb-4">
                 <span class="text-4xl">🌾</span>
-                <h2 class="text-2xl font-bold text-slate-800 mt-2">Tarım Otomasyon Giriş</h2>
+                <h2 class="text-2xl font-bold text-slate-800 mt-2">Demirkapı Tarım Giriş</h2>
                 <p id="modalAltBaslik" class="text-slate-500 text-sm">Lütfen rolünüzü seçin ve şifrenizi girin</p>
             </div>
             
@@ -125,11 +125,11 @@
     <header class="bg-indigo-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim (PDF Fatura & Müşteri Portalı)</h1>
+                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Demirkapı Tarım Ürünleri</h1>
                 <p class="text-indigo-200 text-xs flex items-center gap-2 flex-wrap">
                     <span id="userBadge" class="bg-emerald-500 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">YÖNETİCİ</span>
                     <span id="offlineStatus" class="bg-emerald-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">🟢 Çevrimiçi</span>
-                    Profesyonel PDF Raporlama & Uydu Harita Aktif
+                    Cari, Stok, Uydu Takip ve Kurumsal PDF Sistemi
                 </p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
@@ -161,7 +161,7 @@
             <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg space-y-4">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-semibold mb-1">✨ Gemini Yapay Zeka & 🎙️ Sesli Asistan</h2>
+                        <h2 class="text-lg font-semibold mb-1">✨ Gemini Yapay Zeka Asistanı</h2>
                         <p class="text-indigo-200 text-sm">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL"</p>
                     </div>
                 </div>
@@ -393,7 +393,7 @@
     <div id="fisModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
-                <h3 id="fisBaslik" class="text-xl font-bold text-slate-800">Müşteri Hesap Fişi</h3>
+                <h3 id="fisBaslik" class="text-xl font-bold text-slate-800">Demirkapı Tarım Ürünleri - Hesap Fişi</h3>
                 <button onclick="kapatFisModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
             </div>
             <div id="fisIcerik" class="space-y-4 text-sm"></div>
@@ -447,6 +447,8 @@
             const app = initializeApp(firebaseConfig);
             db = getDatabase(app);
         } catch(e) {}
+
+        const IBAN_NUMARASI = "TR00 0000 0000 0000 0000 0000 00 (Demirkapı Tarım)";
 
         let cloudData = {
             musteriler: [
@@ -656,14 +658,22 @@
             aktifFisMusteri = musteriAd;
             const islemler = cloudData.islemler.filter(i => i.musteri === musteriAd);
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
-            document.getElementById("fisBaslik").innerText = `${musteriAd} - Cari Hesap Fişi`;
-            document.getElementById("fisIcerik").innerHTML = islemler.map(i => `<div class="p-2 border-b flex justify-between"><span>${i.tarih} - ${i.tur}: ${i.detay}</span><span class="font-bold ${i.tutar>0?'text-rose-600':'text-emerald-600'}">${i.tutar.toLocaleString("tr-TR")} TL</span></div>`).join('') + `<div class="p-3 bg-slate-50 text-right font-bold text-rose-600 text-base">Güncel Toplam Borç: ${toplamBorc.toLocaleString("tr-TR")} TL</div>`;
+            document.getElementById("fisBaslik").innerText = `Demirkapı Tarım Ürünleri - ${musteriAd} Hesap Fişi`;
+            
+            document.getElementById("fisIcerik").innerHTML = `
+                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 mb-2 text-xs">
+                    <p class="font-bold text-indigo-900 text-sm">DEMİRKAPI TARIM ÜRÜNLERİ</p>
+                    <p class="text-indigo-700 mt-1"><b>Ödeme İBAN:</b> ${IBAN_NUMARASI}</p>
+                </div>
+            ` + islemler.map(i => `<div class="p-2 border-b flex justify-between"><span>${i.tarih} - ${i.tur}: ${i.detay}</span><span class="font-bold ${i.tutar>0?'text-rose-600':'text-emerald-600'}">${i.tutar.toLocaleString("tr-TR")} TL</span></div>`).join('') + 
+            `<div class="p-3 bg-slate-50 text-right font-bold text-rose-600 text-base">Güncel Toplam Borç: ${toplamBorc.toLocaleString("tr-TR")} TL</div>`;
+            
             document.getElementById("fisModal").classList.remove("hidden");
         };
 
         window.kapatFisModal = function() { document.getElementById("fisModal").classList.add("hidden"); };
 
-        // 🌟 PROFESYONEL PDF OLUŞTURMA MOTORU (jsPDF & AutoTable) 🌟
+        // 🌟 DEMİRKAPI TARIM ÜRÜNLERİ KURUMSAL PDF MOTORU 🌟
         window.musteriHesapPdfIndir = function() {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -674,22 +684,25 @@
 
             // Başlık & Tasarım
             doc.setFillColor(49, 46, 129); // Koyu İndigo
-            doc.rect(0, 0, 210, 35, "F");
+            doc.rect(0, 0, 210, 40, "F");
 
             doc.setTextColor(255, 255, 255);
             doc.setFontSize(18);
-            doc.text("TARIM & TİCARİ CARİ HESAP", 14, 20);
+            doc.text("DEMİRKAPI TARIM ÜRÜNLERİ", 14, 18);
+
+            doc.setFontSize(11);
+            doc.text("Cari Hesap Özeti ve Fişi", 14, 26);
 
             doc.setFontSize(10);
-            doc.text(`Rapor Tarihi: ${new Date().toLocaleDateString("tr-TR")}`, 150, 20);
+            doc.text(`Tarih: ${new Date().toLocaleDateString("tr-TR")}`, 150, 18);
 
             // Müşteri Bilgileri
             doc.setTextColor(50, 50, 50);
-            doc.setFontSize(14);
-            doc.text(`Müşteri / Çiftçi: ${musteriAdi}`, 14, 48);
+            doc.setFontSize(13);
+            doc.text(`Müşteri / Çiftçi: ${musteriAdi}`, 14, 50);
 
             doc.setFontSize(11);
-            doc.text(`Güncel Borç Bakiyesi: ${toplamBorc.toLocaleString("tr-TR")} TL`, 14, 56);
+            doc.text(`Güncel Borç Bakiyesi: ${toplamBorc.toLocaleString("tr-TR")} TL`, 14, 58);
 
             // Tablo Verileri
             const tableData = musteriIslemleri.map(i => [
@@ -708,14 +721,20 @@
                 alternateRowStyles: { fillColor: [241, 245, 249] }
             });
 
-            // Alt Bilgi / İmza Alanı
-            const finalY = doc.lastAutoTable.finalY + 20;
+            // IBAN ve Alt Bilgi Alanı
+            const finalY = doc.lastAutoTable.finalY + 15;
             doc.setFontSize(10);
-            doc.text("İşletme Kaşe / İmza", 14, finalY);
-            doc.text("Müşteri İmza", 150, finalY);
+            doc.setTextColor(30, 30, 30);
+            doc.text(`Ödemeleriniz İçin Banka IBAN:`, 14, finalY);
+            doc.setFont("helvetica", "bold");
+            doc.text(`${IBAN_NUMARASI}`, 14, finalY + 6);
+
+            doc.setFont("helvetica", "normal");
+            doc.text("Demirkapı Tarım Kaşe / İmza", 14, finalY + 22);
+            doc.text("Müşteri İmza", 150, finalY + 22);
 
             // PDF İndir
-            doc.save(`${musteriAdi.replace(/\s+/g, '_')}_Hesap_Ozeti.pdf`);
+            doc.save(`${musteriAdi.replace(/\s+/g, '_')}_Demirkapi_Tarim_Hesap_Ozeti.pdf`);
         };
 
         window.acHaritaModal = function() {
@@ -746,7 +765,7 @@
         window.yedegiDisariAktar = function() {
             const dl = document.createElement('a');
             dl.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cloudData));
-            dl.download = "tarim_yedek.json"; dl.click();
+            dl.download = "demirkapi_tarim_yedek.json"; dl.click();
         };
         window.saveApiKey = function() { alert("Kaydedildi."); };
         window.processAI = function() { alert("AI aktif."); };
