@@ -69,6 +69,11 @@
                     <input type="text" id="kayitAdSoyad" placeholder="Adınızı ve soyadınızı girin..." class="w-full px-4 py-3 border rounded-xl outline-none">
                 </div>
 
+                <div id="kayitSifreAlani" class="hidden">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Kendinize Bir Şifre Belirleyin</label>
+                    <input type="password" id="kayitSifre" placeholder="Giriş için şifrenizi yazın..." class="w-full px-4 py-3 border rounded-xl outline-none">
+                </div>
+
                 <div id="sifreAlani">
                     <label class="block text-sm font-medium text-slate-600 mb-1" id="sifreLabel">Erişim Şifresi</label>
                     <input type="password" id="loginPass" placeholder="Şifrenizi giriniz..." class="w-full px-4 py-3 border rounded-xl outline-none">
@@ -512,6 +517,7 @@
         window.toggleKayitModu = function() {
             const role = document.getElementById("loginRole").value;
             const isimAlani = document.getElementById("isimAlani");
+            const kayitSifreAlani = document.getElementById("kayitSifreAlani");
             const sifreAlani = document.getElementById("sifreAlani");
             const kayitMesaj = document.getElementById("kayitMesaj");
             const btn = document.getElementById("girisKayitBtn");
@@ -521,11 +527,13 @@
 
             if(role === "yeni_kayit") {
                 isimAlani.classList.remove("hidden");
+                kayitSifreAlani.classList.remove("hidden");
                 sifreAlani.classList.add("hidden");
                 btn.innerText = "Kayıt Ol";
-                altBaslik.innerText = "Lütfen adınızı girerek sisteme kayıt olun";
+                altBaslik.innerText = "Adınızı ve kendi belirleyeceğiniz şifreyi girin";
             } else {
                 isimAlani.classList.add("hidden");
+                kayitSifreAlani.classList.add("hidden");
                 sifreAlani.classList.remove("hidden");
                 btn.innerText = "Sisteme Giriş Yap";
                 altBaslik.innerText = "Lütfen rolünüzü seçin ve şifrenizi girin";
@@ -539,16 +547,21 @@
 
             if(role === "yeni_kayit") {
                 const adSoyad = document.getElementById("kayitAdSoyad").value.trim();
-                if(!adSoyad) return alert("Lütfen adınızı ve soyadınızı girin.");
+                const sifre = document.getElementById("kayitSifre").value.trim();
+                
+                if(!adSoyad || !sifre) {
+                    alert("Lütfen adınızı ve belirlemek istediğiniz şifreyi eksiksiz girin.");
+                    return;
+                }
 
                 let calisanlar = getData("kayitli_calisanlar");
-                calisanlar.push({ id: Date.now(), ad: adSoyad, tarih: new Date().toLocaleDateString("tr-TR") });
+                calisanlar.push({ id: Date.now(), ad: adSoyad, sifre: sifre, tarih: new Date().toLocaleDateString("tr-TR") });
                 setData("kayitli_calisanlar", calisanlar);
 
-                // "Kayıt girdi" yazısını göster
                 const kayitMesaj = document.getElementById("kayitMesaj");
                 kayitMesaj.classList.remove("hidden");
                 document.getElementById("kayitAdSoyad").value = "";
+                document.getElementById("kayitSifre").value = "";
 
                 setTimeout(() => {
                     kayitMesaj.classList.add("hidden");
@@ -558,16 +571,28 @@
                 return;
             }
 
-            const pass = document.getElementById("loginPass").value;
+            const pass = document.getElementById("loginPass").value.trim();
 
-            if(role === "patron" && pass === "995425") {
-                localStorage.setItem("tarim_user_role", "patron");
+            if(role === "patron") {
+                if(pass === "995425") {
+                    localStorage.setItem("tarim_user_role", "patron");
+                    localStorage.setItem("tarim_aktif_kullanici", "Yönetici (Patron)");
+                } else {
+                    alert("Hatalı patron şifresi!");
+                    return;
+                }
             } else if(role === "calisan") {
-                // Çalışanlar için şifre istemiyorsanız direkt giriş yapabilir veya standart bir şifre kullanabilirsiniz
+                let calisanlar = getData("kayitli_calisanlar");
+                // Eğer daha önce kayıt olmamışsa varsayılan çalışan şifresiz/serbest geçebilir veya kayıtlı şifresini sorgularız
+                let bulunan = calisanlar.find(c => c.sifre === pass);
+                
+                if(calisanlar.length > 0 && !bulunan) {
+                    alert("Girdiğiniz şifre kayıtlı çalışan şifreleriyle eşleşmedi! Lütfen önce 'Yeni Çalışan Kayıt Ol' sekmesinden şifrenizi oluşturun.");
+                    return;
+                }
+
                 localStorage.setItem("tarim_user_role", "calisan");
-            } else {
-                alert("Hatalı patron şifresi!");
-                return;
+                localStorage.setItem("tarim_aktif_kullanici", bulunan ? bulunan.ad : "Çalışan");
             }
 
             checkAuthSession();
@@ -575,6 +600,7 @@
 
         window.logout = function() {
             localStorage.removeItem("tarim_user_role");
+            localStorage.removeItem("tarim_aktif_kullanici");
             document.getElementById("loginModal").classList.remove("hidden");
             document.getElementById("loginPass").value = "";
             document.getElementById("loginRole").value = "patron";
@@ -583,6 +609,7 @@
 
         function checkAuthSession() {
             const role = localStorage.getItem("tarim_user_role");
+            const aktifIsim = localStorage.getItem("tarim_aktif_kullanici") || "";
             const modal = document.getElementById("loginModal");
             const badge = document.getElementById("userBadge");
             const onayBolumu = document.getElementById("patronOnayBolumu");
@@ -603,7 +630,7 @@
                 calisanNotu.classList.add("hidden");
                 satisBtn.innerText = "Satışı Tamamla ve Borçlandır";
             } else {
-                badge.innerText = "PERSONEL (ÇALIŞAN)";
+                badge.innerText = `PERSONEL: ${aktifIsim}`;
                 badge.className = "bg-blue-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
                 onayBolumu.classList.add("hidden");
                 calisanNotu.classList.remove("hidden");
@@ -680,6 +707,7 @@
         window.handleSatis = function(e) {
             e.preventDefault();
             const role = localStorage.getItem("tarim_user_role");
+            const aktifKullanici = localStorage.getItem("tarim_aktif_kullanici") || "Çalışan";
             const musteriAd = document.getElementById("satisMusteri").value.trim();
             const urun = document.getElementById("satisUrun").value;
             const adet = parseFloat(document.getElementById("satisAdet").value);
@@ -690,13 +718,12 @@
 
             kontrolVeMusteriEkle(musteriAd);
 
-            // EĞER ÇALIŞANSA ONAY KUYRUĞUNA AT
             if(role === "calisan") {
                 let bekleyenler = getData("onay_bekleyen_satislar");
                 bekleyenler.unshift({
                     id: Date.now(),
                     tarih: new Date().toLocaleDateString("tr-TR"),
-                    calisan: "Personel",
+                    calisan: aktifKullanici,
                     musteri: musteriAd,
                     urun: urun,
                     adet: adet,
@@ -713,7 +740,6 @@
                 return;
             }
 
-            // PATRON İSE DİREKT İŞLE
             let stoklar = getData("stoklar");
             const st = stoklar.find(s => s.ad === urun);
             if(st) {
@@ -757,7 +783,6 @@
             refreshAll();
         };
 
-        // PATRONUN ONAY VERMESİ VEYA REDDETMESİ
         window.satisOnayla = function(id) {
             let bekleyenler = getData("onay_bekleyen_satislar");
             const item = bekleyenler.find(b => b.id === id);
@@ -827,7 +852,7 @@
             tbody.innerHTML = list.map(i => `
                 <tr class="border-b last:border-0">
                     <td class="p-2">${i.tarih}</td>
-                    <td class="p-2 text-indigo-600 font-semibold">${i.calisan || 'Çalışan'}</td>
+                    <td class="p-2 text-indigo-600 font-semibold">${i.calisan}</td>
                     <td class="p-2 font-medium">${i.musteri}</td>
                     <td class="p-2">${i.adet} adet ${i.urun} ${i.aciklama ? '('+i.aciklama+')' : ''}</td>
                     <td class="p-2 text-right font-bold text-slate-700">${i.toplam.toLocaleString("tr-TR")} TL</td>
@@ -1163,4 +1188,60 @@
                     config: { responseMimeType: "application/json" }
                 });
 
-                let text = res.text.replace(/```json/g, '').replace(/
+                let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const data = JSON.parse(text);
+                const tarihStr = new Date().toLocaleDateString("tr-TR");
+                let islemler = getData("islemler");
+                const islemId = Date.now();
+
+                kontrolVeMusteriEkle(data.musteri);
+
+                if(data.tur === "SATIŞ") {
+                    const toplam = (data.adet * data.fiyat) || data.tutar || 0;
+                    const pesin = data.pesinat || 0;
+                    
+                    islemler.unshift({
+                        id: islemId,
+                        tarih: tarihStr,
+                        musteri: data.musteri,
+                        tur: "SATIŞ",
+                        detay: `${data.adet || 1} adet ${data.urun || 'Ürün'} (AI)`,
+                        tutar: toplam
+                    });
+
+                    if(pesin > 0) {
+                        islemler.unshift({
+                            id: islemId + 1,
+                            tarih: tarihStr,
+                            musteri: data.musteri,
+                            tur: "TAHSİLAT",
+                            detay: `Satış esnasında peşin ödeme (AI)`,
+                            tutar: -pesin
+                        });
+                    }
+                } else {
+                    islemler.unshift({
+                        id: islemId,
+                        tarih: tarihStr,
+                        musteri: data.musteri,
+                        tur: "TAHSİLAT",
+                        detay: "Yapay zeka ile tahsilat",
+                        tutar: -data.tutar
+                    });
+                }
+
+                setData("islemler", islemler);
+                alert("Yapay zeka işlemi başarıyla algılayıp kaydetti! 🎉");
+                document.getElementById("aiPrompt").value = "";
+                refreshAll();
+            } catch (err) {
+                alert("AI işleme hatası oluştu.");
+                console.error(err);
+            } finally {
+                btn.innerText = "Yapay Zeka ile İşle";
+                btn.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
