@@ -45,28 +45,40 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
-    <!-- GİRİŞ EKRANI MODALI -->
+    <!-- GİRİŞ VE KAYIT EKRANI MODALI -->
     <div id="loginModal" class="fixed inset-0 bg-indigo-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
             <div class="text-center mb-6">
                 <span class="text-4xl">🌾</span>
                 <h2 class="text-2xl font-bold text-slate-800 mt-2">Tarım Otomasyon Giriş</h2>
-                <p class="text-slate-500 text-sm">Lütfen rolünüzü seçin ve şifrenizi girin</p>
+                <p id="modalAltBaslik" class="text-slate-500 text-sm">Lütfen rolünüzü seçin ve şifrenizi girin</p>
             </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
+            
+            <form onsubmit="handleLoginOrRegister(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Giriş Rolü</label>
-                    <select id="loginRole" class="w-full px-4 py-3 border rounded-xl outline-none bg-white font-medium">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">İşlem Türü / Rol</label>
+                    <select id="loginRole" onchange="toggleKayitModu()" class="w-full px-4 py-3 border rounded-xl outline-none bg-white font-medium">
                         <option value="patron">👑 Patron (Yönetici)</option>
-                        <option value="calisan">👨‍💼 Çalışan (Personel)</option>
+                        <option value="calisan">👨‍💼 Çalışan (Personel Girişi)</option>
+                        <option value="yeni_kayit">📝 Yeni Çalışan Kayıt Ol</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Erişim Şifresi</label>
-                    <input type="password" id="loginPass" required placeholder="Şifrenizi giriniz..." class="w-full px-4 py-3 border rounded-xl outline-none">
-                    <p class="text-xs text-slate-400 mt-1">Varsayılan Şifreler -> Patron: <b>1234</b> | Çalışan: <b>5678</b></p>
+
+                <div id="isimAlani" class="hidden">
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Çalışan Adı Soyadı</label>
+                    <input type="text" id="kayitAdSoyad" placeholder="Adınızı ve soyadınızı girin..." class="w-full px-4 py-3 border rounded-xl outline-none">
                 </div>
-                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer shadow-lg shadow-indigo-200">Sisteme Giriş Yap</button>
+
+                <div id="sifreAlani">
+                    <label class="block text-sm font-medium text-slate-600 mb-1" id="sifreLabel">Erişim Şifresi</label>
+                    <input type="password" id="loginPass" placeholder="Şifrenizi giriniz..." class="w-full px-4 py-3 border rounded-xl outline-none">
+                </div>
+
+                <div id="kayitMesaj" class="hidden text-center text-emerald-600 font-bold text-lg py-2">
+                    Kayıt girdi
+                </div>
+
+                <button type="submit" id="girisKayitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer shadow-lg shadow-indigo-200">Sisteme Giriş Yap</button>
             </form>
         </div>
     </div>
@@ -116,6 +128,7 @@
                         <thead>
                             <tr class="border-b text-slate-400">
                                 <th class="p-2">Tarih</th>
+                                <th class="p-2">Çalışan</th>
                                 <th class="p-2">Müşteri</th>
                                 <th class="p-2">İşlem Detayı</th>
                                 <th class="p-2 text-right">Tutar</th>
@@ -495,18 +508,65 @@
             document.getElementById("malTarih").valueAsDate = new Date();
         };
 
-        // GİRİŞ & ROL YÖNETİMİ
-        window.handleLogin = function(e) {
+        // GİRİŞ / KAYIT FORM MODU DEĞİŞTİRME
+        window.toggleKayitModu = function() {
+            const role = document.getElementById("loginRole").value;
+            const isimAlani = document.getElementById("isimAlani");
+            const sifreAlani = document.getElementById("sifreAlani");
+            const kayitMesaj = document.getElementById("kayitMesaj");
+            const btn = document.getElementById("girisKayitBtn");
+            const altBaslik = document.getElementById("modalAltBaslik");
+
+            kayitMesaj.classList.add("hidden");
+
+            if(role === "yeni_kayit") {
+                isimAlani.classList.remove("hidden");
+                sifreAlani.classList.add("hidden");
+                btn.innerText = "Kayıt Ol";
+                altBaslik.innerText = "Lütfen adınızı girerek sisteme kayıt olun";
+            } else {
+                isimAlani.classList.add("hidden");
+                sifreAlani.classList.remove("hidden");
+                btn.innerText = "Sisteme Giriş Yap";
+                altBaslik.innerText = "Lütfen rolünüzü seçin ve şifrenizi girin";
+            }
+        };
+
+        // GİRİŞ VEYA KAYIT İŞLEMİ
+        window.handleLoginOrRegister = function(e) {
             e.preventDefault();
             const role = document.getElementById("loginRole").value;
+
+            if(role === "yeni_kayit") {
+                const adSoyad = document.getElementById("kayitAdSoyad").value.trim();
+                if(!adSoyad) return alert("Lütfen adınızı ve soyadınızı girin.");
+
+                let calisanlar = getData("kayitli_calisanlar");
+                calisanlar.push({ id: Date.now(), ad: adSoyad, tarih: new Date().toLocaleDateString("tr-TR") });
+                setData("kayitli_calisanlar", calisanlar);
+
+                // "Kayıt girdi" yazısını göster
+                const kayitMesaj = document.getElementById("kayitMesaj");
+                kayitMesaj.classList.remove("hidden");
+                document.getElementById("kayitAdSoyad").value = "";
+
+                setTimeout(() => {
+                    kayitMesaj.classList.add("hidden");
+                    document.getElementById("loginRole").value = "calisan";
+                    toggleKayitModu();
+                }, 2000);
+                return;
+            }
+
             const pass = document.getElementById("loginPass").value;
 
-            if(role === "patron" && pass === "1234") {
+            if(role === "patron" && pass === "995425") {
                 localStorage.setItem("tarim_user_role", "patron");
-            } else if(role === "calisan" && pass === "5678") {
+            } else if(role === "calisan") {
+                // Çalışanlar için şifre istemiyorsanız direkt giriş yapabilir veya standart bir şifre kullanabilirsiniz
                 localStorage.setItem("tarim_user_role", "calisan");
             } else {
-                alert("Hatalı şifre! Patron: 1234, Çalışan: 5678");
+                alert("Hatalı patron şifresi!");
                 return;
             }
 
@@ -517,6 +577,8 @@
             localStorage.removeItem("tarim_user_role");
             document.getElementById("loginModal").classList.remove("hidden");
             document.getElementById("loginPass").value = "";
+            document.getElementById("loginRole").value = "patron";
+            toggleKayitModu();
         };
 
         function checkAuthSession() {
@@ -634,6 +696,7 @@
                 bekleyenler.unshift({
                     id: Date.now(),
                     tarih: new Date().toLocaleDateString("tr-TR"),
+                    calisan: "Personel",
                     musteri: musteriAd,
                     urun: urun,
                     adet: adet,
@@ -700,7 +763,6 @@
             const item = bekleyenler.find(b => b.id === id);
             if(!item) return;
 
-            // Stok kontrol ve düşme
             let stoklar = getData("stoklar");
             const st = stoklar.find(s => s.ad === item.urun);
             if(st) {
@@ -712,7 +774,6 @@
                 setData("stoklar", stoklar);
             }
 
-            // Cari hesaba işle
             let islemler = getData("islemler");
             const islemGrupId = Date.now();
             islemler.unshift({
@@ -736,8 +797,6 @@
             }
 
             setData("islemler", islemler);
-
-            // Kuyruktan çıkar
             bekleyenler = bekleyenler.filter(b => b.id !== id);
             setData("onay_bekleyen_satislar", bekleyenler);
 
@@ -768,6 +827,7 @@
             tbody.innerHTML = list.map(i => `
                 <tr class="border-b last:border-0">
                     <td class="p-2">${i.tarih}</td>
+                    <td class="p-2 text-indigo-600 font-semibold">${i.calisan || 'Çalışan'}</td>
                     <td class="p-2 font-medium">${i.musteri}</td>
                     <td class="p-2">${i.adet} adet ${i.urun} ${i.aciklama ? '('+i.aciklama+')' : ''}</td>
                     <td class="p-2 text-right font-bold text-slate-700">${i.toplam.toLocaleString("tr-TR")} TL</td>
@@ -1103,60 +1163,4 @@
                     config: { responseMimeType: "application/json" }
                 });
 
-                let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const data = JSON.parse(text);
-                const tarihStr = new Date().toLocaleDateString("tr-TR");
-                let islemler = getData("islemler");
-                const islemId = Date.now();
-
-                kontrolVeMusteriEkle(data.musteri);
-
-                if(data.tur === "SATIŞ") {
-                    const toplam = (data.adet * data.fiyat) || data.tutar || 0;
-                    const pesin = data.pesinat || 0;
-                    
-                    islemler.unshift({
-                        id: islemId,
-                        tarih: tarihStr,
-                        musteri: data.musteri,
-                        tur: "SATIŞ",
-                        detay: `${data.adet || 1} adet ${data.urun || 'Ürün'} (AI)`,
-                        tutar: toplam
-                    });
-
-                    if(pesin > 0) {
-                        islemler.unshift({
-                            id: islemId + 1,
-                            tarih: tarihStr,
-                            musteri: data.musteri,
-                            tur: "TAHSİLAT",
-                            detay: `Satış esnasında peşin ödeme (AI)`,
-                            tutar: -pesin
-                        });
-                    }
-                } else {
-                    islemler.unshift({
-                        id: islemId,
-                        tarih: tarihStr,
-                        musteri: data.musteri,
-                        tur: "TAHSİLAT",
-                        detay: "Yapay zeka ile tahsilat",
-                        tutar: -data.tutar
-                    });
-                }
-
-                setData("islemler", islemler);
-                alert("Yapay zeka işlemi başarıyla algılayıp kaydetti! 🎉");
-                document.getElementById("aiPrompt").value = "";
-                refreshAll();
-            } catch (err) {
-                alert("AI işleme hatası oluştu.");
-                console.error(err);
-            } finally {
-                btn.innerText = "Yapay Zeka ile İşle";
-                btn.disabled = false;
-            }
-        };
-    </script>
-</body>
-</html>
+                let text = res.text.replace(/```json/g, '').replace(/
