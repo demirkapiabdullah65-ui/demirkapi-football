@@ -14,6 +14,34 @@
         }
       }
     </script>
+    <!-- Yazdırma (Print) Stilleri -->
+    <style>
+        @media print {
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            header, .tab-btn, button, input, select, .no-print {
+                display: none !important;
+            }
+            .tab-content {
+                display: block !important;
+            }
+            #fisModal {
+                position: absolute !important;
+                inset: 0 !important;
+                background: white !important;
+                padding: 0 !important;
+            }
+            #fisModal > div {
+                box-shadow: none !important;
+                max-height: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+        }
+    </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
@@ -475,7 +503,6 @@
             }
         };
 
-        // Müşteriyi otomatik yeni eklenenlere dahil etme fonksiyonu
         function kontrolVeMusteriEkle(ad) {
             if(!ad) return;
             let musteriler = getData("musteriler");
@@ -486,10 +513,8 @@
             }
         }
 
-        // 1. SATIŞ İŞLEMİ (Peşinat Destekli)
         window.handleSatis = function(e) {
             e.preventDefault();
-            const musteri = document.getElementById("satisMusteri5") || document.getElementById("satisMusteri").value.trim();
             const musteriAd = document.getElementById("satisMusteri").value.trim();
             const urun = document.getElementById("satisUrun").value;
             const adet = parseFloat(document.getElementById("satisAdet").value);
@@ -497,11 +522,9 @@
             const pesinat = parseFloat(document.getElementById("satisPesinat").value) || 0;
             const aciklama = document.getElementById("satisAciklama").value;
             const toplamTutar = adet * fiyat;
-            const kalanBorc = toplamTutar - pesinat;
 
             kontrolVeMusteriEkle(musteriAd);
 
-            // Stok kontrol ve düşme
             let stoklar = getData("stoklar");
             const st = stoklar.find(s => s.ad === urun);
             if(st) {
@@ -517,7 +540,6 @@
             const tarihStr = new Date().toLocaleDateString("tr-TR");
             const islemGrupId = Date.now();
 
-            // Satış hareketi (Tam tutar borç yazılır)
             islemler.unshift({
                 id: islemGrupId,
                 tarih: tarihStr,
@@ -527,7 +549,6 @@
                 tutar: toplamTutar
             });
 
-            // Eğer peşinat ödendiyse hemen tahsilat (borçtan düşüş) hareketi ekle
             if(pesinat > 0) {
                 islemler.unshift({
                     id: islemGrupId + 1,
@@ -548,7 +569,6 @@
             refreshAll();
         };
 
-        // 2. TAHSİLAT İŞLEMİ
         window.handleTahsilat = function(e) {
             e.preventDefault();
             const musteri = document.getElementById("tahsilatMusteri").value.trim();
@@ -573,7 +593,6 @@
             refreshAll();
         };
 
-        // 3. STOK EKLE
         window.handleStokEkle = function(e) {
             e.preventDefault();
             const ad = document.getElementById("stokAd").value;
@@ -628,7 +647,6 @@
             const islemler = getData("islemler");
             const tbody = document.getElementById("musteriTablosu");
 
-            // İşlemlerde adı geçen ama müşteri listesinde unvanı olmayanları da dahil et
             const islemdekiMusteriler = [...new Set(islemler.map(i => i.musteri))];
             islemdekiMusteriler.forEach(ad => kontrolVeMusteriEkle(ad));
             
@@ -669,7 +687,7 @@
                             <th class="p-2">İşlem Türü</th>
                             <th class="p-2">Açıklama / Detay</th>
                             <th class="p-2 text-right">Tutar</th>
-                            <th class="p-2 text-center">İşlem</th>
+                            <th class="p-2 text-center no-print">İşlem</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -686,7 +704,7 @@
                             <td class="p-2 font-semibold">${item.tur}</td>
                             <td class="p-2">${item.detay}</td>
                             <td class="p-2 text-right font-bold ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
-                            <td class="p-2 text-center">
+                            <td class="p-2 text-center no-print">
                                 <button onclick="fiyatGuncelle(${item.id})" class="text-indigo-600 hover:underline text-xs">Fiyat Düzenle</button>
                             </td>
                         </tr>
