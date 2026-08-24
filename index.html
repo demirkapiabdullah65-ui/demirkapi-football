@@ -14,6 +14,12 @@
         }
       }
     </script>
+    <!-- Leaflet CSS & JS (Harita için) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Turf.js (Alan hesabı için) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+
     <!-- Yazdırma (Print) Stilleri -->
     <style>
         @media print {
@@ -41,6 +47,7 @@
                 padding: 0 !important;
             }
         }
+        #map { height: 350px; width: 100%; border-radius: 0.75rem; z-index: 10; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
@@ -95,12 +102,13 @@
                 <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim (Bulut Senkronize)</h1>
                 <p class="text-indigo-200 text-xs flex items-center gap-2">
                     <span id="userBadge" class="bg-emerald-500 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">YÖNETİCİ</span>
-                    WhatsApp ve Vade takibi entegre edildi
+                    Harita Alan Ölçümü ve Otomatik Yedekleme Aktif
                 </p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
+                <button onclick="acYedeklemeModal()" class="bg-indigo-800 hover:bg-indigo-700 text-indigo-200 hover:text-white px-3 py-1.5 text-sm rounded-lg font-semibold border border-indigo-700 transition cursor-pointer flex items-center gap-1">💾 Yedekle / Yükle</button>
                 <div class="flex items-center gap-2 bg-indigo-800 p-2 rounded-xl border border-indigo-700">
-                    <input type="password" id="apiKeyInput" placeholder="Gemini API Key" class="px-3 py-1.5 text-sm bg-indigo-900 border border-indigo-600 rounded-lg text-white w-36 outline-none">
+                    <input type="password" id="apiKeyInput" placeholder="Gemini API Key" class="px-3 py-1.5 text-sm bg-indigo-900 border border-indigo-600 rounded-lg text-white w-32 outline-none">
                     <button onclick="saveApiKey()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition cursor-pointer">Kaydet</button>
                 </div>
                 <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 text-sm rounded-xl font-semibold transition cursor-pointer">Çıkış</button>
@@ -415,6 +423,7 @@
                                 <input type="number" step="0.01" id="tarlaKilo" placeholder="0" oninput="document.getElementById('tarlaDonum').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
                             </div>
                         </div>
+                        <button type="button" onclick="acHaritaModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1">🗺️ Haritadan Alan Ölç / Dönüm Hesapla</button>
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Birim Fiyat (TL)</label>
                             <input type="number" step="0.01" id="tarlaFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
@@ -509,6 +518,51 @@
         </div>
     </div>
 
+    <!-- HARİTA & ALAN ÖLÇÜM MODALI -->
+    <div id="haritaModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                <h3 class="text-lg font-bold text-slate-800">🗺️ Harita Üzerinden Tarlayı İşaretleyip Dönüm Hesapla</h3>
+                <button onclick="kapatHaritaModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+            <p class="text-xs text-slate-500 mb-3">Tarlanın sınırlarına harita üzerinde sırasıyla tıklayarak noktalar koyun. Alan otomatik hesaplanacaktır.</p>
+            <div id="map"></div>
+            <div class="mt-4 flex justify-between items-center bg-slate-50 p-3 rounded-xl border">
+                <div>
+                    <span class="text-xs text-slate-400 block">Hesaplanan Alan</span>
+                    <span id="hesaplananDonumYazi" class="text-lg font-bold text-emerald-600">0.00 Dönüm (Dekar)</span>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="haritaNoktalariSifirla()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">Sıfırla</button>
+                    <button type="button" onclick="haritaSonucuAktar()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-semibold cursor-pointer">Tarlaya Aktar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- YEDEKLEME & GERİ YÜKLEME MODALI -->
+    <div id="yedekModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-4">
+                <h3 class="text-lg font-bold text-slate-800">💾 Bulut / Lokal Veri Yedekleme</h3>
+                <button onclick="kapatYedeklemeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+            <div class="space-y-4 text-sm">
+                <div class="bg-slate-50 p-4 rounded-xl border">
+                    <h4 class="font-semibold text-slate-700 mb-1">1. Bilgisayara / Telefona Yedek İndir</h4>
+                    <p class="text-xs text-slate-500 mb-3">Tüm müşteri, stok ve işlem verilerinizi tek dosya olarak kaydedin.</p>
+                    <button onclick="yedegiDisariAktar()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition cursor-pointer">JSON Yedeği İndir</button>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border">
+                    <h4 class="font-semibold text-slate-700 mb-1">2. Yedekten Geri Yükle</h4>
+                    <p class="text-xs text-slate-500 mb-3">Daha önce aldığınız yedek dosyasını seçerek verileri geri yükleyin.</p>
+                    <input type="file" id="yedekDosyaInput" accept=".json" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer mb-2">
+                    <button onclick="yedegiIceAktar()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-semibold transition cursor-pointer">Yedeği Yükle</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JAVASCRIPT & FIREBASE ENTEGRASYONU -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
@@ -545,6 +599,13 @@
             ozlem_yem: []
         };
 
+        // Harita Değişkenleri
+        let map = null;
+        let mapPolygon = null;
+        let mapMarkers = [];
+        let mapLatlngs = [];
+        let hesaplananSonucDonum = 0;
+
         window.onload = function() {
             const savedKey = localStorage.getItem("tarim_gemini_key");
             if(savedKey) document.getElementById("apiKeyInput").value = savedKey;
@@ -580,7 +641,7 @@
             checkAuthSession();
             document.getElementById("tarlaTarih").valueAsDate = new Date();
             document.getElementById("malTarih").valueAsDate = new Date();
-            document.getElementById("satisVade").valueAsDate = new Date(Date.now() + 30*24*60*60*1000); // 30 gün sonra varsayılan vade
+            document.getElementById("satisVade").valueAsDate = new Date(Date.now() + 30*24*60*60*1000);
         };
 
         function saveData(key, val) {
@@ -591,6 +652,112 @@
                 localStorage.setItem(key, JSON.stringify(val));
             }
         }
+
+        // --- YEDEKLEME FONKSİYONLARI ---
+        window.acYedeklemeModal = function() { document.getElementById("yedekModal").classList.remove("hidden"); };
+        window.kapatYedeklemeModal = function() { document.getElementById("yedekModal").classList.add("hidden"); };
+
+        window.yedegiDisariAktar = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cloudData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `tarim_cari_yedek_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        };
+
+        window.yedegiIceAktar = function() {
+            const fileInput = document.getElementById("yedekDosyaInput");
+            if(fileInput.files.length === 0) return alert("Lütfen bir yedek dosyası seçin.");
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    Object.keys(parsed).forEach(key => {
+                        saveData(key, parsed[key]);
+                    });
+                    alert("Yedek başarıyla yüklendi ve veriler senkronize edildi!");
+                    kapatYedeklemeModal();
+                    refreshAll();
+                } catch(err) {
+                    alert("Geçersiz yedek dosyası!");
+                }
+            };
+            reader.readAsText(fileInput.files[0]);
+        };
+
+        // --- HARİTA & ALAN ÖLÇÜMÜ FONKSİYONLARI ---
+        window.acHaritaModal = function() {
+            document.getElementById("haritaModal").classList.remove("hidden");
+            setTimeout(() => {
+                if(!map) {
+                    // Türkiye merkezi veya varsayılan konum (Ankara)
+                    map = L.map('map').setView([39.9334, 32.8597], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    map.on('click', function(e) {
+                        const latlng = e.latlng;
+                        mapLatlngs.push([latlng.lat, latlng.lng]);
+                        const marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
+                        mapMarkers.push(marker);
+                        guncelleHaritaCizim();
+                    });
+
+                    // Kullanıcının mevcut GPS konumunu almaya çalış
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            map.setView([lat, lng], 16);
+                        });
+                    }
+                }
+                map.invalidateSize();
+            }, 200);
+        };
+
+        window.kapatHaritaModal = function() {
+            document.getElementById("haritaModal").classList.add("hidden");
+        };
+
+        function guncelleHaritaCizim() {
+            if(mapPolygon) map.removeLayer(mapPolygon);
+            if(mapLatlngs.length >= 3) {
+                mapPolygon = L.polygon(mapLatlngs, {color: 'emerald', fillColor: '#10b981', fillOpacity: 0.4}).addTo(map);
+                
+                // Turf.js ile alan hesaplama (geojson formatı [lng, lat])
+                let coords = mapLatlngs.map(pt => [pt[1], pt[0]]);
+                coords.push(coords[0]); // kapat
+                const polygonGeo = turf.polygon([coords]);
+                const areaSqMeters = turf.area(polygonGeo); // metrekare
+                
+                // 1 dekar / dönüm = 1000 m²
+                hesaplananSonucDonum = (areaSqMeters / 1000).toFixed(2);
+                document.getElementById("hesaplananDonumYazi50") || (document.getElementById("hesaplananDonumYazi").innerText = `${hesaplananSonucDonum} Dönüm (Dekar) (${Math.round(areaSqMeters)} m²)`);
+            } else {
+                hesaplananSonucDonum = 0;
+                document.getElementById("hesaplananDonumYazi").innerText = "0.00 Dönüm (En az 3 nokta işaretleyin)";
+            }
+        }
+
+        window.haritaNoktalariSifirla = function() {
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+            mapLatlngs = [];
+            if(mapPolygon) map.removeLayer(mapPolygon);
+            hesaplananSonucDonum = 0;
+            document.getElementById("hesaplananDonumYazi").innerText = "0.00 Dönüm (Dekar)";
+        };
+
+        window.haritaSonucuAktar = function() {
+            if(hesaplananSonucDonum <= 0) return alert("Lütfen harita üzerinde alan oluşturun.");
+            document.getElementById("tarlaDonum").value = hesaplananSonucDonum;
+            kapatHaritaModal();
+        };
 
         window.toggleKayitModu = function() {
             const role = document.getElementById("loginRole").value;
@@ -956,7 +1123,6 @@
             const tbody = document.getElementById("vadeUyarilariTablosu");
             const bolum = document.getElementById("vadeUyarilariBolumu");
 
-            // Vadesi bugün olan veya geçmiş satışları saptayalım
             const gecikenler = list.filter(i => i.vade <= today);
 
             if(gecikenler.length === 0) {
@@ -1130,7 +1296,6 @@
 
             document.getElementById("fisIcerik").innerHTML = html;
 
-            // WhatsApp butonunu ayarla
             const waBtn = document.getElementById("whatsappGonderBtn");
             const telNo = musteri?.tel ? musteri.tel.replace(/\D/g, '') : '';
             waBtn.onclick = function() {
