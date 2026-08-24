@@ -45,16 +45,48 @@
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
+    <!-- GİRİŞ EKRANI MODALI -->
+    <div id="loginModal" class="fixed inset-0 bg-indigo-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            <div class="text-center mb-6">
+                <span class="text-4xl">🌾</span>
+                <h2 class="text-2xl font-bold text-slate-800 mt-2">Tarım Otomasyon Giriş</h2>
+                <p class="text-slate-500 text-sm">Lütfen rolünüzü seçin ve şifrenizi girin</p>
+            </div>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Giriş Rolü</label>
+                    <select id="loginRole" class="w-full px-4 py-3 border rounded-xl outline-none bg-white font-medium">
+                        <option value="patron">👑 Patron (Yönetici)</option>
+                        <option value="calisan">👨‍💼 Çalışan (Personel)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-600 mb-1">Erişim Şifresi</label>
+                    <input type="password" id="loginPass" required placeholder="Şifrenizi giriniz..." class="w-full px-4 py-3 border rounded-xl outline-none">
+                    <p class="text-xs text-slate-400 mt-1">Varsayılan Şifreler -> Patron: <b>1234</b> | Çalışan: <b>5678</b></p>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer shadow-lg shadow-indigo-200">Sisteme Giriş Yap</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Üst Menü & API Alanı -->
     <header class="bg-indigo-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
                 <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim Sistemi</h1>
-                <p class="text-indigo-200 text-xs">Satış, Stok, Biçerdöver, Alınan Mallar, Özlem Yem ve Yapay Zeka Asistanı</p>
+                <p class="text-indigo-200 text-xs flex items-center gap-2">
+                    <span id="userBadge" class="bg-emerald-500 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">YÖNETİCİ</span>
+                    Satış, Stok, Biçerdöver, Alınan Mallar, Özlem Yem ve Onay Mekanizması
+                </p>
             </div>
-            <div class="flex items-center gap-2 bg-indigo-800 p-2 rounded-xl border border-indigo-700">
-                <input type="password" id="apiKeyInput" placeholder="Gemini API Key" class="px-3 py-1.5 text-sm bg-indigo-900 border border-indigo-600 rounded-lg text-white w-48 outline-none">
-                <button onclick="saveApiKey()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition cursor-pointer">Anahtarı Kaydet</button>
+            <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 bg-indigo-800 p-2 rounded-xl border border-indigo-700">
+                    <input type="password" id="apiKeyInput" placeholder="Gemini API Key" class="px-3 py-1.5 text-sm bg-indigo-900 border border-indigo-600 rounded-lg text-white w-36 outline-none">
+                    <button onclick="saveApiKey()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition cursor-pointer">Kaydet</button>
+                </div>
+                <button onclick="logout()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-2 text-sm rounded-xl font-semibold transition cursor-pointer">Çıkış</button>
             </div>
         </div>
         <!-- Sayfa Sekmeleri -->
@@ -72,8 +104,31 @@
 
     <main class="max-w-7xl mx-auto px-4 mt-6">
 
-        <!-- 1. DASHBOARD & AI -->
+        <!-- 1. DASHBOARD & AI & ONAY KUTUSU -->
         <div id="tab-dashboard" class="tab-content space-y-6">
+            
+            <!-- ÇALIŞAN SATIŞ ONAY KUTUSU (SADECE PATRON GÖRÜR) -->
+            <div id="patronOnayBolumu" class="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-sm hidden">
+                <h2 class="text-lg font-bold text-amber-800 mb-2 flex items-center gap-2">⚠️ Çalışanlardan Gelen Onay Bekleyen Satışlar</h2>
+                <p class="text-amber-700 text-sm mb-4">Personelin girdiği ve onayınızı bekleyen satışlar aşağıdadır. Onayladığınızda stoktan düşer ve hesaba işlenir.</p>
+                <div class="overflow-x-auto bg-white rounded-xl border border-amber-100 p-2">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b text-slate-400">
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Müşteri</th>
+                                <th class="p-2">İşlem Detayı</th>
+                                <th class="p-2 text-right">Tutar</th>
+                                <th class="p-2 text-center">İşlem Onayı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="onayBekleyenlerTablosu">
+                            <!-- Dinamik -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg">
                 <h2 class="text-lg font-semibold mb-2">✨ Gemini Yapay Zeka ile Akıllı İşlem Ekle</h2>
                 <p class="text-indigo-200 text-sm mb-4">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL, 2000 TL peşin ödedi"</p>
@@ -103,19 +158,18 @@
         <div id="tab-satis" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">🛒 Ürün Satış Ekranı</h2>
+                <div id="calisanBilgiNotu" class="mb-4 p-3 bg-blue-50 border border-blue-100 text-blue-800 text-xs rounded-xl hidden">
+                    ℹ️ <b>Çalışan Modu:</b> Girdiğiniz satışlar direkt işlenmez, patronun onayına gönderilir.
+                </div>
                 <form onsubmit="handleSatis(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin veya Adını Yazın</label>
                         <input type="text" id="satisMusteri" list="musteriListesi" required placeholder="Müşteri seçin veya yeni isim yazın..." class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
-                        <datalist id="musteriListesi">
-                            <!-- Dinamik -->
-                        </datalist>
+                        <datalist id="musteriListesi"></datalist>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Ürün Seçin (Stoktan düşer)</label>
-                        <select id="satisUrun" required onchange="updateSatisFiyat()" class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
-                            <!-- Dinamik Stok Ürünleri -->
-                        </select>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Ürün Seçin</label>
+                        <select id="satisUrun" required onchange="updateSatisFiyat()" class="w-full px-4 py-2 border rounded-xl outline-none bg-white"></select>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -128,14 +182,14 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Satış Anında Yapılan Peşin Ödeme (TL) <span class="text-xs text-slate-400 font-normal">- Yoksa 0 bırakın</span></label>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Peşin Ödeme (TL) <span class="text-xs text-slate-400 font-normal">- Yoksa 0 bırakın</span></label>
                         <input type="number" step="0.01" id="satisPesinat" value="0" min="0" class="w-full px-4 py-2 border rounded-xl outline-none bg-emerald-50 text-emerald-700 font-semibold">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama / Not</label>
                         <input type="text" id="satisAciklama" placeholder="Örn: Vadeli satış" class="w-full px-4 py-2 border rounded-xl outline-none">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Satışı Tamamla ve Borçlandır</button>
+                    <button type="submit" id="satisBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Satışı Tamamla</button>
                 </form>
             </div>
         </div>
@@ -194,9 +248,7 @@
                                     <th class="pb-2 text-right">Birim Fiyatı</th>
                                 </tr>
                             </thead>
-                            <tbody id="stokTablosu">
-                                <!-- Dinamik -->
-                            </tbody>
+                            <tbody id="stokTablosu"></tbody>
                         </table>
                     </div>
                 </div>
@@ -231,9 +283,7 @@
                                     <th class="pb-2 text-center">İşlem / Fiş Al</th>
                                 </tr>
                             </thead>
-                            <tbody id="musteriTablosu">
-                                <!-- Dinamik -->
-                            </tbody>
+                            <tbody id="musteriTablosu"></tbody>
                         </table>
                     </div>
                 </div>
@@ -288,9 +338,7 @@
                                     <th class="pb-2 text-right">Toplam Tutar</th>
                                 </tr>
                             </thead>
-                            <tbody id="alinanMalTablosu">
-                                <!-- Dinamik -->
-                            </tbody>
+                            <tbody id="alinanMalTablosu"></tbody>
                         </table>
                     </div>
                 </div>
@@ -345,9 +393,7 @@
                                     <th class="pb-2 text-right">Toplam Tutar</th>
                                 </tr>
                             </thead>
-                            <tbody id="bicilenTarlaTablosu">
-                                <!-- Dinamik -->
-                            </tbody>
+                            <tbody id="bicilenTarlaTablosu"></tbody>
                         </table>
                     </div>
                 </div>
@@ -396,9 +442,7 @@
                                     <th class="pb-2 text-right">Tutar</th>
                                 </tr>
                             </thead>
-                            <tbody id="yemTablosu">
-                                <!-- Dinamik -->
-                            </tbody>
+                            <tbody id="yemTablosu"></tbody>
                         </table>
                     </div>
                 </div>
@@ -414,9 +458,7 @@
                 <h3 id="fisBaslik" class="text-xl font-bold text-slate-800">Müşteri Hesap Fişi</h3>
                 <button onclick="kapatFisModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
             </div>
-            <div id="fisIcerik" class="space-y-4 text-sm">
-                <!-- Dinamik Fiş İçeriği -->
-            </div>
+            <div id="fisIcerik" class="space-y-4 text-sm"></div>
             <div class="mt-6 pt-4 border-t flex justify-end gap-3">
                 <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Yazdır / PDF Kaydet</button>
                 <button onclick="kapatFisModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Kapat</button>
@@ -448,10 +490,66 @@
                 ]);
             }
 
-            refreshAll();
+            checkAuthSession();
             document.getElementById("tarlaTarih").valueAsDate = new Date();
             document.getElementById("malTarih").valueAsDate = new Date();
         };
+
+        // GİRİŞ & ROL YÖNETİMİ
+        window.handleLogin = function(e) {
+            e.preventDefault();
+            const role = document.getElementById("loginRole").value;
+            const pass = document.getElementById("loginPass").value;
+
+            if(role === "patron" && pass === "1234") {
+                localStorage.setItem("tarim_user_role", "patron");
+            } else if(role === "calisan" && pass === "5678") {
+                localStorage.setItem("tarim_user_role", "calisan");
+            } else {
+                alert("Hatalı şifre! Patron: 1234, Çalışan: 5678");
+                return;
+            }
+
+            checkAuthSession();
+        };
+
+        window.logout = function() {
+            localStorage.removeItem("tarim_user_role");
+            document.getElementById("loginModal").classList.remove("hidden");
+            document.getElementById("loginPass").value = "";
+        };
+
+        function checkAuthSession() {
+            const role = localStorage.getItem("tarim_user_role");
+            const modal = document.getElementById("loginModal");
+            const badge = document.getElementById("userBadge");
+            const onayBolumu = document.getElementById("patronOnayBolumu");
+            const calisanNotu = document.getElementById("calisanBilgiNotu");
+            const satisBtn = document.getElementById("satisBtn");
+
+            if(!role) {
+                modal.classList.remove("hidden");
+                return;
+            }
+
+            modal.classList.add("hidden");
+
+            if(role === "patron") {
+                badge.innerText = "YÖNETİCİ (PATRON)";
+                badge.className = "bg-purple-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
+                onayBolumu.classList.remove("hidden");
+                calisanNotu.classList.add("hidden");
+                satisBtn.innerText = "Satışı Tamamla ve Borçlandır";
+            } else {
+                badge.innerText = "PERSONEL (ÇALIŞAN)";
+                badge.className = "bg-blue-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
+                onayBolumu.classList.add("hidden");
+                calisanNotu.classList.remove("hidden");
+                satisBtn.innerText = "Satışı Patron Onayına Gönder";
+            }
+
+            refreshAll();
+        }
 
         window.saveApiKey = function() {
             const key = document.getElementById("apiKeyInput").value.trim();
@@ -480,6 +578,9 @@
             renderBicilenTarlalar();
             renderYemTablosu();
             renderDashboardStats();
+            if(localStorage.getItem("tarim_user_role") === "patron") {
+                renderOnayBekleyenler();
+            }
         }
 
         function renderMusteriDatalist() {
@@ -513,8 +614,10 @@
             }
         }
 
+        // 1. SATIŞ İŞLEMİ (Rol Kontrollü & Onay Kuyruklu)
         window.handleSatis = function(e) {
             e.preventDefault();
+            const role = localStorage.getItem("tarim_user_role");
             const musteriAd = document.getElementById("satisMusteri").value.trim();
             const urun = document.getElementById("satisUrun").value;
             const adet = parseFloat(document.getElementById("satisAdet").value);
@@ -525,6 +628,29 @@
 
             kontrolVeMusteriEkle(musteriAd);
 
+            // EĞER ÇALIŞANSA ONAY KUYRUĞUNA AT
+            if(role === "calisan") {
+                let bekleyenler = getData("onay_bekleyen_satislar");
+                bekleyenler.unshift({
+                    id: Date.now(),
+                    tarih: new Date().toLocaleDateString("tr-TR"),
+                    musteri: musteriAd,
+                    urun: urun,
+                    adet: adet,
+                    fiyat: fiyat,
+                    pesinat: pesinat,
+                    aciklama: aciklama,
+                    toplam: toplamTutar
+                });
+                setData("onay_bekleyen_satislar", bekleyenler);
+                alert("Satış başarıyla oluşturuldu ve patronun onayına gönderildi!");
+                e.target.reset();
+                document.getElementById("satisPesinat").value = "0";
+                document.getElementById("satisAdet").value = "1";
+                return;
+            }
+
+            // PATRON İSE DİREKT İŞLE
             let stoklar = getData("stoklar");
             const st = stoklar.find(s => s.ad === urun);
             if(st) {
@@ -561,13 +687,97 @@
             }
 
             setData("islemler", islemler);
-
-            alert(`Satış başarıyla gerçekleştirildi! Toplam: ${toplamTutar.toLocaleString("tr-TR")} TL, Alınan Peşin: ${pesinat.toLocaleString("tr-TR")} TL.`);
+            alert(`Satış başarıyla onaylandı ve işlendi! Toplam: ${toplamTutar.toLocaleString("tr-TR")} TL.`);
             e.target.reset();
             document.getElementById("satisPesinat").value = "0";
             document.getElementById("satisAdet").value = "1";
             refreshAll();
         };
+
+        // PATRONUN ONAY VERMESİ VEYA REDDETMESİ
+        window.satisOnayla = function(id) {
+            let bekleyenler = getData("onay_bekleyen_satislar");
+            const item = bekleyenler.find(b => b.id === id);
+            if(!item) return;
+
+            // Stok kontrol ve düşme
+            let stoklar = getData("stoklar");
+            const st = stoklar.find(s => s.ad === item.urun);
+            if(st) {
+                if(st.miktar < item.adet) {
+                    alert(`Stok yetersiz (${st.miktar} kaldı)! Satış onaylanamadı.`);
+                    return;
+                }
+                st.miktar -= item.adet;
+                setData("stoklar", stoklar);
+            }
+
+            // Cari hesaba işle
+            let islemler = getData("islemler");
+            const islemGrupId = Date.now();
+            islemler.unshift({
+                id: islemGrupId,
+                tarih: item.tarih,
+                musteri: item.musteri,
+                tur: "SATIŞ",
+                detay: `${item.adet} adet ${item.urun} (${item.toplam.toLocaleString("tr-TR")} TL) ${item.aciklama ? '- ' + item.aciklama : ''}`,
+                tutar: item.toplam
+            });
+
+            if(item.pesinat > 0) {
+                islemler.unshift({
+                    id: islemGrupId + 1,
+                    tarih: item.tarih,
+                    musteri: item.musteri,
+                    tur: "TAHSİLAT",
+                    detay: `Satış esnasında peşin ödeme`,
+                    tutar: -item.pesinat
+                });
+            }
+
+            setData("islemler", islemler);
+
+            // Kuyruktan çıkar
+            bekleyenler = bekleyenler.filter(b => b.id !== id);
+            setData("onay_bekleyen_satislar", bekleyenler);
+
+            alert("Satış onaylandı ve cari hesaba yansıtıldı!");
+            refreshAll();
+        };
+
+        window.satisReddet = function(id) {
+            if(!confirm("Bu satışı reddetmek istediğinize emin misiniz?")) return;
+            let bekleyenler = getData("onay_bekleyen_satislar");
+            bekleyenler = bekleyenler.filter(b => b.id !== id);
+            setData("onay_bekleyen_satislar", bekleyenler);
+            alert("Satış reddedildi.");
+            refreshAll();
+        };
+
+        function renderOnayBekleyenler() {
+            const list = getData("onay_bekleyen_satislar");
+            const tbody = document.getElementById("onayBekleyenlerTablosu");
+            const bolum = document.getElementById("patronOnayBolumu");
+
+            if(list.length === 0) {
+                bolum.classList.add("hidden");
+                return;
+            }
+
+            bolum.classList.remove("hidden");
+            tbody.innerHTML = list.map(i => `
+                <tr class="border-b last:border-0">
+                    <td class="p-2">${i.tarih}</td>
+                    <td class="p-2 font-medium">${i.musteri}</td>
+                    <td class="p-2">${i.adet} adet ${i.urun} ${i.aciklama ? '('+i.aciklama+')' : ''}</td>
+                    <td class="p-2 text-right font-bold text-slate-700">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                    <td class="p-2 text-center flex justify-center gap-2">
+                        <button onclick="satisOnayla(${i.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Onayla</button>
+                        <button onclick="satisReddet(${i.id})" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Reddet</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
 
         window.handleTahsilat = function(e) {
             e.preventDefault();
@@ -673,6 +883,7 @@
             const islemler = getData("islemler").filter(i => i.musteri === musteriAd);
             const musteri = getData("musteriler").find(m => m.ad === musteriAd);
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            const role = localStorage.getItem("tarim_user_role");
 
             document.getElementById("fisBaslik").innerText = `${musteriAd} - Hesap Fişi ve Ekstresi`;
             let html = `
@@ -687,7 +898,7 @@
                             <th class="p-2">İşlem Türü</th>
                             <th class="p-2">Açıklama / Detay</th>
                             <th class="p-2 text-right">Tutar</th>
-                            <th class="p-2 text-center no-print">İşlem</th>
+                            ${role === 'patron' ? '<th class="p-2 text-center no-print">İşlem</th>' : ''}
                         </tr>
                     </thead>
                     <tbody>
@@ -704,9 +915,7 @@
                             <td class="p-2 font-semibold">${item.tur}</td>
                             <td class="p-2">${item.detay}</td>
                             <td class="p-2 text-right font-bold ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
-                            <td class="p-2 text-center no-print">
-                                <button onclick="fiyatGuncelle(${item.id})" class="text-indigo-600 hover:underline text-xs">Fiyat Düzenle</button>
-                            </td>
+                            ${role === 'patron' ? `<td class="p-2 text-center no-print"><button onclick="fiyatGuncelle(${item.id})" class="text-indigo-600 hover:underline text-xs">Düzenle</button></td>` : ''}
                         </tr>
                     `;
                 });
