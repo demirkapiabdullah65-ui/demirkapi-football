@@ -2,622 +2,260 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Demirkapı eFootball Pro - Detaylı Karakterler</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap');
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; user-select: none; -webkit-user-select: none; }
-        
-        body { 
-            background: #060913; 
-            color: #fff; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center;
-            overflow: hidden;
-            touch-action: none;
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profesyonel Akıllı Cari Hesap</title>
+    <!-- Tailwind CSS v4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Gen AI SDK (Tarayıcı için) -->
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
         }
-
-        .main-wrapper {
-            width: 100%;
-            max-width: 1350px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 5px;
-        }
-
-        .menu-container {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(16px);
-            border: 2px solid rgba(56, 189, 248, 0.4);
-            border-radius: 24px;
-            padding: 30px;
-            width: 100%;
-            max-width: 650px;
-            text-align: center;
-            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .game-title {
-            font-size: 2.8rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #38bdf8 0%, #4ade80 50%, #facc15 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .game-subtitle {
-            font-size: 0.95rem;
-            color: #94a3b8;
-            margin-bottom: 30px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
-
-        .menu-btn {
-            display: block;
-            width: 100%;
-            max-width: 380px;
-            margin: 12px auto;
-            padding: 15px 24px;
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: white;
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            border: none;
-            border-radius: 14px;
-            cursor: pointer;
-            box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.6);
-            transition: all 0.25s ease;
-            text-transform: uppercase;
-            outline: none;
-        }
-
-        .menu-btn:hover { transform: translateY(-3px) scale(1.02); }
-        .menu-btn.green { background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); }
-        .menu-btn.red { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); }
-
-        .screen { display: none; }
-        .screen.active { display: block; }
-
-        #game-area {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            max-width: 1350px;
-            animation: fadeIn 0.3s ease;
-            position: relative;
-        }
-
-        #field-container {
-            position: relative;
-            width: 100%;
-            max-width: 1350px;
-            aspect-ratio: 16 / 9;
-            border: 3px solid rgba(255,255,255,0.7);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.9);
-            background: #228b22;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-
-        .efootball-hud {
-            position: absolute;
-            top: 15px;
-            left: 20px;
-            background: rgba(10, 15, 30, 0.85);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            padding: 6px 14px;
-            gap: 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            z-index: 20;
-            pointer-events: none;
-        }
-
-        .hud-team { font-weight: 900; font-size: 1rem; color: #fff; }
-        .hud-score { background: #000; padding: 4px 10px; font-weight: 900; color: #facc15; border-radius: 4px; font-size: 1.1rem; }
-        .hud-time { color: #38bdf8; font-weight: 800; font-size: 0.95rem; border-left: 1px solid rgba(255,255,255,0.2); padding-left: 12px; }
-
-        .efootball-controls {
-            position: absolute;
-            bottom: 25px;
-            right: 25px;
-            width: 220px;
-            height: 220px;
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .ef-btn {
-            position: absolute;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            color: white;
-            cursor: pointer;
-            border: 2px solid rgba(255,255,255,0.6);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            pointer-events: auto;
-            transition: transform 0.05s;
-        }
-        .ef-btn:active { transform: scale(0.92); }
-
-        #btn-shoot { width: 75px; height: 75px; background: radial-gradient(circle, #22c55e 0%, #15803d 100%); top: 0; right: 20px; font-size: 0.85rem; }
-        #btn-dash { width: 85px; height: 85px; background: radial-gradient(circle, #16a34a 0%, #14532d 100%); bottom: 10px; right: 10px; font-size: 0.9rem; }
-        #btn-through { width: 70px; height: 70px; background: radial-gradient(circle, #15803d 0%, #166534 100%); top: 70px; left: 0; font-size: 0.75rem; }
-        #btn-pass { width: 75px; height: 75px; background: radial-gradient(circle, #15803d 0%, #14532d 100%); bottom: 15px; left: 55px; font-size: 0.85rem; }
-
-        #joystick-base {
-            position: absolute;
-            bottom: 25px;
-            left: 25px;
-            width: 110px;
-            height: 110px;
-            background: rgba(255, 255, 255, 0.08);
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            border-radius: 50%;
-            z-index: 20;
-            touch-action: none;
-        }
-
-        #joystick-knob {
-            width: 45px;
-            height: 45px;
-            background: rgba(56, 189, 248, 0.75);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            position: absolute;
-            top: 30px; left: 30px;
-            pointer-events: none;
-            transition: transform 0.05s linear;
-        }
-
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 15px 0;
-        }
-
-        .team-card {
-            background: rgba(30, 41, 59, 0.7);
-            border: 2px solid #334155;
-            padding: 15px;
-            border-radius: 14px;
-            cursor: pointer;
-            font-weight: 700;
-        }
-        .team-card.selected { border-color: #38bdf8; background: rgba(56, 189, 248, 0.15); }
-
-        #goal-modal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .goal-popup-box {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-            border: 3px solid #facc15;
-            padding: 40px 60px;
-            border-radius: 30px;
-            text-align: center;
-        }
-
-        .goal-title-text { font-size: 3.5rem; font-weight: 900; color: #facc15; text-transform: uppercase; margin-bottom: 10px; }
-        .goal-sub-text { font-size: 1.3rem; color: #e2e8f0; margin-bottom: 25px; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
+      }
+    </script>
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans">
 
-<div class="main-wrapper">
-    <div id="menu-screen" class="menu-container screen active">
-        <div class="game-title">Demirkapı eFootball</div>
-        <div class="game-subtitle">Detaylı Karakter & 3D Hissiyat</div>
-        
-        <button class="menu-btn green" onclick="switchScreen('single-setup-screen')">🏆 Maça Başla</button>
-    </div>
-
-    <div id="single-setup-screen" class="menu-container screen">
-        <h2 style="margin-bottom: 15px; color:#38bdf8;">Takımını Seç</h2>
-        <div class="team-grid">
-            <div class="team-card selected" id="t-galatasaray" onclick="selectTeam('FCB', '#ef4444', '#facc15')">🔴 Galatasaray</div>
-            <div class="team-card" id="t-fenerbahce" onclick="selectTeam('FEN', '#facc15', '#000000')">🟡 Fenerbahçe</div>
-        </div>
-        <button class="menu-btn green" style="margin-top:20px;" onclick="startMatch()">Maça Başla</button>
-    </div>
-
-    <div id="game-area">
-        <div id="field-container">
-            <div class="efootball-hud">
-                <span class="hud-team" id="hud-t1">FCB</span>
-                <span class="hud-score" id="score1">0</span>
-                <span style="color:#94a3b8;">-</span>
-                <span class="hud-score" id="score2">0</span>
-                <span class="hud-team">BAR</span>
-                <span class="hud-time">15:00</span>
+    <div class="max-w-5xl mx-auto p-6">
+        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+            <div>
+                <h1 class="text-2xl font-bold text-indigo-600">Akıllı Cari Hesap Takibi</h1>
+                <p class="text-slate-500 text-sm">Gemini Destekli Yapay Zeka Asistanı ile Hızlı Muhasebe</p>
             </div>
-
-            <canvas id="field" width="1600" height="900"></canvas>
-
-            <div id="joystick-base">
-                <div id="joystick-knob"></div>
+            <!-- API Key Giriş Alanı -->
+            <div class="w-full md:w-auto flex items-center gap-2">
+                <input type="password" id="apiKeyInput" placeholder="Gemini API Key Girin" class="px-3 py-2 text-sm border rounded-xl w-60 focus:ring-2 focus:ring-indigo-500 outline-none">
+                <button onclick="saveApiKey()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 text-sm rounded-xl transition cursor-pointer">Kaydet</button>
             </div>
+        </header>
 
-            <div class="efootball-controls">
-                <button class="ef-btn" id="btn-shoot" onpointerdown="setKey('space', true)" onpointerup="setKey('space', false)">Shoot</button>
-                <button class="ef-btn" id="btn-dash" onpointerdown="setKey('shift', true)" onpointerup="setKey('shift', false)">Dash</button>
-                <button class="ef-btn" id="btn-through" onpointerdown="switchActivePlayer()">Through</button>
-                <button class="ef-btn" id="btn-pass" onpointerdown="setKey('e', true)" onpointerup="setKey('e', false)">Pass</button>
+        <!-- Yapay Zeka ile Hızlı Giriş Alanı -->
+        <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg mb-8">
+            <h2 class="text-lg font-semibold mb-2">✨ Yapay Zeka ile Akıllı İşlem Ekle</h2>
+            <p class="text-indigo-200 text-sm mb-4">Örnek: "Ahmet Ticaret'e 15000 TL mal satıldı, vadeli" veya "Mehmet Bey 5000 TL ödeme yaptı"</p>
+            <div class="flex gap-2">
+                <input type="text" id="aiPrompt" placeholder="İşlemi normal bir cümleyle yazın..." class="flex-1 px-4 py-3 rounded-xl bg-indigo-800 border border-indigo-700 text-white placeholder-indigo-400 focus:outline-none">
+                <button onclick="processAI()" id="aiBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl font-semibold transition cursor-pointer">İşle</button>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Manuel İşlem Formu -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">Manuel İşlem Girişi</h2>
+                <form id="txForm" onsubmit="addManualTx(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri / Firma Adı</label>
+                        <input type="text" id="customer" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">İşlem Türü</label>
+                        <select id="type" class="w-full px-4 py-2 border rounded-xl outline-none">
+                            <option value="BORÇ">Borç (Mal/Hizmet Satışı)</option>
+                            <option value="ALACAK">Alacak (Tahsilat/Ödeme)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Tutar (TL)</label>
+                        <input type="number" step="0.01" id="amount" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama</label>
+                        <input type="text" id="desc" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Kaydet</button>
+                </form>
+            </div>
+
+            <!-- Cari Özet ve Geçmiş Listesi -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-700">Müşteri Bakiyeleri</h2>
+                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b text-slate-400 text-sm sticky top-0 bg-white">
+                                    <th class="pb-2">Müşteri</th>
+                                    <th class="pb-2 text-right">Bakiye</th>
+                                </tr>
+                            </thead>
+                            <tbody id="summaryTable">
+                                <!-- Dinamik dolacak -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
+                    <span class="text-xs text-slate-400">Veriler tarayıcınızda (localStorage) saklanır.</span>
+                    <button onclick="clearData()" class="text-xs text-rose-500 hover:underline cursor-pointer">Tüm Verileri Sıfırla</button>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 
-<div id="goal-modal">
-    <div class="goal-popup-box">
-        <div class="goal-title-text">GOL!</div>
-        <div class="goal-sub-text" id="modal-sub-title">Mükemmel Gol!</div>
-        <button class="menu-btn green" style="max-width:220px; margin:0 auto;" onclick="closeGoalModal()">Devam Et</button>
-    </div>
-</div>
+    <!-- JavaScript Kodları -->
+    <script type="module">
+        import { GoogleGenAI } from "@google/genai";
 
-<script>
-    function switchScreen(screenId) {
-        document.querySelectorAll('.menu-container').forEach(s => s.classList.remove('active'));
-        document.getElementById('game-area').style.display = 'none';
-        document.getElementById(screenId).classList.add('active');
-    }
-
-    let selectedTeamCode = "FCB";
-    let teamPrimaryColor = "#ef4444";
-    let teamSecondaryColor = "#facc15";
-
-    function selectTeam(code, c1, c2) {
-        selectedTeamCode = code;
-        teamPrimaryColor = c1;
-        teamSecondaryColor = c2;
-    }
-
-    function startMatch() {
-        document.getElementById('hud-t1').innerText = selectedTeamCode;
-        document.querySelectorAll('.menu-container').forEach(s => s.classList.remove('active'));
-        document.getElementById('game-area').style.display = 'flex';
-        initGameEngine();
-    }
-
-    const canvas = document.getElementById('field');
-    const ctx = canvas.getContext('2d');
-
-    let score1 = 0, score2 = 0;
-    let animId, gameActive = true;
-    let ball = { x: 800, y: 450, r: 16, vx: 0, vy: 0, friction: 0.99, rotation: 0 };
-
-    let team1 = [];
-    let team2 = [];
-    let activePlayerIndex = 10;
-
-    function setupTeams() {
-        team1 = [
-            { x: 80, y: 450, bx: 80, by: 450, name: 'GK', anim: 0 },
-            { x: 280, y: 220, bx: 280, by: 220, name: 'LB', anim: 0 },
-            { x: 280, y: 380, bx: 280, by: 380, name: 'CB', anim: 0 },
-            { x: 280, y: 520, bx: 280, by: 520, name: 'CB', anim: 0 },
-            { x: 280, y: 680, bx: 280, by: 680, name: 'RB', anim: 0 },
-            { x: 500, y: 300, bx: 500, by: 300, name: 'CMF', anim: 0 },
-            { x: 500, y: 600, bx: 500, by: 600, name: 'CMF', anim: 0 },
-            { x: 620, y: 450, bx: 620, by: 450, name: 'AMF', anim: 0 },
-            { x: 420, y: 140, bx: 420, by: 140, name: 'LWF', anim: 0 },
-            { x: 420, y: 760, bx: 420, by: 760, name: 'RWF', anim: 0 },
-            { x: 700, y: 450, bx: 700, by: 450, name: 'CF', anim: 0 }
-        ];
-
-        team2 = [
-            { x: 1520, y: 450, bx: 1520, by: 450, name: 'GK', anim: 0 },
-            { x: 1320, y: 220, bx: 1320, by: 220, name: 'LB', anim: 0 },
-            { x: 1320, y: 380, bx: 1320, by: 380, name: 'CB', anim: 0 },
-            { x: 1320, y: 520, bx: 1320, by: 520, name: 'CB', anim: 0 },
-            { x: 1320, y: 680, bx: 1320, by: 680, name: 'RB', anim: 0 },
-            { x: 1100, y: 300, bx: 1100, by: 300, name: 'CMF', anim: 0 },
-            { x: 1100, y: 600, bx: 1100, by: 600, name: 'CMF', anim: 0 },
-            { x: 980, y: 450, bx: 980, by: 450, name: 'AMF', anim: 0 },
-            { x: 1180, y: 140, bx: 1180, by: 140, name: 'LWF', anim: 0 },
-            { x: 1180, y: 760, bx: 1180, by: 760, name: 'RWF', anim: 0 },
-            { x: 900, y: 450, bx: 900, by: 450, name: 'CF', anim: 0 }
-        ];
-    }
-
-    let keys = {};
-    function setKey(k, status) { keys[k] = status; }
-
-    window.addEventListener('keydown', (e) => {
-        if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", " "].includes(e.key)) e.preventDefault();
-        keys[e.key.toLowerCase()] = true;
-        if(e.key === " ") keys['space'] = true;
-        if(e.key === "Shift") keys['shift'] = true;
-        if(e.key.toLowerCase() === "q") switchActivePlayer();
-    });
-    window.addEventListener('keyup', (e) => {
-        keys[e.key.toLowerCase()] = false;
-        if(e.key === " ") keys['space'] = false;
-        if(e.key === "Shift") keys['shift'] = false;
-    });
-
-    function switchActivePlayer() {
-        let minDist = Infinity;
-        let nextIndex = activePlayerIndex;
-        for (let i = 0; i < team1.length; i++) {
-            let dist = Math.hypot(ball.x - team1[i].x, ball.y - team1[i].y);
-            if (dist < minDist && i !== activePlayerIndex) {
-                minDist = dist;
-                nextIndex = i;
+        // Sayfa açıldığında API anahtarını inputa doldur
+        window.onload = function() {
+            const savedKey = localStorage.getItem("gemini_cari_key");
+            if(savedKey) {
+                document.getElementById("apiKeyInput").value = savedKey;
             }
-        }
-        activePlayerIndex = nextIndex;
-    }
+            renderSummary();
+        };
 
-    const joystickBase = document.getElementById('joystick-base');
-    const joystickKnob = document.getElementById('joystick-knob');
-    let joystickActive = false;
-    let joystickVector = { x: 0, y: 0 };
-
-    joystickBase.addEventListener('pointerdown', (e) => { joystickActive = true; updateJoystick(e); });
-    window.addEventListener('pointermove', (e) => { if (!joystickActive) return; updateJoystick(e); });
-    window.addEventListener('pointerup', () => { if (!joystickActive) return; joystickActive = false; joystickVector = { x: 0, y: 0 }; joystickKnob.style.transform = `translate(0px, 0px)`; });
-
-    function updateJoystick(e) {
-        const rect = joystickBase.getBoundingClientRect();
-        let dx = e.clientX - (rect.left + rect.width / 2);
-        let dy = e.clientY - (rect.top + rect.height / 2);
-        let dist = Math.hypot(dx, dy);
-        let maxRadius = 35;
-        if (dist > maxRadius) { dx = (dx / dist) * maxRadius; dy = (dy / dist) * maxRadius; }
-        joystickKnob.style.transform = `translate(${dx}px, ${dy}px)`;
-        joystickVector = { x: dx / maxRadius, y: dy / maxRadius };
-    }
-
-    function initGameEngine() {
-        score1 = 0; score2 = 0;
-        gameActive = true;
-        document.getElementById('score1').innerText = score1;
-        document.getElementById('score2').innerText = score2;
-        setupTeams();
-        resetBallAndPlayers();
-        if(animId) cancelAnimationFrame(animId);
-        gameLoop();
-    }
-
-    function resetBallAndPlayers() {
-        ball.x = 800; ball.y = 450; ball.vx = 0; ball.vy = 0;
-        setupTeams();
-        activePlayerIndex = 10;
-    }
-
-    function updateGame() {
-        if (!gameActive) return;
-
-        let player = team1[activePlayerIndex];
-        let speed = keys['shift'] ? 7.5 : 4.8;
-        let isMoving = false;
-
-        if (joystickActive) {
-            player.x += joystickVector.x * speed;
-            player.y += joystickVector.y * speed;
-            isMoving = true;
-        } else {
-            if (keys['w'] || keys['W']) { player.y -= speed; isMoving = true; }
-            if (keys['s'] || keys['S']) { player.y += speed; isMoving = true; }
-            if (keys['a'] || keys['A']) { player.x -= speed; isMoving = true; }
-            if (keys['d'] || keys['D']) { player.x += speed; isMoving = true; }
-        }
-
-        if (isMoving) player.anim += 0.3; else player.anim = 0;
-        player.x = Math.max(20, Math.min(canvas.width - 20, player.x));
-        player.y = Math.max(25, Math.min(canvas.height - 25, player.y));
-
-        for (let i = 0; i < team1.length; i++) {
-            if (i === activePlayerIndex) continue;
-            let p = team1[i];
-            let targetX = p.bx + (ball.x - 800) * 0.15;
-            let targetY = p.by + (ball.y - 450) * 0.15;
-            p.x += (targetX - p.x) * 0.05;
-            p.y += (targetY - p.y) * 0.05;
-        }
-
-        for (let i = 0; i < team2.length; i++) {
-            let p = team2[i];
-            let targetX = p.bx + (ball.x - 800) * 0.2;
-            let targetY = ball.y;
-            if (i === 10) { targetX = ball.x; targetY = ball.y; }
-            p.x += (targetX - p.x) * 0.04;
-            p.y += (targetY - p.y) * 0.04;
-        }
-
-        ball.x += ball.vx;
-        ball.y += ball.vy;
-        ball.vx *= ball.friction;
-        ball.vy *= ball.friction;
-        ball.rotation += ball.vx * 0.04;
-
-        if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy *= -1; }
-        if (ball.y + ball.r > canvas.height) { ball.y = canvas.height - ball.r; ball.vy *= -1; }
-
-        if (ball.x - ball.r < 0) {
-            if (ball.y >= 270 && ball.y <= 630) {
-                score2++; document.getElementById('score2').innerText = score2;
-                triggerGoalEvent("Rakip Gol Attı!"); return;
-            } else { ball.x = ball.r; ball.vx *= -1; }
-        }
-        if (ball.x + ball.r > canvas.width) {
-            if (ball.y >= 270 && ball.y <= 630) {
-                score1++; document.getElementById('score1').innerText = score1;
-                triggerGoalEvent("Muhteşem Gol!"); return;
-            } else { ball.x = canvas.width - ball.r; ball.vx *= -1; }
-        }
-
-        checkAllCollisions();
-    }
-
-    function checkAllCollisions() {
-        let allPlayers = [...team1, ...team2];
-        for (let p of allPlayers) {
-            let dx = ball.x - p.x;
-            let dy = ball.y - p.y;
-            let dist = Math.hypot(dx, dy);
-            if (dist < 24 + ball.r) {
-                let angle = Math.atan2(dy, dx);
-                let power = 8;
-                let isUserActive = team1.includes(p) && team1.indexOf(p) === activePlayerIndex;
-
-                if (isUserActive && keys['space']) power = 19;
-                else if (isUserActive && keys['e']) power = 11;
-
-                ball.vx = Math.cos(angle) * power;
-                ball.vy = Math.sin(angle) * power;
+        window.saveApiKey = function() {
+            const key = document.getElementById("apiKeyInput").value.trim();
+            if(!key) {
+                alert("Lütfen geçerli bir API anahtarı girin.");
+                return;
             }
-        }
-    }
+            localStorage.setItem("gemini_cari_key", key);
+            alert("API Anahtarı başarıyla kaydedildi! 🎉");
+        };
 
-    function triggerGoalEvent(text) {
-        gameActive = false;
-        document.getElementById('modal-sub-title').innerText = text;
-        document.getElementById('goal-modal').style.display = 'flex';
-    }
-
-    function closeGoalModal() {
-        document.getElementById('goal-modal').style.display = 'none';
-        resetBallAndPlayers();
-        gameActive = true;
-        gameLoop();
-    }
-
-    // DETAYLI OYUNCU ÇİZİM FONKSİYONU (Kafa, Forma, Şort, Ayak, Kollar)
-    function drawDetailedPlayer(ctx, x, y, primaryColor, secondaryColor, name, isActive, anim) {
-        // Aktif Üçgen ve Çember
-        if (isActive) {
-            ctx.fillStyle = "#38bdf8";
-            ctx.beginPath();
-            ctx.moveTo(x, y - 32);
-            ctx.lineTo(x - 7, y - 43);
-            ctx.lineTo(x + 7, y - 43);
-            ctx.closePath();
-            ctx.fill();
-
-            ctx.strokeStyle = "#38bdf8";
-            ctx.lineWidth = 2.5;
-            ctx.beginPath(); ctx.arc(x, y, 22, 0, Math.PI * 2); ctx.stroke();
+        // İşlemleri localStorage'dan al / kaydet
+        function getTransactions() {
+            const data = localStorage.getItem("cari_transactions");
+            return data ? JSON.parse(data) : [];
         }
 
-        // Gölge
-        ctx.fillStyle = "rgba(0,0,0,0.3)";
-        ctx.beginPath(); ctx.ellipse(x, y + 16, 10, 5, 0, 0, Math.PI * 2); ctx.fill();
-
-        // Ayaklar (Koşma animasyonlu)
-        let legOffset = Math.sin(anim) * 6;
-        ctx.fillStyle = "#1e293b";
-        ctx.fillRect(x - 6, y + 8, 4, 10 + legOffset);
-        ctx.fillRect(x + 2, y + 8, 4, 10 - legOffset);
-
-        // Şort
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(x - 7, y + 2, 14, 8);
-
-        // Gövde (Forma)
-        ctx.fillStyle = primaryColor;
-        ctx.beginPath(); ctx.roundRect(x - 9, y - 10, 18, 14, 4); ctx.fill();
-        ctx.lineWidth = 2; ctx.strokeStyle = secondaryColor; ctx.stroke();
-
-        // Kollar
-        ctx.fillStyle = "#fbcfe8"; // Ten rengi
-        ctx.fillRect(x - 14, y - 8, 4, 10);
-        ctx.fillRect(x + 10, y - 8, 4, 10);
-
-        // Kafa
-        ctx.fillStyle = "#fbcfe8";
-        ctx.beginPath(); ctx.arc(x, y - 17, 7, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = 1.5; ctx.strokeStyle = "#d97706"; ctx.stroke();
-
-        // İsim Etiketi
-        ctx.fillStyle = isActive ? "#facc15" : "#ffffff";
-        ctx.font = isActive ? "bold 11px Montserrat" : "bold 10px Montserrat";
-        ctx.textAlign = "center";
-        ctx.fillText(name, x, y - 28);
-    }
-
-    function renderField() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Çim Şeritleri
-        const stripeWidth = 100;
-        for (let x = 0; x < canvas.width; x += stripeWidth) {
-            ctx.fillStyle = (x / stripeWidth) % 2 === 0 ? "#1b7a2b" : "#228b22";
-            ctx.fillRect(x, 0, stripeWidth, canvas.height);
+        function saveTransactions(txs) {
+            localStorage.setItem("cari_transactions", JSON.stringify(txs));
         }
 
-        // Saha Çizgileri
-        ctx.strokeStyle = "rgba(255,255,255,0.6)";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(0, 0, canvas.width, canvas.height);
-        ctx.beginPath(); ctx.moveTo(canvas.width / 2, 0); ctx.lineTo(canvas.width / 2, canvas.height); ctx.stroke();
-        ctx.beginPath(); ctx.arc(canvas.width / 2, canvas.height / 2, 130, 0, Math.PI * 2); ctx.stroke();
+        // Manuel İşlem Ekleme
+        window.addManualTx = function(e) {
+            e.preventDefault();
+            const customer = document.getElementById("customer").value.trim();
+            const type = document.getElementById("type").value;
+            const amount = parseFloat(document.getElementById("amount").value);
+            const description = document.getElementById("desc").value.trim();
 
-        ctx.fillStyle = "rgba(255,255,255,0.9)";
-        ctx.fillRect(0, 270, 16, 360);
-        ctx.fillRect(canvas.width - 16, 270, 16, 360);
+            const txs = getTransactions();
+            txs.unshift({
+                id: Date.now(),
+                customer_name: customer,
+                transaction_type: type,
+                amount: amount,
+                description: description,
+                date: new Date().toLocaleString("tr-TR")
+            });
 
-        // Takım 1
-        for (let i = 0; i < team1.length; i++) {
-            let p = team1[i];
-            drawDetailedPlayer(ctx, p.x, p.y, teamPrimaryColor, teamSecondaryColor, p.name, i === activePlayerIndex, p.anim);
-        }
+            saveTransactions(txs);
+            document.getElementById("txForm").reset();
+            renderSummary();
+        };
 
-        // Takım 2
-        for (let p of team2) {
-            drawDetailedPlayer(ctx, p.x, p.y, "#1d4ed8", "#93c5fd", p.name, false, Math.random() * 5);
-        }
+        // Özet Tablosunu Güncelleme
+        window.renderSummary = function() {
+            const txs = getTransactions();
+            const balances = {};
 
-        // Top
-        ctx.save();
-        ctx.translate(ball.x, ball.y);
-        ctx.rotate(ball.rotation);
-        ctx.fillStyle = "#f8fafc";
-        ctx.beginPath(); ctx.arc(0, 0, ball.r, 0, Math.PI * 2); ctx.fill();
-        ctx.lineWidth = 2; ctx.strokeStyle = "#cbd5e1"; ctx.stroke();
-        ctx.restore();
-    }
+            txs.forEach(t => {
+                if(!balances[t.customer_name]) {
+                    balances[t.customer_name] = 0;
+                }
+                if(t.transaction_type === "BORÇ") {
+                    balances[t.customer_name] += t.amount;
+                } else {
+                    balances[t.customer_name] -= t.amount;
+                }
+            });
 
-    function gameLoop() {
-        updateGame();
-        renderField();
-        if (gameActive) animId = requestAnimationFrame(gameLoop);
-    }
-</script>
+            const tbody = document.getElementById("summaryTable");
+            tbody.innerHTML = "";
 
+            const keys = Object.keys(balances);
+            if(keys.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="py-4 text-center text-slate-400">Henüz kayıt bulunmuyor.</td></tr>`;
+                return;
+            }
+
+            keys.forEach(cust => {
+                const bal = balances[cust];
+                const color = bal >= 0 ? "text-emerald-600" : "text-rose-600";
+                tbody.innerHTML += `
+                    <tr class="border-b last:border-0">
+                        <td class="py-3 font-medium">${cust}</td>
+                        <td class="py-3 text-right font-bold ${color}">${bal.toLocaleString("tr-TR")} TL</td>
+                    </tr>
+                `;
+            });
+        };
+
+        // Yapay Zeka (Gemini) ile İşleme Alınması
+        window.processAI = async function() {
+            const apiKey = localStorage.getItem("gemini_cari_key") || document.getElementById("apiKeyInput").value.trim();
+            if(!apiKey) {
+                alert("Lütfen önce sağ üst köşeden Gemini API Anahtarınızı girip kaydedin!");
+                return;
+            }
+
+            const promptText = document.getElementById("aiPrompt").value.trim();
+            if(!promptText) return;
+
+            const aiBtn = document.getElementById("aiBtn");
+            aiBtn.innerText = "İşleniyor...";
+            aiBtn.disabled = true;
+
+            try {
+                // Doğrudan tarayıcıdan Google Gen AI SDK kullanımı
+                const ai = new GoogleGenAI({ apiKey: apiKey });
+                
+                const fullPrompt = `
+                Aşağıdaki cümle bir cari hesap işlemidir. Bu cümleyi analiz et ve TAM OLARAK şu JSON formatında çıktı ver. Başka hiçbir açıklama, metin veya markdown (```json gibi) ekleme yapma:
+                {"customer_name": "Müşteri veya Firma Adı", "transaction_type": "BORÇ veya ALACAK", "amount": 0.0, "description": "İşlem açıklaması"}
+                
+                Cümle: "${promptText}"
+                `;
+
+                const response = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: fullPrompt,
+                    config: {
+                        responseMimeType: "application/json"
+                    }
+                });
+
+                let jsonText = response.text.trim();
+                jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const parsed = JSON.parse(jsonText);
+
+                // İşlemi kaydet
+                const txs = getTransactions();
+                txs.unshift({
+                    id: Date.now(),
+                    customer_name: parsed.customer_name,
+                    transaction_type: parsed.transaction_type,
+                    amount: parseFloat(parsed.amount),
+                    description: parsed.description || promptText,
+                    date: new Date().toLocaleString("tr-TR")
+                });
+
+                saveTransactions(txs);
+                document.getElementById("aiPrompt").value = "";
+                renderSummary();
+                alert(`Başarıyla eklendi!\nMüşteri: ${parsed.customer_name}\nTür: ${parsed.transaction_type}\nTutar: ${parsed.amount} TL`);
+
+            } catch (err) {
+                alert("Yapay zeka işleme sırasında bir hata oluştu. API anahtarınızı kontrol edin.");
+                console.error(err);
+            } finally {
+                aiBtn.innerText = "İşle";
+                aiBtn.disabled = false;
+            }
+        };
+
+        window.clearData = function() {
+            if(confirm("Tüm cari geçmişiniz silinecek. Emin misiniz?")) {
+                localStorage.removeItem("cari_transactions");
+                renderSummary();
+            }
+        };
+    </script>
 </body>
 </html>
