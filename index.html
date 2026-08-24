@@ -48,7 +48,7 @@
         <div id="tab-dashboard" class="tab-content space-y-6">
             <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg">
                 <h2 class="text-lg font-semibold mb-2">✨ Gemini Yapay Zeka ile Akıllı İşlem Ekle</h2>
-                <p class="text-indigo-200 text-sm mb-4">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL" veya "Mehmet 5000 TL ödeme yaptı"</p>
+                <p class="text-indigo-200 text-sm mb-4">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL, 2000 TL peşin ödedi"</p>
                 <div class="flex gap-2">
                     <input type="text" id="aiPrompt" placeholder="İşleminizi doğal dille yazın..." class="flex-1 px-4 py-3 rounded-xl bg-indigo-800 border border-indigo-700 text-white placeholder-indigo-400 outline-none">
                     <button onclick="processAI()" id="aiBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl font-semibold transition cursor-pointer">Yapay Zeka ile İşle</button>
@@ -77,10 +77,11 @@
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">🛒 Ürün Satış Ekranı</h2>
                 <form onsubmit="handleSatis(event)" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin</label>
-                        <select id="satisMusteri" required class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
-                            <!-- Dinamik Müşteri Listesi -->
-                        </select>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin veya Adını Yazın</label>
+                        <input type="text" id="satisMusteri" list="musteriListesi" required placeholder="Müşteri seçin veya yeni isim yazın..." class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                        <datalist id="musteriListesi">
+                            <!-- Dinamik -->
+                        </datalist>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Ürün Seçin (Stoktan düşer)</label>
@@ -99,6 +100,10 @@
                         </div>
                     </div>
                     <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Satış Anında Yapılan Peşin Ödeme (TL) <span class="text-xs text-slate-400 font-normal">- Yoksa 0 bırakın</span></label>
+                        <input type="number" step="0.01" id="satisPesinat" value="0" min="0" class="w-full px-4 py-2 border rounded-xl outline-none bg-emerald-50 text-emerald-700 font-semibold">
+                    </div>
+                    <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama / Not</label>
                         <input type="text" id="satisAciklama" placeholder="Örn: Vadeli satış" class="w-full px-4 py-2 border rounded-xl outline-none">
                     </div>
@@ -113,10 +118,8 @@
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">💵 Müşteri Tahsilat (Ödeme Alma)</h2>
                 <form onsubmit="handleTahsilat(event)" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin</label>
-                        <select id="tahsilatMusteri" required class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
-                            <!-- Dinamik -->
-                        </select>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin veya Adını Yazın</label>
+                        <input type="text" id="tahsilatMusteri" list="musteriListesi" required placeholder="Müşteri seçin veya yazın..." class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Tahsil Edilen Tutar (TL)</label>
@@ -397,7 +400,6 @@
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // LocalStorage Veri Yönetimi
         const getData = (key) => JSON.parse(localStorage.getItem(key)) || [];
         const setData = (key, val) => localStorage.setItem(key, JSON.stringify(val));
 
@@ -405,7 +407,6 @@
             const savedKey = localStorage.getItem("tarim_gemini_key");
             if(savedKey) document.getElementById("apiKeyInput").value = savedKey;
             
-            // Varsayılan boşsa örnek müşteri ekle
             if(getData("musteriler").length === 0) {
                 setData("musteriler", [
                     { id: 1, ad: "Ali Çiftçi", tel: "05551112233" },
@@ -431,7 +432,6 @@
             alert("API Key kaydedildi!");
         };
 
-        // Sekme Değiştirme
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -444,7 +444,7 @@
         };
 
         function refreshAll() {
-            renderMusteriSelects();
+            renderMusteriDatalist();
             renderStokSelects();
             renderStokTablosu();
             renderMusterilerTablosu();
@@ -454,15 +454,12 @@
             renderDashboardStats();
         }
 
-        // --- MÜŞTERİ SEÇİMLERİ ---
-        function renderMusteriSelects() {
+        function renderMusteriDatalist() {
             const musteriler = getData("musteriler");
-            const opts = musteriler.map(m => `<option value="${m.ad}">${m.ad}</option>`).join('');
-            document.getElementById("satisMusteri").innerHTML = opts;
-            document.getElementById("tahsilatMusteri").innerHTML = opts;
+            const opts = musteriler.map(m => `<option value="${m.ad}">`).join('');
+            document.getElementById("musteriListesi").innerHTML = opts;
         }
 
-        // --- STOK SEÇİMLERİ ---
         function renderStokSelects() {
             const stoklar = getData("stoklar");
             const opts = stoklar.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}" data-miktar="${s.miktar}">${s.ad} (Kalan: ${s.miktar})</option>`).join('');
@@ -478,15 +475,31 @@
             }
         };
 
-        // 1. SATIŞ İŞLEMİ
+        // Müşteriyi otomatik yeni eklenenlere dahil etme fonksiyonu
+        function kontrolVeMusteriEkle(ad) {
+            if(!ad) return;
+            let musteriler = getData("musteriler");
+            const temizAd = ad.trim();
+            if(!musteriler.some(m => m.ad.toLowerCase() === temizAd.toLowerCase())) {
+                musteriler.push({ id: Date.now(), ad: temizAd, tel: "" });
+                setData("musteriler", musteriler);
+            }
+        }
+
+        // 1. SATIŞ İŞLEMİ (Peşinat Destekli)
         window.handleSatis = function(e) {
             e.preventDefault();
-            const musteri = document.getElementById("satisMusteri").value;
+            const musteri = document.getElementById("satisMusteri5") || document.getElementById("satisMusteri").value.trim();
+            const musteriAd = document.getElementById("satisMusteri").value.trim();
             const urun = document.getElementById("satisUrun").value;
             const adet = parseFloat(document.getElementById("satisAdet").value);
             const fiyat = parseFloat(document.getElementById("satisFiyat").value);
+            const pesinat = parseFloat(document.getElementById("satisPesinat").value) || 0;
             const aciklama = document.getElementById("satisAciklama").value;
-            const toplam = adet * fiyat;
+            const toplamTutar = adet * fiyat;
+            const kalanBorc = toplamTutar - pesinat;
+
+            kontrolVeMusteriEkle(musteriAd);
 
             // Stok kontrol ve düşme
             let stoklar = getData("stoklar");
@@ -500,29 +513,49 @@
                 setData("stoklar", stoklar);
             }
 
-            // İşlemi kaydet (Hareketler listesine)
             let islemler = getData("islemler");
+            const tarihStr = new Date().toLocaleDateString("tr-TR");
+            const islemGrupId = Date.now();
+
+            // Satış hareketi (Tam tutar borç yazılır)
             islemler.unshift({
-                id: Date.now(),
-                tarih: new Date().toLocaleDateString("tr-TR"),
-                musteri: musteri,
+                id: islemGrupId,
+                tarih: tarihStr,
+                musteri: musteriAd,
                 tur: "SATIŞ",
-                detay: `${adet} adet ${urun} - ${aciklama}`,
-                tutar: toplam
+                detay: `${adet} adet ${urun} (${toplamTutar.toLocaleString("tr-TR")} TL) ${aciklama ? '- ' + aciklama : ''}`,
+                tutar: toplamTutar
             });
+
+            // Eğer peşinat ödendiyse hemen tahsilat (borçtan düşüş) hareketi ekle
+            if(pesinat > 0) {
+                islemler.unshift({
+                    id: islemGrupId + 1,
+                    tarih: tarihStr,
+                    musteri: musteriAd,
+                    tur: "TAHSİLAT",
+                    detay: `Satış esnasında peşin ödeme`,
+                    tutar: -pesinat
+                });
+            }
+
             setData("islemler", islemler);
 
-            alert("Satış başarıyla gerçekleştirildi ve müşteriye borç olarak eklendi.");
+            alert(`Satış başarıyla gerçekleştirildi! Toplam: ${toplamTutar.toLocaleString("tr-TR")} TL, Alınan Peşin: ${pesinat.toLocaleString("tr-TR")} TL.`);
             e.target.reset();
+            document.getElementById("satisPesinat").value = "0";
+            document.getElementById("satisAdet").value = "1";
             refreshAll();
         };
 
         // 2. TAHSİLAT İŞLEMİ
         window.handleTahsilat = function(e) {
             e.preventDefault();
-            const musteri = document.getElementById("tahsilatMusteri").value;
+            const musteri = document.getElementById("tahsilatMusteri").value.trim();
             const tutar = parseFloat(document.getElementById("tahsilatTutar").value);
             const aciklama = document.getElementById("tahsilatAciklama").value;
+
+            kontrolVeMusteriEkle(musteri);
 
             let islemler = getData("islemler");
             islemler.unshift({
@@ -531,7 +564,7 @@
                 musteri: musteri,
                 tur: "TAHSİLAT",
                 detay: aciklama || "Borç Ödemesi",
-                tutar: -tutar // Borçtan düşer
+                tutar: -tutar
             });
             setData("islemler", islemler);
 
@@ -574,7 +607,6 @@
                 `).join('');
         }
 
-        // 5 & 6. MÜŞTERİLER & FİŞ ALMA
         window.handleMusteriEkle = function(e) {
             e.preventDefault();
             const ad = document.getElementById("yeniMusteriAd").value.trim();
@@ -596,8 +628,14 @@
             const islemler = getData("islemler");
             const tbody = document.getElementById("musteriTablosu");
 
-            tbody.innerHTML = musteriler.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Müşteri bulunmuyor.</td></tr>` :
-                musteriler.map(m => {
+            // İşlemlerde adı geçen ama müşteri listesinde unvanı olmayanları da dahil et
+            const islemdekiMusteriler = [...new Set(islemler.map(i => i.musteri))];
+            islemdekiMusteriler.forEach(ad => kontrolVeMusteriEkle(ad));
+            
+            const guncelMusteriler = getData("musteriler");
+
+            tbody.innerHTML = guncelMusteriler.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Müşteri bulunmuyor.</td></tr>` :
+                guncelMusteriler.map(m => {
                     const musteriIslemleri = islemler.filter(i => i.musteri === m.ad);
                     const bakiye = musteriIslemleri.reduce((acc, curr) => acc + curr.tutar, 0);
                     const renk = bakiye > 0 ? "text-rose-600" : "text-emerald-600";
@@ -613,7 +651,6 @@
                 }).join('');
         }
 
-        // Fiş ve PDF Modalı & Fiyat Güncelleme
         window.acFisModal = function(musteriAd) {
             const islemler = getData("islemler").filter(i => i.musteri === musteriAd);
             const musteri = getData("musteriler").find(m => m.ad === musteriAd);
@@ -689,7 +726,6 @@
             }
         };
 
-        // 7. ALINAN MALLAR
         window.handleAlinanMalEkle = function(e) {
             e.preventDefault();
             const tarih = document.getElementById("malTarih").value;
@@ -726,7 +762,6 @@
                 `).join('');
         }
 
-        // 8. BİÇİLEN TARLALAR
         window.handleBicilenTarlaEkle = function(e) {
             e.preventDefault();
             const tarih = document.getElementById("tarlaTarih").value;
@@ -763,7 +798,6 @@
                 `).join('');
         }
 
-        // 9. ÖZLEM YEM BAYİLİK
         window.handleYemIslem = function(e) {
             e.preventDefault();
             const tip = document.getElementById("yemTip").value;
@@ -805,7 +839,6 @@
                 }).join('');
         }
 
-        // Dashboard Genel İstatistikler
         function renderDashboardStats() {
             const islemler = getData("islemler");
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
@@ -819,7 +852,6 @@
             document.getElementById("statYem").innerText = `${yemBakiye.toLocaleString("tr-TR")} TL`;
         }
 
-        // GEMINI AI PARSER
         window.processAI = async function() {
             const apiKey = localStorage.getItem("tarim_gemini_key") || document.getElementById("apiKeyInput").value.trim();
             if(!apiKey) return alert("Lütfen önce üst kısımdan Gemini API Key girin.");
@@ -834,7 +866,7 @@
                 const ai = new GoogleGenAI({ apiKey });
                 const prompt = `
                 Bu cümle bir tarımsal ticaret işlemidir. Analiz et ve TAM OLARAK şu JSON formatında cevap ver, başka hiçbir metin ekleme:
-                {"musteri": "Müşteri Adı", "tur": "SATIŞ veya TAHSİLAT", "urun": "Ürün Adı veya açıklama", "adet": 0.0, "fiyat": 0.0, "tutar": 0.0}
+                {"musteri": "Müşteri Adı", "tur": "SATIŞ veya TAHSİLAT", "urun": "Ürün Adı", "adet": 0.0, "fiyat": 0.0, "pesinat": 0.0, "tutar": 0.0}
                 Cümle: "${promptText}"
                 `;
 
@@ -846,32 +878,47 @@
 
                 let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
                 const data = JSON.parse(text);
+                const tarihStr = new Date().toLocaleDateString("tr-TR");
+                let islemler = getData("islemler");
+                const islemId = Date.now();
+
+                kontrolVeMusteriEkle(data.musteri);
 
                 if(data.tur === "SATIŞ") {
-                    let islemler = getData("islemler");
-                    const toplam = data.adet * data.fiyat || data.tutar;
+                    const toplam = (data.adet * data.fiyat) || data.tutar || 0;
+                    const pesin = data.pesinat || 0;
+                    
                     islemler.unshift({
-                        id: Date.now(),
-                        tarih: new Date().toLocaleDateString("tr-TR"),
+                        id: islemId,
+                        tarih: tarihStr,
                         musteri: data.musteri,
                         tur: "SATIŞ",
-                        detay: `${data.adet || 1} adet ${data.urun} (AI)`,
+                        detay: `${data.adet || 1} adet ${data.urun || 'Ürün'} (AI)`,
                         tutar: toplam
                     });
-                    setData("islemler", islemler);
+
+                    if(pesin > 0) {
+                        islemler.unshift({
+                            id: islemId + 1,
+                            tarih: tarihStr,
+                            musteri: data.musteri,
+                            tur: "TAHSİLAT",
+                            detay: `Satış esnasında peşin ödeme (AI)`,
+                            tutar: -pesin
+                        });
+                    }
                 } else {
-                    let islemler = getData("islemler");
                     islemler.unshift({
-                        id: Date.now(),
-                        tarih: new Date().toLocaleDateString("tr-TR"),
+                        id: islemId,
+                        tarih: tarihStr,
                         musteri: data.musteri,
                         tur: "TAHSİLAT",
                         detay: "Yapay zeka ile tahsilat",
                         tutar: -data.tutar
                     });
-                    setData("islemler", islemler);
                 }
 
+                setData("islemler", islemler);
                 alert("Yapay zeka işlemi başarıyla algılayıp kaydetti! 🎉");
                 document.getElementById("aiPrompt").value = "";
                 refreshAll();
