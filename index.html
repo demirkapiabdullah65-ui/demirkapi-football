@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesyonel Akıllı Cari Hesap</title>
+    <title>Profesyonel Tarım ve Ticari Cari Hesap Otomasyonu</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- Google Gen AI SDK (Tarayıcı için) -->
+    <!-- Google Gen AI SDK -->
     <script type="importmap">
       {
         "imports": {
@@ -15,245 +15,872 @@
       }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans">
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
-    <div class="max-w-5xl mx-auto p-6">
-        <header class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+    <!-- Üst Menü & API Alanı -->
+    <header class="bg-indigo-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold text-indigo-600">Akıllı Cari Hesap Takibi</h1>
-                <p class="text-slate-500 text-sm">Gemini Destekli Yapay Zeka Asistanı ile Hızlı Muhasebe</p>
+                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim Sistemi</h1>
+                <p class="text-indigo-200 text-xs">Satış, Stok, Biçerdöver, Alınan Mallar, Özlem Yem ve Yapay Zeka Asistanı</p>
             </div>
-            <!-- API Key Giriş Alanı -->
-            <div class="w-full md:w-auto flex items-center gap-2">
-                <input type="password" id="apiKeyInput" placeholder="Gemini API Key Girin" class="px-3 py-2 text-sm border rounded-xl w-60 focus:ring-2 focus:ring-indigo-500 outline-none">
-                <button onclick="saveApiKey()" class="bg-slate-800 hover:bg-slate-900 text-white px-4 py-2 text-sm rounded-xl transition cursor-pointer">Kaydet</button>
+            <div class="flex items-center gap-2 bg-indigo-800 p-2 rounded-xl border border-indigo-700">
+                <input type="password" id="apiKeyInput" placeholder="Gemini API Key" class="px-3 py-1.5 text-sm bg-indigo-900 border border-indigo-600 rounded-lg text-white w-48 outline-none">
+                <button onclick="saveApiKey()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1.5 text-sm rounded-lg font-semibold transition cursor-pointer">Anahtarı Kaydet</button>
             </div>
-        </header>
+        </div>
+        <!-- Sayfa Sekmeleri -->
+        <div class="max-w-7xl mx-auto px-4 flex overflow-x-auto gap-2 py-2 border-t border-indigo-800">
+            <button onclick="switchTab('tab-dashboard')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg bg-indigo-800 text-white transition cursor-pointer">🏠 Panel & AI</button>
+            <button onclick="switchTab('tab-satis')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">🛒 Satış Yap</button>
+            <button onclick="switchTab('tab-tahsilat')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">💵 Tahsilat Al</button>
+            <button onclick="switchTab('tab-stok')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">📦 Stok Yönetimi</button>
+            <button onclick="switchTab('tab-musteriler')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">👥 Müşteriler & Borç</button>
+            <button onclick="switchTab('tab-alinan')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">📥 Alınan Mallar</button>
+            <button onclick="switchTab('tab-bicilen')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">🚜 Biçilen Tarlalar</button>
+            <button onclick="switchTab('tab-yem')" class="tab-btn px-4 py-2 text-sm font-medium rounded-lg hover:bg-indigo-800 text-indigo-200 transition cursor-pointer">🐄 Özlem Yem Bayilik</button>
+        </div>
+    </header>
 
-        <!-- Yapay Zeka ile Hızlı Giriş Alanı -->
-        <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg mb-8">
-            <h2 class="text-lg font-semibold mb-2">✨ Yapay Zeka ile Akıllı İşlem Ekle</h2>
-            <p class="text-indigo-200 text-sm mb-4">Örnek: "Ahmet Ticaret'e 15000 TL mal satıldı, vadeli" veya "Mehmet Bey 5000 TL ödeme yaptı"</p>
-            <div class="flex gap-2">
-                <input type="text" id="aiPrompt" placeholder="İşlemi normal bir cümleyle yazın..." class="flex-1 px-4 py-3 rounded-xl bg-indigo-800 border border-indigo-700 text-white placeholder-indigo-400 focus:outline-none">
-                <button onclick="processAI()" id="aiBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl font-semibold transition cursor-pointer">İşle</button>
+    <main class="max-w-7xl mx-auto px-4 mt-6">
+
+        <!-- 1. DASHBOARD & AI -->
+        <div id="tab-dashboard" class="tab-content space-y-6">
+            <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg">
+                <h2 class="text-lg font-semibold mb-2">✨ Gemini Yapay Zeka ile Akıllı İşlem Ekle</h2>
+                <p class="text-indigo-200 text-sm mb-4">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL" veya "Mehmet 5000 TL ödeme yaptı"</p>
+                <div class="flex gap-2">
+                    <input type="text" id="aiPrompt" placeholder="İşleminizi doğal dille yazın..." class="flex-1 px-4 py-3 rounded-xl bg-indigo-800 border border-indigo-700 text-white placeholder-indigo-400 outline-none">
+                    <button onclick="processAI()" id="aiBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl font-semibold transition cursor-pointer">Yapay Zeka ile İşle</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-slate-500 text-sm font-medium">Toplam Müşteri Alacağı</h3>
+                    <p id="statBorc" class="text-3xl font-bold text-rose-600 mt-2">0,00 TL</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-slate-500 text-sm font-medium">Toplam Stok Çeşidi</h3>
+                    <p id="statStok" class="text-3xl font-bold text-indigo-600 mt-2">0 Adet</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-slate-500 text-sm font-medium">Özlem Yem Cari Bakiye</h3>
+                    <p id="statYem" class="text-3xl font-bold text-emerald-600 mt-2">0,00 TL</p>
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- Manuel İşlem Formu -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-xl font-semibold mb-4 text-slate-700">Manuel İşlem Girişi</h2>
-                <form id="txForm" onsubmit="addManualTx(event)" class="space-y-4">
+        <!-- 2. SATIŞ YAP -->
+        <div id="tab-satis" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">🛒 Ürün Satış Ekranı</h2>
+                <form onsubmit="handleSatis(event)" class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri / Firma Adı</label>
-                        <input type="text" id="customer" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">İşlem Türü</label>
-                        <select id="type" class="w-full px-4 py-2 border rounded-xl outline-none">
-                            <option value="BORÇ">Borç (Mal/Hizmet Satışı)</option>
-                            <option value="ALACAK">Alacak (Tahsilat/Ödeme)</option>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin</label>
+                        <select id="satisMusteri" required class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                            <!-- Dinamik Müşteri Listesi -->
                         </select>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Tutar (TL)</label>
-                        <input type="number" step="0.01" id="amount" required class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Ürün Seçin (Stoktan düşer)</label>
+                        <select id="satisUrun" required onchange="updateSatisFiyat()" class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                            <!-- Dinamik Stok Ürünleri -->
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Miktar / Adet</label>
+                            <input type="number" step="0.01" id="satisAdet" required value="1" min="0.01" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Birim Fiyat (TL)</label>
+                            <input type="number" step="0.01" id="satisFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama</label>
-                        <input type="text" id="desc" class="w-full px-4 py-2 border rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama / Not</label>
+                        <input type="text" id="satisAciklama" placeholder="Örn: Vadeli satış" class="w-full px-4 py-2 border rounded-xl outline-none">
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Kaydet</button>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Satışı Tamamla ve Borçlandır</button>
                 </form>
             </div>
+        </div>
 
-            <!-- Cari Özet ve Geçmiş Listesi -->
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-700">Müşteri Bakiyeleri</h2>
-                    <div class="overflow-x-auto max-h-80 overflow-y-auto">
+        <!-- 3. TAHSİLAT AL -->
+        <div id="tab-tahsilat" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
+                <h2 class="text-xl font-semibold mb-4 text-slate-700">💵 Müşteri Tahsilat (Ödeme Alma)</h2>
+                <form onsubmit="handleTahsilat(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Seçin</label>
+                        <select id="tahsilatMusteri" required class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                            <!-- Dinamik -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Tahsil Edilen Tutar (TL)</label>
+                        <input type="number" step="0.01" id="tahsilatTutar" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Ödeme Türü / Açıklama</label>
+                        <input type="text" id="tahsilatAciklama" placeholder="Örn: Nakit / Havale ile ödeme" class="w-full px-4 py-2 border rounded-xl outline-none">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Tahsilatı Al ve Borçtan Düş</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- 4. STOK YÖNETİMİ -->
+        <div id="tab-stok" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📦 Yeni Ürün / Stok Ekle</h2>
+                    <form onsubmit="handleStokEkle(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Ürün Adı</label>
+                            <input type="text" id="stokAd" required placeholder="Örn: Buğday Tohumu / 20-20 Gübre" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Miktar / Adet</label>
+                            <input type="number" step="0.01" id="stokMiktar" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Satış Birim Fiyatı (TL)</label>
+                            <input type="number" step="0.01" id="stokFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Stok Ekle</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📋 Mevcut Stok Listesi</h2>
+                    <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="border-b text-slate-400 text-sm sticky top-0 bg-white">
-                                    <th class="pb-2">Müşteri</th>
-                                    <th class="pb-2 text-right">Bakiye</th>
+                                <tr class="border-b text-slate-400 text-sm">
+                                    <th class="pb-2">Ürün Adı</th>
+                                    <th class="pb-2 text-center">Kalan Adet / Miktar</th>
+                                    <th class="pb-2 text-right">Birim Fiyatı</th>
                                 </tr>
                             </thead>
-                            <tbody id="summaryTable">
-                                <!-- Dinamik dolacak -->
+                            <tbody id="stokTablosu">
+                                <!-- Dinamik -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <div class="mt-6 pt-4 border-t border-slate-100 flex justify-between items-center">
-                    <span class="text-xs text-slate-400">Veriler tarayıcınızda (localStorage) saklanır.</span>
-                    <button onclick="clearData()" class="text-xs text-rose-500 hover:underline cursor-pointer">Tüm Verileri Sıfırla</button>
+            </div>
+        </div>
+
+        <!-- 5. MÜŞTERİLER & BORÇ TAKİBİ -->
+        <div id="tab-musteriler" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">👤 Yeni Müşteri Kaydı</h2>
+                    <form onsubmit="handleMusteriEkle(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Müşteri Ad Soyad / Unvan</label>
+                            <input type="text" id="yeniMusteriAd" required placeholder="Örn: Ali Yılmaz" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Telefon / Not</label>
+                            <input type="text" id="yeniMusteriTel" placeholder="0555..." class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Müşteri Ekle</button>
+                    </form>
                 </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📋 Müşteri Listesi ve Hesap Detayları</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b text-slate-400 text-sm">
+                                    <th class="pb-2">Müşteri Adı</th>
+                                    <th class="pb-2 text-right">Güncel Bakiye (Borç)</th>
+                                    <th class="pb-2 text-center">İşlem / Fiş Al</th>
+                                </tr>
+                            </thead>
+                            <tbody id="musteriTablosu">
+                                <!-- Dinamik -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. ALINAN MALLAR -->
+        <div id="tab-alinan" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📥 Alınan Mal Kaydı Ekle</h2>
+                    <form onsubmit="handleAlinanMalEkle(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="malTarih" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Malı Veren / İsim</label>
+                            <input type="text" id="malIsim" required placeholder="Örn: Hasan Demir" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Köy</label>
+                            <input type="text" id="malKoy" required placeholder="Örn: Dereköy" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Dönüm (Varsa)</label>
+                                <input type="number" step="0.01" id="malDonum" placeholder="0" oninput="document.getElementById('malKilo').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Kilo (Varsa)</label>
+                                <input type="number" step="0.01" id="malKilo" placeholder="0" oninput="document.getElementById('malDonum').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Birim Fiyat (TL)</label>
+                            <input type="number" step="0.01" id="malFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Mal Kaydını Ekle</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📋 Alınan Mallar Listesi</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b text-slate-400">
+                                    <th class="pb-2">Tarih</th>
+                                    <th class="pb-2">İsim / Köy</th>
+                                    <th class="pb-2 text-center">Ölçü (Dönüm/Kilo)</th>
+                                    <th class="pb-2 text-right">Birim Fiyat</th>
+                                    <th class="pb-2 text-right">Toplam Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alinanMalTablosu">
+                                <!-- Dinamik -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. BİÇİLEN TARLALAR -->
+        <div id="tab-bicilen" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">🚜 Biçilen Tarla Kaydı</h2>
+                    <form onsubmit="handleBicilenTarlaEkle(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="tarlaTarih" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tarla Sahibi / İsim</label>
+                            <input type="text" id="tarlaIsim" required placeholder="Örn: Veli Koç" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Köy</label>
+                            <input type="text" id="tarlaKoy" required placeholder="Örn: Yeniköy" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Dönüm</label>
+                                <input type="number" step="0.01" id="tarlaDonum" placeholder="0" oninput="document.getElementById('tarlaKilo').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Kilo (Pay)</label>
+                                <input type="number" step="0.01" id="tarlaKilo" placeholder="0" oninput="document.getElementById('tarlaDonum').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Birim Fiyat (TL)</label>
+                            <input type="number" step="0.01" id="tarlaFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Biçilen Tarla Ekle</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📋 Biçilen Tarlalar Listesi</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b text-slate-400">
+                                    <th class="pb-2">Tarih</th>
+                                    <th class="pb-2">İsim / Köy</th>
+                                    <th class="pb-2 text-center">Ölçü (Dönüm/Kilo)</th>
+                                    <th class="pb-2 text-right">Birim Fiyat</th>
+                                    <th class="pb-2 text-right">Toplam Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bicilenTarlaTablosu">
+                                <!-- Dinamik -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. ÖZLEM YEM BAYİLİK -->
+        <div id="tab-yem" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">🐄 Özlem Yem İşlem Ekle</h2>
+                    <form onsubmit="handleYemIslem(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">İşlem Türü</label>
+                            <select id="yemTip" class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                                <option value="YEM_ALIM">Yem Alındı (Borç Artar)</option>
+                                <option value="YEM_ODEME">Yem Ödemesi Yapıldı (Borç Düşer)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tutar (TL)</label>
+                            <input type="number" step="0.01" id="yemTutar" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama</label>
+                            <input type="text" id="yemAciklama" placeholder="Örn: 50 çuval buzağı yemi / Banka havale" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Kaydet</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-slate-700">📋 Özlem Yem Hesap Hareketleri</h2>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Kalan Bayilik Borcu</span>
+                            <span id="yemBakiyeYazi" class="text-xl font-bold text-indigo-600">0,00 TL</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b text-slate-400">
+                                    <th class="pb-2">Tarih</th>
+                                    <th class="pb-2">Tür</th>
+                                    <th class="pb-2">Açıklama</th>
+                                    <th class="pb-2 text-right">Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="yemTablosu">
+                                <!-- Dinamik -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MÜŞTERİ FİŞ / PDF MODALI -->
+    <div id="fisModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-4 mb-4">
+                <h3 id="fisBaslik" class="text-xl font-bold text-slate-800">Müşteri Hesap Fişi</h3>
+                <button onclick="kapatFisModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
+            </div>
+            <div id="fisIcerik" class="space-y-4 text-sm">
+                <!-- Dinamik Fiş İçeriği -->
+            </div>
+            <div class="mt-6 pt-4 border-t flex justify-end gap-3">
+                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Yazdır / PDF Kaydet</button>
+                <button onclick="kapatFisModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Kapat</button>
             </div>
         </div>
     </div>
 
-    <!-- JavaScript Kodları -->
+    <!-- JAVASCRIPT UYGULAMA MANTIĞI -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
 
-        // Sayfa açıldığında API anahtarını inputa doldur
+        // LocalStorage Veri Yönetimi
+        const getData = (key) => JSON.parse(localStorage.getItem(key)) || [];
+        const setData = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+
         window.onload = function() {
-            const savedKey = localStorage.getItem("gemini_cari_key");
-            if(savedKey) {
-                document.getElementById("apiKeyInput").value = savedKey;
+            const savedKey = localStorage.getItem("tarim_gemini_key");
+            if(savedKey) document.getElementById("apiKeyInput").value = savedKey;
+            
+            // Varsayılan boşsa örnek müşteri ekle
+            if(getData("musteriler").length === 0) {
+                setData("musteriler", [
+                    { id: 1, ad: "Ali Çiftçi", tel: "05551112233" },
+                    { id: 2, ad: "Mehmet Ağa", tel: "05324445566" }
+                ]);
             }
-            renderSummary();
+            if(getData("stoklar").length === 0) {
+                setData("stoklar", [
+                    { id: 1, ad: "20-20 Kompoze Gübre", miktar: 100, fiyat: 650 },
+                    { id: 2, ad: "Sertifikalı Buğday Tohumu", miktar: 500, fiyat: 25 }
+                ]);
+            }
+
+            refreshAll();
+            document.getElementById("tarlaTarih").valueAsDate = new Date();
+            document.getElementById("malTarih").valueAsDate = new Date();
         };
 
         window.saveApiKey = function() {
             const key = document.getElementById("apiKeyInput").value.trim();
-            if(!key) {
-                alert("Lütfen geçerli bir API anahtarı girin.");
-                return;
-            }
-            localStorage.setItem("gemini_cari_key", key);
-            alert("API Anahtarı başarıyla kaydedildi! 🎉");
+            if(!key) return alert("Lütfen anahtar girin.");
+            localStorage.setItem("tarim_gemini_key", key);
+            alert("API Key kaydedildi!");
         };
 
-        // İşlemleri localStorage'dan al / kaydet
-        function getTransactions() {
-            const data = localStorage.getItem("cari_transactions");
-            return data ? JSON.parse(data) : [];
+        // Sekme Değiştirme
+        window.switchTab = function(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-indigo-800', 'text-white');
+                el.classList.add('text-indigo-200');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            event.currentTarget.classList.add('bg-indigo-800', 'text-white');
+            event.currentTarget.classList.remove('text-indigo-200');
+        };
+
+        function refreshAll() {
+            renderMusteriSelects();
+            renderStokSelects();
+            renderStokTablosu();
+            renderMusterilerTablosu();
+            renderAlinanMallar();
+            renderBicilenTarlalar();
+            renderYemTablosu();
+            renderDashboardStats();
         }
 
-        function saveTransactions(txs) {
-            localStorage.setItem("cari_transactions", JSON.stringify(txs));
+        // --- MÜŞTERİ SEÇİMLERİ ---
+        function renderMusteriSelects() {
+            const musteriler = getData("musteriler");
+            const opts = musteriler.map(m => `<option value="${m.ad}">${m.ad}</option>`).join('');
+            document.getElementById("satisMusteri").innerHTML = opts;
+            document.getElementById("tahsilatMusteri").innerHTML = opts;
         }
 
-        // Manuel İşlem Ekleme
-        window.addManualTx = function(e) {
+        // --- STOK SEÇİMLERİ ---
+        function renderStokSelects() {
+            const stoklar = getData("stoklar");
+            const opts = stoklar.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}" data-miktar="${s.miktar}">${s.ad} (Kalan: ${s.miktar})</option>`).join('');
+            document.getElementById("satisUrun").innerHTML = opts;
+            updateSatisFiyat();
+        }
+
+        window.updateSatisFiyat = function() {
+            const sel = document.getElementById("satisUrun");
+            const opt = sel.options[sel.selectedIndex];
+            if(opt) {
+                document.getElementById("satisFiyat").value = opt.getAttribute("data-fiyat") || 0;
+            }
+        };
+
+        // 1. SATIŞ İŞLEMİ
+        window.handleSatis = function(e) {
             e.preventDefault();
-            const customer = document.getElementById("customer").value.trim();
-            const type = document.getElementById("type").value;
-            const amount = parseFloat(document.getElementById("amount").value);
-            const description = document.getElementById("desc").value.trim();
+            const musteri = document.getElementById("satisMusteri").value;
+            const urun = document.getElementById("satisUrun").value;
+            const adet = parseFloat(document.getElementById("satisAdet").value);
+            const fiyat = parseFloat(document.getElementById("satisFiyat").value);
+            const aciklama = document.getElementById("satisAciklama").value;
+            const toplam = adet * fiyat;
 
-            const txs = getTransactions();
-            txs.unshift({
+            // Stok kontrol ve düşme
+            let stoklar = getData("stoklar");
+            const st = stoklar.find(s => s.ad === urun);
+            if(st) {
+                if(st.miktar < adet) {
+                    alert(`Stok yetersiz! Kalan miktar: ${st.miktar}`);
+                    return;
+                }
+                st.miktar -= adet;
+                setData("stoklar", stoklar);
+            }
+
+            // İşlemi kaydet (Hareketler listesine)
+            let islemler = getData("islemler");
+            islemler.unshift({
                 id: Date.now(),
-                customer_name: customer,
-                transaction_type: type,
-                amount: amount,
-                description: description,
-                date: new Date().toLocaleString("tr-TR")
+                tarih: new Date().toLocaleDateString("tr-TR"),
+                musteri: musteri,
+                tur: "SATIŞ",
+                detay: `${adet} adet ${urun} - ${aciklama}`,
+                tutar: toplam
             });
+            setData("islemler", islemler);
 
-            saveTransactions(txs);
-            document.getElementById("txForm").reset();
-            renderSummary();
+            alert("Satış başarıyla gerçekleştirildi ve müşteriye borç olarak eklendi.");
+            e.target.reset();
+            refreshAll();
         };
 
-        // Özet Tablosunu Güncelleme
-        window.renderSummary = function() {
-            const txs = getTransactions();
-            const balances = {};
+        // 2. TAHSİLAT İŞLEMİ
+        window.handleTahsilat = function(e) {
+            e.preventDefault();
+            const musteri = document.getElementById("tahsilatMusteri").value;
+            const tutar = parseFloat(document.getElementById("tahsilatTutar").value);
+            const aciklama = document.getElementById("tahsilatAciklama").value;
 
-            txs.forEach(t => {
-                if(!balances[t.customer_name]) {
-                    balances[t.customer_name] = 0;
-                }
-                if(t.transaction_type === "BORÇ") {
-                    balances[t.customer_name] += t.amount;
-                } else {
-                    balances[t.customer_name] -= t.amount;
-                }
+            let islemler = getData("islemler");
+            islemler.unshift({
+                id: Date.now(),
+                tarih: new Date().toLocaleDateString("tr-TR"),
+                musteri: musteri,
+                tur: "TAHSİLAT",
+                detay: aciklama || "Borç Ödemesi",
+                tutar: -tutar // Borçtan düşer
             });
+            setData("islemler", islemler);
 
-            const tbody = document.getElementById("summaryTable");
-            tbody.innerHTML = "";
+            alert("Tahsilat başarıyla kaydedildi.");
+            e.target.reset();
+            refreshAll();
+        };
 
-            const keys = Object.keys(balances);
-            if(keys.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" class="py-4 text-center text-slate-400">Henüz kayıt bulunmuyor.</td></tr>`;
-                return;
+        // 3. STOK EKLE
+        window.handleStokEkle = function(e) {
+            e.preventDefault();
+            const ad = document.getElementById("stokAd").value;
+            const miktar = parseFloat(document.getElementById("stokMiktar").value);
+            const fiyat = parseFloat(document.getElementById("stokFiyat").value);
+
+            let stoklar = getData("stoklar");
+            const mevcut = stoklar.find(s => s.ad.toLowerCase() === ad.toLowerCase());
+            if(mevcut) {
+                mevcut.miktar += miktar;
+                mevcut.fiyat = fiyat;
+            } else {
+                stoklar.push({ id: Date.now(), ad, miktar, fiyat });
             }
+            setData("stoklar", stoklar);
+            alert("Stok başarıyla eklendi.");
+            e.target.reset();
+            refreshAll();
+        };
 
-            keys.forEach(cust => {
-                const bal = balances[cust];
-                const color = bal >= 0 ? "text-emerald-600" : "text-rose-600";
-                tbody.innerHTML += `
+        function renderStokTablosu() {
+            const stoklar = getData("stoklar");
+            const tbody = document.getElementById("stokTablosu");
+            tbody.innerHTML = stoklar.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Stok bulunmuyor.</td></tr>` :
+                stoklar.map(s => `
                     <tr class="border-b last:border-0">
-                        <td class="py-3 font-medium">${cust}</td>
-                        <td class="py-3 text-right font-bold ${color}">${bal.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 font-medium">${s.ad}</td>
+                        <td class="py-3 text-center font-bold text-indigo-600">${s.miktar}</td>
+                        <td class="py-3 text-right">${s.fiyat.toLocaleString("tr-TR")} TL</td>
                     </tr>
-                `;
-            });
-        };
+                `).join('');
+        }
 
-        // Yapay Zeka (Gemini) ile İşleme Alınması
-        window.processAI = async function() {
-            const apiKey = localStorage.getItem("gemini_cari_key") || document.getElementById("apiKeyInput").value.trim();
-            if(!apiKey) {
-                alert("Lütfen önce sağ üst köşeden Gemini API Anahtarınızı girip kaydedin!");
+        // 5 & 6. MÜŞTERİLER & FİŞ ALMA
+        window.handleMusteriEkle = function(e) {
+            e.preventDefault();
+            const ad = document.getElementById("yeniMusteriAd").value.trim();
+            const tel = document.getElementById("yeniMusteriTel").value;
+            let musteriler = getData("musteriler");
+            if(musteriler.some(m => m.ad.toLowerCase() === ad.toLowerCase())) {
+                alert("Bu müşteri zaten kayıtlı!");
                 return;
             }
+            musteriler.push({ id: Date.now(), ad, tel });
+            setData("musteriler", musteriler);
+            alert("Müşteri eklendi.");
+            e.target.reset();
+            refreshAll();
+        };
 
+        function renderMusterilerTablosu() {
+            const musteriler = getData("musteriler");
+            const islemler = getData("islemler");
+            const tbody = document.getElementById("musteriTablosu");
+
+            tbody.innerHTML = musteriler.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Müşteri bulunmuyor.</td></tr>` :
+                musteriler.map(m => {
+                    const musteriIslemleri = islemler.filter(i => i.musteri === m.ad);
+                    const bakiye = musteriIslemleri.reduce((acc, curr) => acc + curr.tutar, 0);
+                    const renk = bakiye > 0 ? "text-rose-600" : "text-emerald-600";
+                    return `
+                        <tr class="border-b last:border-0">
+                            <td class="py-3 font-medium">${m.ad} <br><span class="text-xs text-slate-400">${m.tel || ''}</span></td>
+                            <td class="py-3 text-right font-bold ${renk}">${bakiye.toLocaleString("tr-TR")} TL</td>
+                            <td class="py-3 text-center">
+                                <button onclick="acFisModal('${m.ad}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Fiş / Hesap Dök</button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+        }
+
+        // Fiş ve PDF Modalı & Fiyat Güncelleme
+        window.acFisModal = function(musteriAd) {
+            const islemler = getData("islemler").filter(i => i.musteri === musteriAd);
+            const musteri = getData("musteriler").find(m => m.ad === musteriAd);
+            const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+
+            document.getElementById("fisBaslik").innerText = `${musteriAd} - Hesap Fişi ve Ekstresi`;
+            let html = `
+                <div class="mb-4 text-xs text-slate-500">
+                    <p><strong>Telefon:</strong> ${musteri?.tel || '-'}</p>
+                    <p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleDateString("tr-TR")}</p>
+                </div>
+                <table class="w-full text-left border-collapse text-xs mb-4">
+                    <thead>
+                        <tr class="border-b bg-slate-50 text-slate-500">
+                            <th class="p-2">Tarih</th>
+                            <th class="p-2">İşlem Türü</th>
+                            <th class="p-2">Açıklama / Detay</th>
+                            <th class="p-2 text-right">Tutar</th>
+                            <th class="p-2 text-center">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            if(islemler.length === 0) {
+                html += `<tr><td colspan="5" class="p-4 text-center text-slate-400">Henüz işlem hareketi yok.</td></tr>`;
+            } else {
+                islemler.forEach(item => {
+                    const renk = item.tutar > 0 ? "text-rose-600" : "text-emerald-600";
+                    html += `
+                        <tr class="border-b">
+                            <td class="p-2">${item.tarih}</td>
+                            <td class="p-2 font-semibold">${item.tur}</td>
+                            <td class="p-2">${item.detay}</td>
+                            <td class="p-2 text-right font-bold ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
+                            <td class="p-2 text-center">
+                                <button onclick="fiyatGuncelle(${item.id})" class="text-indigo-600 hover:underline text-xs">Fiyat Düzenle</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+
+            html += `
+                    </tbody>
+                </table>
+                <div class="text-right p-3 bg-slate-50 rounded-xl">
+                    <span class="text-sm font-medium">Toplam Güncel Bakiye (Borç): </span>
+                    <span class="text-lg font-bold text-rose-600">${toplamBorc.toLocaleString("tr-TR")} TL</span>
+                </div>
+            `;
+
+            document.getElementById("fisIcerik").innerHTML = html;
+            document.getElementById("fisModal").classList.remove("hidden");
+        };
+
+        window.kapatFisModal = function() {
+            document.getElementById("fisModal").classList.add("hidden");
+        };
+
+        window.fiyatGuncelle = function(id) {
+            let islemler = getData("islemler");
+            const item = islemler.find(i => i.id === id);
+            if(!item) return;
+            const yeniTutar = prompt("Yeni tutarı girin (TL):", Math.abs(item.tutar));
+            if(yeniTutar !== null && !isNaN(yeniTutar)) {
+                const val = parseFloat(yeniTutar);
+                item.tutar = item.tur === "SATIŞ" ? val : -val;
+                setData("islemler", islemler);
+                alert("Fiyat güncellendi.");
+                kapatFisModal();
+                refreshAll();
+            }
+        };
+
+        // 7. ALINAN MALLAR
+        window.handleAlinanMalEkle = function(e) {
+            e.preventDefault();
+            const tarih = document.getElementById("malTarih").value;
+            const isim = document.getElementById("malIsim").value;
+            const koy = document.getElementById("malKoy").value;
+            const donum = parseFloat(document.getElementById("malDonum").value) || 0;
+            const kilo = parseFloat(document.getElementById("malKilo").value) || 0;
+            const fiyat = parseFloat(document.getElementById("malFiyat").value);
+            const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
+            const toplam = (donum > 0 ? donum : kilo) * fiyat;
+
+            let alinanlar = getData("alinan_mallar");
+            alinanlar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
+            setData("alinan_mallar", alinanlar);
+
+            alert("Alınan mal kaydedildi.");
+            e.target.reset();
+            document.getElementById("malTarih").valueAsDate = new Date();
+            renderAlinanMallar();
+        };
+
+        function renderAlinanMallar() {
+            const list = getData("alinan_mallar");
+            const tbody = document.getElementById("alinanMalTablosu");
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
+                list.map(i => `
+                    <tr class="border-b last:border-0">
+                        <td class="py-3">${i.tarih}</td>
+                        <td class="py-3 font-medium">${i.isim} <br><span class="text-xs text-slate-400">${i.koy}</span></td>
+                        <td class="py-3 text-center">${i.miktarOlcu}</td>
+                        <td class="py-3 text-right">${i.fiyat.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                    </tr>
+                `).join('');
+        }
+
+        // 8. BİÇİLEN TARLALAR
+        window.handleBicilenTarlaEkle = function(e) {
+            e.preventDefault();
+            const tarih = document.getElementById("tarlaTarih").value;
+            const isim = document.getElementById("tarlaIsim").value;
+            const koy = document.getElementById("tarlaKoy").value;
+            const donum = parseFloat(document.getElementById("tarlaDonum").value) || 0;
+            const kilo = parseFloat(document.getElementById("tarlaKilo").value) || 0;
+            const fiyat = parseFloat(document.getElementById("tarlaFiyat").value);
+            const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
+            const toplam = (donum > 0 ? donum : kilo) * fiyat;
+
+            let tarlalar = getData("bicilen_tarlalar");
+            tarlalar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
+            setData("bicilen_tarlalar", tarlalar);
+
+            alert("Biçilen tarla kaydedildi.");
+            e.target.reset();
+            document.getElementById("tarlaTarih").valueAsDate = new Date();
+            renderBicilenTarlalar();
+        };
+
+        function renderBicilenTarlalar() {
+            const list = getData("bicilen_tarlalar");
+            const tbody = document.getElementById("bicilenTarlaTablosu");
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
+                list.map(i => `
+                    <tr class="border-b last:border-0">
+                        <td class="py-3">${i.tarih}</td>
+                        <td class="py-3 font-medium">${i.isim} <br><span class="text-xs text-slate-400">${i.koy}</span></td>
+                        <td class="py-3 text-center">${i.miktarOlcu}</td>
+                        <td class="py-3 text-right">${i.fiyat.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                    </tr>
+                `).join('');
+        }
+
+        // 9. ÖZLEM YEM BAYİLİK
+        window.handleYemIslem = function(e) {
+            e.preventDefault();
+            const tip = document.getElementById("yemTip").value;
+            const tutar = parseFloat(document.getElementById("yemTutar").value);
+            const aciklama = document.getElementById("yemAciklama").value;
+
+            let yemler = getData("ozlem_yem");
+            yemler.unshift({
+                id: Date.now(),
+                tarih: new Date().toLocaleDateString("tr-TR"),
+                tip: tip,
+                tutar: tip === "YEM_ALIM" ? tutar : -tutar,
+                aciklama: aciklama || (tip === "YEM_ALIM" ? "Yem Alımı" : "Yem Ödemesi")
+            });
+            setData("ozlem_yem", yemler);
+            alert("Özlem yem işlemi kaydedildi.");
+            e.target.reset();
+            renderYemTablosu();
+        };
+
+        function renderYemTablosu() {
+            const list = getData("ozlem_yem");
+            const tbody = document.getElementById("yemTablosu");
+            const bakiye = list.reduce((acc, curr) => acc + curr.tutar, 0);
+            
+            document.getElementById("yemBakiyeYazi").innerText = `${bakiye.toLocaleString("tr-TR")} TL`;
+
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="4" class="py-4 text-center text-slate-400">Yem işlem hareketi yok.</td></tr>` :
+                list.map(i => {
+                    const renk = i.tutar > 0 ? "text-rose-600" : "text-emerald-600";
+                    return `
+                        <tr class="border-b last:border-0">
+                            <td class="py-3">${i.tarih}</td>
+                            <td class="py-3 font-semibold">${i.tip === "YEM_ALIM" ? "Yem Alındı (Borç)" : "Ödeme Yapıldı"}</td>
+                            <td class="py-3">${i.aciklama}</td>
+                            <td class="py-3 text-right font-bold ${renk}">${i.tutar.toLocaleString("tr-TR")} TL</td>
+                        </tr>
+                    `;
+                }).join('');
+        }
+
+        // Dashboard Genel İstatistikler
+        function renderDashboardStats() {
+            const islemler = getData("islemler");
+            const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            document.getElementById("statBorc").innerText = `${toplamBorc.toLocaleString("tr-TR")} TL`;
+
+            const stoklar = getData("stoklar");
+            document.getElementById("statStok").innerText = `${stoklar.length} Çeşit`;
+
+            const yemler = getData("ozlem_yem");
+            const yemBakiye = yemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            document.getElementById("statYem").innerText = `${yemBakiye.toLocaleString("tr-TR")} TL`;
+        }
+
+        // GEMINI AI PARSER
+        window.processAI = async function() {
+            const apiKey = localStorage.getItem("tarim_gemini_key") || document.getElementById("apiKeyInput").value.trim();
+            if(!apiKey) return alert("Lütfen önce üst kısımdan Gemini API Key girin.");
             const promptText = document.getElementById("aiPrompt").value.trim();
             if(!promptText) return;
 
-            const aiBtn = document.getElementById("aiBtn");
-            aiBtn.innerText = "İşleniyor...";
-            aiBtn.disabled = true;
+            const btn = document.getElementById("aiBtn");
+            btn.innerText = "Yapay Zeka İşliyor...";
+            btn.disabled = true;
 
             try {
-                // Doğrudan tarayıcıdan Google Gen AI SDK kullanımı
-                const ai = new GoogleGenAI({ apiKey: apiKey });
-                
-                const fullPrompt = `
-                Aşağıdaki cümle bir cari hesap işlemidir. Bu cümleyi analiz et ve TAM OLARAK şu JSON formatında çıktı ver. Başka hiçbir açıklama, metin veya markdown (```json gibi) ekleme yapma:
-                {"customer_name": "Müşteri veya Firma Adı", "transaction_type": "BORÇ veya ALACAK", "amount": 0.0, "description": "İşlem açıklaması"}
-                
+                const ai = new GoogleGenAI({ apiKey });
+                const prompt = `
+                Bu cümle bir tarımsal ticaret işlemidir. Analiz et ve TAM OLARAK şu JSON formatında cevap ver, başka hiçbir metin ekleme:
+                {"musteri": "Müşteri Adı", "tur": "SATIŞ veya TAHSİLAT", "urun": "Ürün Adı veya açıklama", "adet": 0.0, "fiyat": 0.0, "tutar": 0.0}
                 Cümle: "${promptText}"
                 `;
 
-                const response = await ai.models.generateContent({
+                const res = await ai.models.generateContent({
                     model: 'gemini-2.5-flash',
-                    contents: fullPrompt,
-                    config: {
-                        responseMimeType: "application/json"
-                    }
+                    contents: prompt,
+                    config: { responseMimeType: "application/json" }
                 });
 
-                let jsonText = response.text.trim();
-                jsonText = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
-                const parsed = JSON.parse(jsonText);
+                let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const data = JSON.parse(text);
 
-                // İşlemi kaydet
-                const txs = getTransactions();
-                txs.unshift({
-                    id: Date.now(),
-                    customer_name: parsed.customer_name,
-                    transaction_type: parsed.transaction_type,
-                    amount: parseFloat(parsed.amount),
-                    description: parsed.description || promptText,
-                    date: new Date().toLocaleString("tr-TR")
-                });
+                if(data.tur === "SATIŞ") {
+                    let islemler = getData("islemler");
+                    const toplam = data.adet * data.fiyat || data.tutar;
+                    islemler.unshift({
+                        id: Date.now(),
+                        tarih: new Date().toLocaleDateString("tr-TR"),
+                        musteri: data.musteri,
+                        tur: "SATIŞ",
+                        detay: `${data.adet || 1} adet ${data.urun} (AI)`,
+                        tutar: toplam
+                    });
+                    setData("islemler", islemler);
+                } else {
+                    let islemler = getData("islemler");
+                    islemler.unshift({
+                        id: Date.now(),
+                        tarih: new Date().toLocaleDateString("tr-TR"),
+                        musteri: data.musteri,
+                        tur: "TAHSİLAT",
+                        detay: "Yapay zeka ile tahsilat",
+                        tutar: -data.tutar
+                    });
+                    setData("islemler", islemler);
+                }
 
-                saveTransactions(txs);
+                alert("Yapay zeka işlemi başarıyla algılayıp kaydetti! 🎉");
                 document.getElementById("aiPrompt").value = "";
-                renderSummary();
-                alert(`Başarıyla eklendi!\nMüşteri: ${parsed.customer_name}\nTür: ${parsed.transaction_type}\nTutar: ${parsed.amount} TL`);
-
+                refreshAll();
             } catch (err) {
-                alert("Yapay zeka işleme sırasında bir hata oluştu. API anahtarınızı kontrol edin.");
+                alert("AI işleme hatası oluştu.");
                 console.error(err);
             } finally {
-                aiBtn.innerText = "İşle";
-                aiBtn.disabled = false;
-            }
-        };
-
-        window.clearData = function() {
-            if(confirm("Tüm cari geçmişiniz silinecek. Emin misiniz?")) {
-                localStorage.removeItem("cari_transactions");
-                renderSummary();
+                btn.innerText = "Yapay Zeka ile İşle";
+                btn.disabled = false;
             }
         };
     </script>
