@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profesyonel Tarım ve Ticari Cari Hesap Otomasyonu</title>
+    <title>Profesyonel Tarım ve Ticari Cari Hesap Otomasyonu (Bulut Senkronize)</title>
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Google Gen AI SDK -->
@@ -92,10 +92,10 @@
     <header class="bg-indigo-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim Sistemi</h1>
+                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim (Bulut Senkronize)</h1>
                 <p class="text-indigo-200 text-xs flex items-center gap-2">
                     <span id="userBadge" class="bg-emerald-500 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">YÖNETİCİ</span>
-                    Satış, Stok, Biçerdöver, Alınan Mallar, Özlem Yem ve Onay Mekanizması
+                    Tüm cihazlar arası ortak bulut veritabanı aktif
                 </p>
             </div>
             <div class="flex items-center gap-2">
@@ -177,7 +177,7 @@
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">🛒 Ürün Satış Ekranı</h2>
                 <div id="calisanBilgiNotu" class="mb-4 p-3 bg-blue-50 border border-blue-100 text-blue-800 text-xs rounded-xl hidden">
-                    ℹ️ <b>Çalışan Modu:</b> Girdiğiniz satışlar direkt işlenmez, patronun onayına gönderilir.
+                    ℹ️ <b>Çalışan Modu:</b> Girdiğiniz satışlar patronun onayına gönderilir.
                 </div>
                 <form onsubmit="handleSatis(event)" class="space-y-4">
                     <div>
@@ -242,7 +242,7 @@
                     <form onsubmit="handleStokEkle(event)" class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Ürün Adı</label>
-                            <input type="text" id="stokAd" required placeholder="Örn: Buğday Tohumu / 20-20 Gübre" class="w-full px-4 py-2 border rounded-xl outline-none">
+                            <input type="text" id="stokAd" required placeholder="Örn: Buğday Tohumu" class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Miktar / Adet</label>
@@ -437,7 +437,7 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama</label>
-                            <input type="text" id="yemAciklama" placeholder="Örn: 50 çuval buzağı yemi / Banka havale" class="w-full px-4 py-2 border rounded-xl outline-none">
+                            <input type="text" id="yemAciklama" placeholder="Örn: 50 çuval buzağı yemi" class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
                         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Kaydet</button>
                     </form>
@@ -484,28 +484,76 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT UYGULAMA MANTIĞI -->
+    <!-- JAVASCRIPT & FIREBASE ENTEGRASYONU -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, get, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const getData = (key) => JSON.parse(localStorage.getItem(key)) || [];
-        const setData = (key, val) => localStorage.setItem(key, JSON.stringify(val));
+        // 🔥 BURAYA KENDİ FIREBASE BİLGİLERİNİZİ YAPIŞTIRIN 🔥
+        const firebaseConfig = {
+            apiKey: "BURAYA_API_KEY_GIRIN",
+            authDomain: "BURAYA_AUTH_DOMAIN_GIRIN",
+            databaseURL: "BURAYA_DATABASE_URL_GIRIN",
+            projectId: "BURAYA_PROJECT_ID_GIRIN",
+            storageBucket: "BURAYA_STORAGE_BUCKET_GIRIN",
+            messagingSenderId: "BURAYA_MESSAGING_SENDER_ID_GIRIN",
+            appId: "BURAYA_APP_ID_GIRIN"
+        };
+
+        let db = null;
+        try {
+            const app = initializeApp(firebaseConfig);
+            db = getDatabase(app);
+        } catch(e) {
+            console.warn("Firebase bağlantı bilgileri girilmediği için geçici olarak yerel modda çalışıyor. Lütfen firebaseConfig alanını doldurun.");
+        }
+
+        // Bellek içi veri havuzu (Buluttan anlık güncellenir)
+        let cloudData = {
+            musteriler: [],
+            stoklar: [],
+            islemler: [],
+            onay_bekleyen_satislar: [],
+            kayitli_calisanlar: [],
+            alinan_mallar: [],
+            bicilen_tarlalar: [],
+            ozlem_yem: []
+        };
 
         window.onload = function() {
             const savedKey = localStorage.getItem("tarim_gemini_key");
             if(savedKey) document.getElementById("apiKeyInput").value = savedKey;
-            
-            if(getData("musteriler").length === 0) {
-                setData("musteriler", [
-                    { id: 1, ad: "Ali Çiftçi", tel: "05551112233" },
-                    { id: 2, ad: "Mehmet Ağa", tel: "05324445566" }
-                ]);
-            }
-            if(getData("stoklar").length === 0) {
-                setData("stoklar", [
-                    { id: 1, ad: "20-20 Kompoze Gübre", miktar: 100, fiyat: 650 },
-                    { id: 2, ad: "Sertifikalı Buğday Tohumu", miktar: 500, fiyat: 25 }
-                ]);
+
+            if(db) {
+                // Firebase Realtime Dinleyicileri (Anlık Senkronizasyon)
+                ['musteriler', 'stoklar', 'islemler', 'onay_bekleyen_satislar', 'kayitli_calisanlar', 'alinan_mallar', 'bicilen_tarlalar', 'ozlem_yem'].forEach(key => {
+                    onValue(ref(db, 'tarim_app/' + key), (snapshot) => {
+                        const val = snapshot.val();
+                        cloudData[key] = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+                        
+                        // İlk açılışta örnek veriler yoksa ekle
+                        if(key === 'musteriler' && cloudData.musteriler.length === 0) {
+                            set(ref(db, 'tarim_app/musteriler'), [
+                                { id: 1, ad: "Ali Çiftçi", tel: "05551112233" },
+                                { id: 2, ad: "Mehmet Ağa", tel: "05324445566" }
+                            ]);
+                        }
+                        if(key === 'stoklar' && cloudData.stoklar.length === 0) {
+                            set(ref(db, 'tarim_app/stoklar'), [
+                                { id: 1, ad: "20-20 Kompoze Gübre", miktar: 100, fiyat: 650 },
+                                { id: 2, ad: "Sertifikalı Buğday Tohumu", miktar: 500, fiyat: 25 }
+                            ]);
+                        }
+                        refreshAll();
+                    });
+                });
+            } else {
+                // Firebase yoksa yerel yedek kullan
+                ['musteriler', 'stoklar', 'islemler', 'onay_bekleyen_satislar', 'kayitli_calisanlar', 'alinan_mallar', 'bicilen_tarlalar', 'ozlem_yem'].forEach(k => {
+                    cloudData[k] = JSON.parse(localStorage.getItem(k)) || [];
+                });
+                refreshAll();
             }
 
             checkAuthSession();
@@ -513,7 +561,15 @@
             document.getElementById("malTarih").valueAsDate = new Date();
         };
 
-        // GİRİŞ / KAYIT FORM MODU DEĞİŞTİRME
+        function saveData(key, val) {
+            cloudData[key] = val;
+            if(db) {
+                set(ref(db, 'tarim_app/' + key), val);
+            } else {
+                localStorage.setItem(key, JSON.stringify(val));
+            }
+        }
+
         window.toggleKayitModu = function() {
             const role = document.getElementById("loginRole").value;
             const isimAlani = document.getElementById("isimAlani");
@@ -540,7 +596,6 @@
             }
         };
 
-        // GİRİŞ VEYA KAYIT İŞLEMİ
         window.handleLoginOrRegister = function(e) {
             e.preventDefault();
             const role = document.getElementById("loginRole").value;
@@ -554,9 +609,9 @@
                     return;
                 }
 
-                let calisanlar = getData("kayitli_calisanlar");
+                let calisanlar = [...cloudData.kayitli_calisanlar];
                 calisanlar.push({ id: Date.now(), ad: adSoyad, sifre: sifre, tarih: new Date().toLocaleDateString("tr-TR") });
-                setData("kayitli_calisanlar", calisanlar);
+                saveData("kayitli_calisanlar", calisanlar);
 
                 const kayitMesaj = document.getElementById("kayitMesaj");
                 kayitMesaj.classList.remove("hidden");
@@ -582,8 +637,7 @@
                     return;
                 }
             } else if(role === "calisan") {
-                let calisanlar = getData("kayitli_calisanlar");
-                let bulunan = calisanlar.find(c => c.sifre === pass);
+                let bulunan = cloudData.kayitli_calisanlar.find(c => c.sifre === pass);
                 
                 if(!bulunan) {
                     alert("Girdiğiniz şifre eşleşmedi! Lütfen önce 'Yeni Çalışan Kayıt Ol' seçeneğinden adınız ve şifrenizle kayıt olun.");
@@ -672,14 +726,12 @@
         }
 
         function renderMusteriDatalist() {
-            const musteriler = getData("musteriler");
-            const opts = musteriler.map(m => `<option value="${m.ad}">`).join('');
+            const opts = cloudData.musteriler.map(m => `<option value="${m.ad}">`).join('');
             document.getElementById("musteriListesi").innerHTML = opts;
         }
 
         function renderStokSelects() {
-            const stoklar = getData("stoklar");
-            const opts = stoklar.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}" data-miktar="${s.miktar}">${s.ad} (Kalan: ${s.miktar})</option>`).join('');
+            const opts = cloudData.stoklar.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}" data-miktar="${s.miktar}">${s.ad} (Kalan: ${s.miktar})</option>`).join('');
             document.getElementById("satisUrun").innerHTML = opts;
             updateSatisFiyat();
         }
@@ -694,15 +746,14 @@
 
         function kontrolVeMusteriEkle(ad) {
             if(!ad) return;
-            let musteriler = getData("musteriler");
+            let musteriler = [...cloudData.musteriler];
             const temizAd = ad.trim();
             if(!musteriler.some(m => m.ad.toLowerCase() === temizAd.toLowerCase())) {
                 musteriler.push({ id: Date.now(), ad: temizAd, tel: "" });
-                setData("musteriler", musteriler);
+                saveData("musteriler", musteriler);
             }
         }
 
-        // MÜŞTERİYİ VE TÜM VERİLERİNİ (CARI, ALINAN MALLAR, BİÇİLEN TARLALAR) TAMAMEN SİLME
         window.musteriTamamenSil = function(musteriAd) {
             const role = localStorage.getItem("tarim_user_role");
             if(role !== "patron") {
@@ -710,36 +761,20 @@
                 return;
             }
 
-            if(!confirm(`DİKKAT! "${musteriAd}" isimli müşteriyi, tüm cari hesap geçmişini (satışlar/tahsilatlar), alınan mallarını ve biçilen tarla kayıtlarını kalıcı olarak silmek istediğinize emin misiniz?`)) {
+            if(!confirm(`DİKKAT! "${musteriAd}" isimli müşteriyi ve tüm geçmişini buluttan tamamen silmek istediğinize emin misiniz?`)) {
                 return;
             }
 
-            // 1. Müşteri listesinden sil
-            let musteriler = getData("musteriler");
-            musteriler = musteriler.filter(m => m.ad.toLowerCase() !== musteriAd.toLowerCase());
-            setData("musteriler", musteriler);
+            saveData("musteriler", cloudData.musteriler.filter(m => m.ad.toLowerCase() !== musteriAd.toLowerCase()));
+            saveData("islemler", cloudData.islemler.filter(i => i.musteri.toLowerCase() !== musteriAd.toLowerCase()));
+            saveData("alinan_mallar", cloudData.alinan_mallar.filter(a => a.isim.toLowerCase() !== musteriAd.toLowerCase()));
+            saveData("bicilen_tarlalar", cloudData.bicilen_tarlalar.filter(t => t.isim.toLowerCase() !== musteriAd.toLowerCase()));
 
-            // 2. Cari işlemlerden (satış, tahsilat) sil
-            let islemler = getData("islemler");
-            islemler = islemler.filter(i => i.musteri.toLowerCase() !== musteriAd.toLowerCase());
-            setData("islemler", islemler);
-
-            // 3. Alınan mallardan sil
-            let alinanlar = getData("alinan_mallar");
-            alinanlar = alinlar.filter(a => a.isim.toLowerCase() !== musteriAd.toLowerCase());
-            setData("alinan_mallar", alinanlar);
-
-            // 4. Biçilen tarlalardan sil
-            let tarlalar = getData("bicilen_tarlalar");
-            tarlalar = tarlalar.filter(t => t.isim.toLowerCase() !== musteriAd.toLowerCase());
-            setData("bicilen_tarlalar", tarlalar);
-
-            alert(`"${musteriAd}" ve bu müşteriye ait tüm veriler başarıyla silindi.`);
+            alert(`"${musteriAd}" ve tüm verileri buluttan silindi.`);
             kapatFisModal();
             refreshAll();
         };
 
-        // 1. SATIŞ İŞLEMİ (Rol Kontrollü & Onay Kuyruklu)
         window.handleSatis = function(e) {
             e.preventDefault();
             const role = localStorage.getItem("tarim_user_role");
@@ -755,7 +790,7 @@
             kontrolVeMusteriEkle(musteriAd);
 
             if(role === "calisan") {
-                let bekleyenler = getData("onay_bekleyen_satislar");
+                let bekleyenler = [...cloudData.onay_bekleyen_satislar];
                 bekleyenler.unshift({
                     id: Date.now(),
                     tarih: new Date().toLocaleDateString("tr-TR"),
@@ -768,15 +803,15 @@
                     aciklama: aciklama,
                     toplam: toplamTutar
                 });
-                setData("onay_bekleyen_satislar", bekleyenler);
-                alert("Satış başarıyla oluşturuldu ve patronun onayına gönderildi!");
+                saveData("onay_bekleyen_satislar", bekleyenler);
+                alert("Satış başarıyla oluşturuldu ve bulut üzerinden patron onayına gönderildi!");
                 e.target.reset();
                 document.getElementById("satisPesinat").value = "0";
                 document.getElementById("satisAdet").value = "1";
                 return;
             }
 
-            let stoklar = getData("stoklar");
+            let stoklar = [...cloudData.stoklar];
             const st = stoklar.find(s => s.ad === urun);
             if(st) {
                 if(st.miktar < adet) {
@@ -784,10 +819,10 @@
                     return;
                 }
                 st.miktar -= adet;
-                setData("stoklar", stoklar);
+                saveData("stoklar", stoklar);
             }
 
-            let islemler = getData("islemler");
+            let islemler = [...cloudData.islemler];
             const tarihStr = new Date().toLocaleDateString("tr-TR");
             const islemGrupId = Date.now();
 
@@ -811,8 +846,8 @@
                 });
             }
 
-            setData("islemler", islemler);
-            alert(`Satış başarıyla onaylandı ve işlendi! Toplam: ${toplamTutar.toLocaleString("tr-TR")} TL.`);
+            saveData("islemler", islemler);
+            alert(`Satış başarıyla işlendi ve buluta kaydedildi!`);
             e.target.reset();
             document.getElementById("satisPesinat").value = "0";
             document.getElementById("satisAdet").value = "1";
@@ -820,22 +855,22 @@
         };
 
         window.satisOnayla = function(id) {
-            let bekleyenler = getData("onay_bekleyen_satislar");
+            let bekleyenler = [...cloudData.onay_bekleyen_satislar];
             const item = bekleyenler.find(b => b.id === id);
             if(!item) return;
 
-            let stoklar = getData("stoklar");
+            let stoklar = [...cloudData.stoklar];
             const st = stoklar.find(s => s.ad === item.urun);
             if(st) {
                 if(st.miktar < item.adet) {
-                    alert(`Stok yetersiz (${st.miktar} kaldı)! Satış onaylanamadı.`);
+                    alert(`Stok yetersiz (${st.miktar} kaldı)! Onaylanamadı.`);
                     return;
                 }
                 st.miktar -= item.adet;
-                setData("stoklar", stoklar);
+                saveData("stoklar", stoklar);
             }
 
-            let islemler = getData("islemler");
+            let islemler = [...cloudData.islemler];
             const islemGrupId = Date.now();
             islemler.unshift({
                 id: islemGrupId,
@@ -857,25 +892,22 @@
                 });
             }
 
-            setData("islemler", islemler);
-            bekleyenler = bekleyenler.filter(b => b.id !== id);
-            setData("onay_bekleyen_satislar", bekleyenler);
+            saveData("islemler", islemler);
+            saveData("onay_bekleyen_satislar", bekleyenler.filter(b => b.id !== id));
 
-            alert("Satış onaylandı ve cari hesaba yansıtıldı!");
+            alert("Satış onaylandı ve buluta işlendi!");
             refreshAll();
         };
 
         window.satisReddet = function(id) {
             if(!confirm("Bu satışı reddetmek istediğinize emin misiniz?")) return;
-            let bekleyenler = getData("onay_bekleyen_satislar");
-            bekleyenler = bekleyenler.filter(b => b.id !== id);
-            setData("onay_bekleyen_satislar", bekleyenler);
+            saveData("onay_bekleyen_satislar", cloudData.onay_bekleyen_satislar.filter(b => b.id !== id));
             alert("Satış reddedildi.");
             refreshAll();
         };
 
         function renderOnayBekleyenler() {
-            const list = getData("onay_bekleyen_satislar");
+            const list = cloudData.onay_bekleyen_satislar;
             const tbody = document.getElementById("onayBekleyenlerTablosu");
             const bolum = document.getElementById("patronOnayBolumu");
 
@@ -890,7 +922,7 @@
                     <td class="p-2">${i.tarih}</td>
                     <td class="p-2 text-indigo-600 font-semibold">${i.calisan}</td>
                     <td class="p-2 font-medium">${i.musteri}</td>
-                    <td class="p-2">${i.adet} adet ${i.urun} ${i.aciklama ? '('+i.aciklama+')' : ''}</td>
+                    <td class="p-2">${i.adet} adet ${i.urun}</td>
                     <td class="p-2 text-right font-bold text-slate-700">${i.toplam.toLocaleString("tr-TR")} TL</td>
                     <td class="p-2 text-center flex justify-center gap-2">
                         <button onclick="satisOnayla(${i.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Onayla</button>
@@ -908,7 +940,7 @@
 
             kontrolVeMusteriEkle(musteri);
 
-            let islemler = getData("islemler");
+            let islemler = [...cloudData.islemler];
             islemler.unshift({
                 id: Date.now(),
                 tarih: new Date().toLocaleDateString("tr-TR"),
@@ -917,9 +949,9 @@
                 detay: aciklama || "Borç Ödemesi",
                 tutar: -tutar
             });
-            setData("islemler", islemler);
+            saveData("islemler", islemler);
 
-            alert("Tahsilat başarıyla kaydedildi.");
+            alert("Tahsilat buluta kaydedildi.");
             e.target.reset();
             refreshAll();
         };
@@ -930,7 +962,7 @@
             const miktar = parseFloat(document.getElementById("stokMiktar").value);
             const fiyat = parseFloat(document.getElementById("stokFiyat").value);
 
-            let stoklar = getData("stoklar");
+            let stoklar = [...cloudData.stoklar];
             const mevcut = stoklar.find(s => s.ad.toLowerCase() === ad.toLowerCase());
             if(mevcut) {
                 mevcut.miktar += miktar;
@@ -938,14 +970,14 @@
             } else {
                 stoklar.push({ id: Date.now(), ad, miktar, fiyat });
             }
-            setData("stoklar", stoklar);
-            alert("Stok başarıyla eklendi.");
+            saveData("stoklar", stoklar);
+            alert("Stok güncellendi.");
             e.target.reset();
             refreshAll();
         };
 
         function renderStokTablosu() {
-            const stoklar = getData("stoklar");
+            const stoklar = cloudData.stoklar;
             const tbody = document.getElementById("stokTablosu");
             tbody.innerHTML = stoklar.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Stok bulunmuyor.</td></tr>` :
                 stoklar.map(s => `
@@ -961,31 +993,26 @@
             e.preventDefault();
             const ad = document.getElementById("yeniMusteriAd").value.trim();
             const tel = document.getElementById("yeniMusteriTel").value;
-            let musteriler = getData("musteriler");
+            let musteriler = [...cloudData.musteriler];
             if(musteriler.some(m => m.ad.toLowerCase() === ad.toLowerCase())) {
                 alert("Bu müşteri zaten kayıtlı!");
                 return;
             }
             musteriler.push({ id: Date.now(), ad, tel });
-            setData("musteriler", musteriler);
-            alert("Müşteri eklendi.");
+            saveData("musteriler", musteriler);
+            alert("Müşteri buluta eklendi.");
             e.target.reset();
             refreshAll();
         };
 
         function renderMusterilerTablosu() {
-            const musteriler = getData("musteriler");
-            const islemler = getData("islemler");
+            const musteriler = cloudData.musteriler;
+            const islemler = cloudData.islemler;
             const tbody = document.getElementById("musteriTablosu");
             const role = localStorage.getItem("tarim_user_role");
 
-            const islemdekiMusteriler = [...new Set(islemler.map(i => i.musteri))];
-            islemdekiMusteriler.forEach(ad => kontrolVeMusteriEkle(ad));
-            
-            const guncelMusteriler = getData("musteriler");
-
-            tbody.innerHTML = guncelMusteriler.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Müşteri bulunmuyor.</td></tr>` :
-                guncelMusteriler.map(m => {
+            tbody.innerHTML = musteriler.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Müşteri bulunmuyor.</td></tr>` :
+                musteriler.map(m => {
                     const musteriIslemleri = islemler.filter(i => i.musteri === m.ad);
                     const bakiye = musteriIslemleri.reduce((acc, curr) => acc + curr.tutar, 0);
                     const renk = bakiye > 0 ? "text-rose-600" : "text-emerald-600";
@@ -994,7 +1021,7 @@
                             <td class="py-3 font-medium">${m.ad} <br><span class="text-xs text-slate-400">${m.tel || ''}</span></td>
                             <td class="py-3 text-right font-bold ${renk}">${bakiye.toLocaleString("tr-TR")} TL</td>
                             <td class="py-3 text-center flex justify-center items-center gap-2">
-                                <button onclick="acFisModal('${m.ad}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Fiş / Ekstre</button>
+                                <button onclick="acFisModal('${m.ad}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Fiş</button>
                                 ${role === 'patron' ? `<button onclick="musteriTamamenSil('${m.ad}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Sil</button>` : ''}
                             </td>
                         </tr>
@@ -1003,35 +1030,32 @@
         }
 
         window.acFisModal = function(musteriAd) {
-            const islemler = getData("islemler").filter(i => i.musteri === musteriAd);
-            const musteri = getData("musteriler").find(m => m.ad === musteriAd);
+            const islemler = cloudData.islemler.filter(i => i.musteri === musteriAd);
+            const musteri = cloudData.musteriler.find(m => m.ad === musteriAd);
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
             const role = localStorage.getItem("tarim_user_role");
 
-            document.getElementById("fisBaslik").innerText = `${musteriAd} - Hesap Fişi ve Ekstresi`;
+            document.getElementById("fisBaslik").innerText = `${musteriAd} - Hesap Fişi`;
             let html = `
                 <div class="mb-4 text-xs text-slate-500 flex justify-between items-center">
                     <div>
                         <p><strong>Telefon:</strong> ${musteri?.tel || '-'}</p>
-                        <p><strong>Rapor Tarihi:</strong> ${new Date().toLocaleDateString("tr-TR")}</p>
                     </div>
-                    ${role === 'patron' ? `<button onclick="musteriTamamenSil('${musteriAd}')" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-semibold no-print cursor-pointer">Müşteriyi ve Her Şeyini Sil</button>` : ''}
                 </div>
                 <table class="w-full text-left border-collapse text-xs mb-4">
                     <thead>
                         <tr class="border-b bg-slate-50 text-slate-500">
                             <th class="p-2">Tarih</th>
-                            <th class="p-2">İşlem Türü</th>
-                            <th class="p-2">Açıklama / Detay</th>
+                            <th class="p-2">Tür</th>
+                            <th class="p-2">Detay</th>
                             <th class="p-2 text-right">Tutar</th>
-                            ${role === 'patron' ? '<th class="p-2 text-center no-print">İşlem</th>' : ''}
                         </tr>
                     </thead>
                     <tbody>
             `;
 
             if(islemler.length === 0) {
-                html += `<tr><td colspan="5" class="p-4 text-center text-slate-400">Henüz işlem hareketi yok.</td></tr>`;
+                html += `<tr><td colspan="4" class="p-4 text-center text-slate-400">İşlem hareketi yok.</td></tr>`;
             } else {
                 islemler.forEach(item => {
                     const renk = item.tutar > 0 ? "text-rose-600" : "text-emerald-600";
@@ -1041,7 +1065,6 @@
                             <td class="p-2 font-semibold">${item.tur}</td>
                             <td class="p-2">${item.detay}</td>
                             <td class="p-2 text-right font-bold ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
-                            ${role === 'patron' ? `<td class="p-2 text-center no-print"><button onclick="fiyatGuncelle(${item.id})" class="text-indigo-600 hover:underline text-xs">Düzenle</button></td>` : ''}
                         </tr>
                     `;
                 });
@@ -1051,7 +1074,7 @@
                     </tbody>
                 </table>
                 <div class="text-right p-3 bg-slate-50 rounded-xl">
-                    <span class="text-sm font-medium">Toplam Güncel Bakiye (Borç): </span>
+                    <span class="text-sm font-medium">Toplam Bakiye (Borç): </span>
                     <span class="text-lg font-bold text-rose-600">${toplamBorc.toLocaleString("tr-TR")} TL</span>
                 </div>
             `;
@@ -1062,21 +1085,6 @@
 
         window.kapatFisModal = function() {
             document.getElementById("fisModal").classList.add("hidden");
-        };
-
-        window.fiyatGuncelle = function(id) {
-            let islemler = getData("islemler");
-            const item = islemler.find(i => i.id === id);
-            if(!item) return;
-            const yeniTutar = prompt("Yeni tutarı girin (TL):", Math.abs(item.tutar));
-            if(yeniTutar !== null && !isNaN(yeniTutar)) {
-                const val = parseFloat(yeniTutar);
-                item.tutar = item.tur === "SATIŞ" ? val : -val;
-                setData("islemler", islemler);
-                alert("Fiyat güncellendi.");
-                kapatFisModal();
-                refreshAll();
-            }
         };
 
         window.handleAlinanMalEkle = function(e) {
@@ -1090,18 +1098,17 @@
             const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
             const toplam = (donum > 0 ? donum : kilo) * fiyat;
 
-            let alinanlar = getData("alinan_mallar");
+            let alinanlar = [...cloudData.alinan_mallar];
             alinanlar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
-            setData("alinan_mallar", alinanlar);
+            saveData("alinan_mallar", alinanlar);
 
-            alert("Alınan mal kaydedildi.");
+            alert("Alınan mal buluta kaydedildi.");
             e.target.reset();
             document.getElementById("malTarih").valueAsDate = new Date();
-            renderAlinanMallar();
         };
 
         function renderAlinanMallar() {
-            const list = getData("alinan_mallar");
+            const list = cloudData.alinan_mallar;
             const tbody = document.getElementById("alinanMalTablosu");
             tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
                 list.map(i => `
@@ -1126,18 +1133,17 @@
             const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
             const toplam = (donum > 0 ? donum : kilo) * fiyat;
 
-            let tarlalar = getData("bicilen_tarlalar");
+            let tarlalar = [...cloudData.bicilen_tarlalar];
             tarlalar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
-            setData("bicilen_tarlalar", tarlalar);
+            saveData("bicilen_tarlalar", tarlalar);
 
-            alert("Biçilen tarla kaydedildi.");
+            alert("Biçilen tarla buluta kaydedildi.");
             e.target.reset();
             document.getElementById("tarlaTarih").valueAsDate = new Date();
-            renderBicilenTarlalar();
         };
 
         function renderBicilenTarlalar() {
-            const list = getData("bicilen_tarlalar");
+            const list = cloudData.bicilen_tarlalar;
             const tbody = document.getElementById("bicilenTarlaTablosu");
             tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
                 list.map(i => `
@@ -1157,7 +1163,7 @@
             const tutar = parseFloat(document.getElementById("yemTutar").value);
             const aciklama = document.getElementById("yemAciklama").value;
 
-            let yemler = getData("ozlem_yem");
+            let yemler = [...cloudData.ozlem_yem];
             yemler.unshift({
                 id: Date.now(),
                 tarih: new Date().toLocaleDateString("tr-TR"),
@@ -1165,26 +1171,25 @@
                 tutar: tip === "YEM_ALIM" ? tutar : -tutar,
                 aciklama: aciklama || (tip === "YEM_ALIM" ? "Yem Alımı" : "Yem Ödemesi")
             });
-            setData("ozlem_yem", yemler);
-            alert("Özlem yem işlemi kaydedildi.");
+            saveData("ozlem_yem", yemler);
+            alert("Özlem yem işlemi buluta kaydedildi.");
             e.target.reset();
-            renderYemTablosu();
         };
 
         function renderYemTablosu() {
-            const list = getData("ozlem_yem");
+            const list = cloudData.ozlem_yem;
             const tbody = document.getElementById("yemTablosu");
             const bakiye = list.reduce((acc, curr) => acc + curr.tutar, 0);
             
             document.getElementById("yemBakiyeYazi").innerText = `${bakiye.toLocaleString("tr-TR")} TL`;
 
-            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="4" class="py-4 text-center text-slate-400">Yem işlem hareketi yok.</td></tr>` :
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="4" class="py-4 text-center text-slate-400">Yem hareketi yok.</td></tr>` :
                 list.map(i => {
                     const renk = i.tutar > 0 ? "text-rose-600" : "text-emerald-600";
                     return `
                         <tr class="border-b last:border-0">
                             <td class="py-3">${i.tarih}</td>
-                            <td class="py-3 font-semibold">${i.tip === "YEM_ALIM" ? "Yem Alındı (Borç)" : "Ödeme Yapıldı"}</td>
+                            <td class="py-3 font-semibold">${i.tip === "YEM_ALIM" ? "Yem Alındı" : "Ödeme Yapıldı"}</td>
                             <td class="py-3">${i.aciklama}</td>
                             <td class="py-3 text-right font-bold ${renk}">${i.tutar.toLocaleString("tr-TR")} TL</td>
                         </tr>
@@ -1193,21 +1198,18 @@
         }
 
         function renderDashboardStats() {
-            const islemler = getData("islemler");
-            const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            const toplamBorc = cloudData.islemler.reduce((acc, curr) => acc + curr.tutar, 0);
             document.getElementById("statBorc").innerText = `${toplamBorc.toLocaleString("tr-TR")} TL`;
 
-            const stoklar = getData("stoklar");
-            document.getElementById("statStok").innerText = `${stoklar.length} Çeşit`;
+            document.getElementById("statStok").innerText = `${cloudData.stoklar.length} Çeşit`;
 
-            const yemler = getData("ozlem_yem");
-            const yemBakiye = yemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            const yemBakiye = cloudData.ozlem_yem.reduce((acc, curr) => acc + curr.tutar, 0);
             document.getElementById("statYem").innerText = `${yemBakiye.toLocaleString("tr-TR")} TL`;
         }
 
         window.processAI = async function() {
             const apiKey = localStorage.getItem("tarim_gemini_key") || document.getElementById("apiKeyInput").value.trim();
-            if(!apiKey) return alert("Lütfen önce üst kısımdan Gemini API Key girin.");
+            if(!apiKey) return alert("Lütfen Gemini API Key girin.");
             const promptText = document.getElementById("aiPrompt").value.trim();
             if(!promptText) return;
 
@@ -1232,7 +1234,7 @@
                 let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
                 const data = JSON.parse(text);
                 const tarihStr = new Date().toLocaleDateString("tr-TR");
-                let islemler = getData("islemler");
+                let islemler = [...cloudData.islemler];
                 const islemId = Date.now();
 
                 kontrolVeMusteriEkle(data.musteri);
@@ -1256,7 +1258,7 @@
                             tarih: tarihStr,
                             musteri: data.musteri,
                             tur: "TAHSİLAT",
-                            detay: `Satış esnasında peşin ödeme (AI)`,
+                            detay: `Peşin ödeme (AI)`,
                             tutar: -pesin
                         });
                     }
@@ -1266,18 +1268,16 @@
                         tarih: tarihStr,
                         musteri: data.musteri,
                         tur: "TAHSİLAT",
-                        detay: "Yapay zeka ile tahsilat",
+                        detay: "Yapay zeka tahsilat",
                         tutar: -data.tutar
                     });
                 }
 
-                setData("islemler", islemler);
-                alert("Yapay zeka işlemi başarıyla algılayıp kaydetti! 🎉");
+                saveData("islemler", islemler);
+                alert("Yapay zeka işlemi buluta kaydetti! 🎉");
                 document.getElementById("aiPrompt").value = "";
-                refreshAll();
             } catch (err) {
-                alert("AI işleme hatası oluştu.");
-                console.error(err);
+                alert("AI işleme hatası.");
             } finally {
                 btn.innerText = "Yapay Zeka ile İşle";
                 btn.disabled = false;
