@@ -38,7 +38,7 @@
                 color: black !important;
                 /* Termal yazıcılarda en iyi duran font tipi */
                 font-family: 'Courier New', Courier, monospace, sans-serif !important; 
-                font-size: 12px !important;
+                font-size: 11px !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
@@ -70,12 +70,12 @@
             /* Termal fiş için özel tablo yapısı */
             #fisIcerik table {
                 width: 100% !important;
-                font-size: 12px !important;
+                font-size: 11px !important;
                 margin-bottom: 10px !important;
             }
             
             #fisIcerik th, #fisIcerik td {
-                padding: 4px 0 !important;
+                padding: 3px 0 !important;
                 border-bottom: 1px dashed #000 !important; /* Klasik fiş çizgisi */
             }
             
@@ -1272,7 +1272,9 @@
                 vade: vade,
                 musteri: musteriAd,
                 tur: "SATIŞ",
-                detay: `${adet} adet ${urun} (${toplamTutar.toLocaleString("tr-TR")} TL) ${aciklama ? '- ' + aciklama : ''}`,
+                detay: `${adet} Adet x ${fiyat.toLocaleString("tr-TR")} TL - ${urun} ${aciklama ? '(' + aciklama + ')' : ''}`,
+                adet: adet,
+                birimFiyat: fiyat,
                 tutar: toplamTutar
             });
 
@@ -1318,7 +1320,9 @@
                 vade: item.vade,
                 musteri: item.musteri,
                 tur: "SATIŞ",
-                detay: `${item.adet} adet ${item.urun} (${item.toplam.toLocaleString("tr-TR")} TL) ${item.aciklama ? '- ' + item.aciklama : ''}`,
+                detay: `${item.adet} Adet x ${item.fiyat.toLocaleString("tr-TR")} TL - ${item.urun} ${item.aciklama ? '(' + item.aciklama + ')' : ''}`,
+                adet: item.adet,
+                birimFiyat: item.fiyat,
                 tutar: item.toplam
             });
 
@@ -1363,7 +1367,7 @@
                     <td class="p-2">${i.tarih}</td>
                     <td class="p-2 text-indigo-600 font-semibold">${i.calisan}</td>
                     <td class="p-2 font-medium">${i.musteri}</td>
-                    <td class="p-2">${i.adet} adet ${i.urun}</td>
+                    <td class="p-2">${i.adet} adet ${i.urun} (${i.fiyat} TL/Birim)</td>
                     <td class="p-2 text-right font-bold text-slate-700">${i.toplam.toLocaleString("tr-TR")} TL</td>
                     <td class="p-2 text-center flex justify-center gap-2">
                         <button onclick="satisOnayla(${i.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Onayla</button>
@@ -1515,14 +1519,13 @@
                 }).join('');
         }
 
-        // YENİ GÜNCELLENEN 80mm TERMAL FİŞ FONKSİYONU
+        // YENİ GÜNCELLENEN 80mm TERMAL FİŞ FONKSİYONU (Birim ve Birim Fiyatı Dahil)
         window.acFisModal = function(musteriAd) {
             const islemler = cloudData.islemler.filter(i => i.musteri === musteriAd);
             const musteri = cloudData.musteriler.find(m => m.ad === musteriAd);
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
             const islemTarihi = new Date().toLocaleString("tr-TR");
 
-            // Modal Üst Başlığı (Ekranda görünür, fişte ortalanır)
             document.getElementById("fisBaslik").innerHTML = `<div class="text-center w-full text-black font-bold border-b-2 border-dashed border-black pb-2">
                 <h2 class="text-xl">DEMİRKAPI ÇİFTLİĞİ</h2>
                 <p class="text-sm font-normal">HESAP EKSTRESİ</p>
@@ -1539,7 +1542,8 @@
                     <thead>
                         <tr class="border-b-2 border-black">
                             <th class="py-1">Tarih</th>
-                            <th class="py-1">İşlem/Detay</th>
+                            <th class="py-1">İşlem / Detay</th>
+                            <th class="py-1 text-center">Birim / Fiyat</th>
                             <th class="py-1 text-right">Tutar</th>
                         </tr>
                     </thead>
@@ -1549,16 +1553,24 @@
             let waMetni = `Sayın ${musteriAd}, güncel hesap dökümünüz aşağıdadır:\n\n`;
 
             if(islemler.length === 0) {
-                html += `<tr><td colspan="3" class="py-2 text-center">İşlem hareketi yok.</td></tr>`;
+                html += `<tr><td colspan="4" class="py-2 text-center">İşlem hareketi yok.</td></tr>`;
                 waMetni += `Hesap hareketiniz bulunmamaktadır.\n`;
             } else {
                 islemler.forEach(item => {
                     const renk = item.tutar > 0 ? "text-rose-600 font-bold" : "text-emerald-600 font-bold";
-                    // Fişte çok yer kaplamaması için Tür ve Detayı alt alta birleştirdik
+                    
+                    let birimDetay = "-";
+                    if(item.tur === "SATIŞ" && item.adet && item.birimFiyat) {
+                        birimDetay = `${item.adet} Adet<br>${item.birimFiyat.toLocaleString("tr-TR")} TL`;
+                    } else if(item.tur === "TAHSİLAT") {
+                        birimDetay = "Ödeme";
+                    }
+
                     html += `
                         <tr>
                             <td class="py-2 align-top whitespace-nowrap">${item.tarih}</td>
                             <td class="py-2 align-top pr-1"><strong>${item.tur}</strong><br><span class="text-[10px] leading-tight block">${item.detay}</span></td>
+                            <td class="py-2 align-top text-center text-[10px] whitespace-nowrap">${birimDetay}</td>
                             <td class="py-2 align-top text-right ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
                         </tr>
                     `;
