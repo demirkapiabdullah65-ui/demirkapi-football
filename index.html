@@ -24,31 +24,75 @@
     <!-- Turf.js (Alan hesabı için) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 
-    <!-- Yazdırma (Print) Stilleri -->
+    <!-- Yazdırma (Print) Stilleri - 80mm Termal Yazıcı İçin Optimize Edildi -->
     <style>
         @media print {
+            /* Tarayıcı varsayılan kenar boşluklarını sıfırla ve 80mm rulo kağıda ayarla */
+            @page {
+                margin: 0;
+                size: 80mm auto;
+            }
+            
             body {
                 background: white !important;
                 color: black !important;
-            }
-            header, .tab-btn, button, input, select, .no-print {
-                display: none !important;
-            }
-            .tab-content {
-                display: block !important;
-            }
-            #fisModal {
-                position: absolute !important;
-                inset: 0 !important;
-                background: white !important;
+                /* Termal yazıcılarda en iyi duran font tipi */
+                font-family: 'Courier New', Courier, monospace, sans-serif !important; 
+                font-size: 12px !important;
+                margin: 0 !important;
                 padding: 0 !important;
             }
+            
+            /* Fiş Modalı haricindeki tüm ekranı gizle */
+            body > *:not(#fisModal) {
+                display: none !important;
+            }
+            
+            #fisModal {
+                display: block !important;
+                position: relative !important;
+                width: 100% !important;
+                max-width: 80mm !important;
+                margin: 0 auto !important;
+                padding: 4mm !important;
+                background: white !important;
+            }
+            
             #fisModal > div {
                 box-shadow: none !important;
-                max-height: none !important;
                 width: 100% !important;
                 max-width: 100% !important;
                 padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+            }
+
+            /* Termal fiş için özel tablo yapısı */
+            #fisIcerik table {
+                width: 100% !important;
+                font-size: 12px !important;
+                margin-bottom: 10px !important;
+            }
+            
+            #fisIcerik th, #fisIcerik td {
+                padding: 4px 0 !important;
+                border-bottom: 1px dashed #000 !important; /* Klasik fiş çizgisi */
+            }
+            
+            #fisIcerik th {
+                border-bottom: 2px solid #000 !important;
+                font-weight: bold !important;
+            }
+
+            /* Kapat/Yazdır butonlarını kağıtta gizle */
+            #fisModal .flex-wrap, button {
+                display: none !important;
+            }
+            
+            /* Renkli yazıları (borç/alacak) termalde simsiyah ve kalın yap */
+            .text-rose-600, .text-emerald-600 {
+                color: black !important;
+                font-weight: bold !important;
             }
         }
         #map { height: 350px; width: 100%; border-radius: 0.75rem; z-index: 10; }
@@ -1471,25 +1515,32 @@
                 }).join('');
         }
 
+        // YENİ GÜNCELLENEN 80mm TERMAL FİŞ FONKSİYONU
         window.acFisModal = function(musteriAd) {
             const islemler = cloudData.islemler.filter(i => i.musteri === musteriAd);
             const musteri = cloudData.musteriler.find(m => m.ad === musteriAd);
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            const islemTarihi = new Date().toLocaleString("tr-TR");
 
-            document.getElementById("fisBaslik").innerText = `${musteriAd} - Hesap Fişi`;
+            // Modal Üst Başlığı (Ekranda görünür, fişte ortalanır)
+            document.getElementById("fisBaslik").innerHTML = `<div class="text-center w-full text-black font-bold border-b-2 border-dashed border-black pb-2">
+                <h2 class="text-xl">DEMİRKAPI ÇİFTLİĞİ</h2>
+                <p class="text-sm font-normal">HESAP EKSTRESİ</p>
+            </div>`;
+
             let html = `
-                <div class="mb-4 text-xs text-slate-500 flex justify-between items-center">
-                    <div>
-                        <p><strong>Telefon:</strong> ${musteri?.tel || '-'}</p>
-                    </div>
+                <div class="mb-3 text-xs text-black text-center border-b border-dashed border-black pb-2">
+                    <p><strong>Müşteri:</strong> ${musteriAd}</p>
+                    <p><strong>Telefon:</strong> ${musteri?.tel || '-'}</p>
+                    <p><strong>Tarih:</strong> ${islemTarihi}</p>
                 </div>
-                <table class="w-full text-left border-collapse text-xs mb-4">
+                
+                <table class="w-full text-left border-collapse text-xs mb-4 text-black">
                     <thead>
-                        <tr class="border-b bg-slate-50 text-slate-500">
-                            <th class="p-2">Tarih</th>
-                            <th class="p-2">Tür</th>
-                            <th class="p-2">Detay</th>
-                            <th class="p-2 text-right">Tutar</th>
+                        <tr class="border-b-2 border-black">
+                            <th class="py-1">Tarih</th>
+                            <th class="py-1">İşlem/Detay</th>
+                            <th class="py-1 text-right">Tutar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1498,17 +1549,17 @@
             let waMetni = `Sayın ${musteriAd}, güncel hesap dökümünüz aşağıdadır:\n\n`;
 
             if(islemler.length === 0) {
-                html += `<tr><td colspan="4" class="p-4 text-center text-slate-400">İşlem hareketi yok.</td></tr>`;
+                html += `<tr><td colspan="3" class="py-2 text-center">İşlem hareketi yok.</td></tr>`;
                 waMetni += `Hesap hareketiniz bulunmamaktadır.\n`;
             } else {
                 islemler.forEach(item => {
-                    const renk = item.tutar > 0 ? "text-rose-600" : "text-emerald-600";
+                    const renk = item.tutar > 0 ? "text-rose-600 font-bold" : "text-emerald-600 font-bold";
+                    // Fişte çok yer kaplamaması için Tür ve Detayı alt alta birleştirdik
                     html += `
-                        <tr class="border-b">
-                            <td class="p-2">${item.tarih}</td>
-                            <td class="p-2 font-semibold">${item.tur}</td>
-                            <td class="p-2">${item.detay}</td>
-                            <td class="p-2 text-right font-bold ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
+                        <tr>
+                            <td class="py-2 align-top whitespace-nowrap">${item.tarih}</td>
+                            <td class="py-2 align-top pr-1"><strong>${item.tur}</strong><br><span class="text-[10px] leading-tight block">${item.detay}</span></td>
+                            <td class="py-2 align-top text-right ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
                         </tr>
                     `;
                     waMetni += `- ${item.tarih} | ${item.tur}: ${item.detay} (${item.tutar.toLocaleString("tr-TR")} TL)\n`;
@@ -1520,24 +1571,25 @@
             html += `
                     </tbody>
                 </table>
-                <div class="text-right p-3 bg-slate-50 rounded-xl">
-                    <span class="text-sm font-medium">Toplam Bakiye (Borç): </span>
-                    <span class="text-lg font-bold text-rose-600">${toplamBorc.toLocaleString("tr-TR")} TL</span>
+                
+                <div class="text-right pt-2 border-t-2 border-black border-dashed mt-2">
+                    <span class="text-sm font-bold text-black">TOPLAM BAKİYE: </span>
+                    <span class="text-base font-bold text-black">${toplamBorc.toLocaleString("tr-TR")} TL</span>
+                </div>
+                <div class="text-center text-[10px] text-black mt-4 border-t border-dashed border-black pt-2">
+                    <p>Bizi tercih ettiğiniz için teşekkür ederiz.</p>
                 </div>
             `;
 
             document.getElementById("fisIcerik").innerHTML = html;
-
-            const waBtn = document.getElementById("whatsappGonderBtn");
-            const telNo = musteri?.tel ? musteri.tel.replace(/\D/g, '') : '';
-            waBtn.onclick = function() {
-                const encoded = encodeURIComponent(waMetni);
-                if(telNo) {
-                    window.open(`https://wa.me/${telNo.startsWith('90') ? telNo : '9' + telNo}?text=${encoded}`, '_blank');
-                } else {
-                    window.open(`https://wa.me/?text=${encoded}`, '_blank');
-                }
-            };
+            
+            const wpBtn = document.getElementById("whatsappGonderBtn");
+            if(musteri?.tel) {
+                wpBtn.classList.remove("hidden");
+                wpBtn.onclick = () => window.open(`https://wa.me/90${musteri.tel.replace(/\D/g,'')}?text=${encodeURIComponent(waMetni)}`, '_blank');
+            } else {
+                wpBtn.classList.add("hidden");
+            }
 
             document.getElementById("fisModal").classList.remove("hidden");
         };
@@ -1549,34 +1601,45 @@
         window.handleAlinanMalEkle = function(e) {
             e.preventDefault();
             const tarih = document.getElementById("malTarih").value;
-            const isim = document.getElementById("malIsim").value;
-            const koy = document.getElementById("malKoy").value;
+            const isim = document.getElementById("malIsim").value.trim();
+            const koy = document.getElementById("malKoy").value.trim();
             const donum = parseFloat(document.getElementById("malDonum").value) || 0;
             const kilo = parseFloat(document.getElementById("malKilo").value) || 0;
             const fiyat = parseFloat(document.getElementById("malFiyat").value);
-            const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
-            const toplam = (donum > 0 ? donum : kilo) * fiyat;
+            const tutar = (donum > 0 ? donum : kilo) * fiyat;
 
-            let alinanlar = [...cloudData.alinan_mallar];
-            alinanlar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
-            saveData("alinan_mallar", alinanlar);
+            let mallar = [...cloudData.alinan_mallar];
+            mallar.unshift({ id: Date.now(), tarih, isim, koy, donum, kilo, fiyat, tutar });
+            saveData("alinan_mallar", mallar);
 
-            alert("Kayıt eklendi.");
+            kontrolVeMusteriEkle(isim);
+            let islemler = [...cloudData.islemler];
+            islemler.unshift({
+                id: Date.now(),
+                tarih: new Date(tarih).toLocaleDateString("tr-TR"),
+                musteri: isim,
+                tur: "MAL ALIMI",
+                detay: `${koy} köyünden mal alımı (${donum > 0 ? donum+' Dönüm' : kilo+' Kilo'})`,
+                tutar: -tutar
+            });
+            saveData("islemler", islemler);
+
+            alert("Mal kaydı eklendi ve müşteriye alacak olarak işlendi.");
             e.target.reset();
-            document.getElementById("malTarih").valueAsDate = new Date();
+            refreshAll();
         };
 
         function renderAlinanMallar() {
             const list = cloudData.alinan_mallar;
             const tbody = document.getElementById("alinanMalTablosu");
             tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
-                list.map(i => `
+                list.map(m => `
                     <tr class="border-b last:border-0">
-                        <td class="py-3">${i.tarih}</td>
-                        <td class="py-3 font-medium">${i.isim} <br><span class="text-xs text-slate-400">${i.koy}</span></td>
-                        <td class="py-3 text-center">${i.miktarOlcu}</td>
-                        <td class="py-3 text-right">${i.fiyat.toLocaleString("tr-TR")} TL</td>
-                        <td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3">${m.tarih}</td>
+                        <td class="py-3 font-medium">${m.isim} <br><span class="text-xs text-slate-400">${m.koy}</span></td>
+                        <td class="py-3 text-center">${m.donum > 0 ? m.donum+' Dönüm' : m.kilo+' Kilo'}</td>
+                        <td class="py-3 text-right">${m.fiyat.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 text-right font-bold text-indigo-600">${m.tutar.toLocaleString("tr-TR")} TL</td>
                     </tr>
                 `).join('');
         }
@@ -1584,34 +1647,46 @@
         window.handleBicilenTarlaEkle = function(e) {
             e.preventDefault();
             const tarih = document.getElementById("tarlaTarih").value;
-            const isim = document.getElementById("tarlaIsim").value;
-            const koy = document.getElementById("tarlaKoy").value;
+            const isim = document.getElementById("tarlaIsim").value.trim();
+            const koy = document.getElementById("tarlaKoy").value.trim();
             const donum = parseFloat(document.getElementById("tarlaDonum").value) || 0;
             const kilo = parseFloat(document.getElementById("tarlaKilo").value) || 0;
             const fiyat = parseFloat(document.getElementById("tarlaFiyat").value);
-            const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
-            const toplam = (donum > 0 ? donum : kilo) * fiyat;
+            const tutar = (donum > 0 ? donum : kilo) * fiyat;
 
             let tarlalar = [...cloudData.bicilen_tarlalar];
-            tarlalar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
+            tarlalar.unshift({ id: Date.now(), tarih, isim, koy, donum, kilo, fiyat, tutar });
             saveData("bicilen_tarlalar", tarlalar);
 
-            alert("Kayıt eklendi.");
+            kontrolVeMusteriEkle(isim);
+            let islemler = [...cloudData.islemler];
+            islemler.unshift({
+                id: Date.now(),
+                tarih: new Date(tarih).toLocaleDateString("tr-TR"),
+                musteri: isim,
+                tur: "TARLA BİÇİMİ",
+                detay: `${koy} köyünde tarla biçimi (${donum > 0 ? donum+' Dönüm' : kilo+' Kilo'})`,
+                tutar: tutar
+            });
+            saveData("islemler", islemler);
+
+            alert("Tarla biçim kaydı eklendi ve müşteriye borç olarak işlendi.");
             e.target.reset();
-            document.getElementById("tarlaTarih").valueAsDate = new Date();
+            haritaNoktalariSifirla();
+            refreshAll();
         };
 
         function renderBicilenTarlalar() {
             const list = cloudData.bicilen_tarlalar;
             const tbody = document.getElementById("bicilenTarlaTablosu");
             tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
-                list.map(i => `
+                list.map(t => `
                     <tr class="border-b last:border-0">
-                        <td class="py-3">${i.tarih}</td>
-                        <td class="py-3 font-medium">${i.isim} <br><span class="text-xs text-slate-400">${i.koy}</span></td>
-                        <td class="py-3 text-center">${i.miktarOlcu}</td>
-                        <td class="py-3 text-right">${i.fiyat.toLocaleString("tr-TR")} TL</td>
-                        <td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3">${t.tarih}</td>
+                        <td class="py-3 font-medium">${t.isim} <br><span class="text-xs text-slate-400">${t.koy}</span></td>
+                        <td class="py-3 text-center">${t.donum > 0 ? t.donum+' Dönüm' : t.kilo+' Kilo'}</td>
+                        <td class="py-3 text-right">${t.fiyat.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 text-right font-bold text-rose-600">${t.tutar.toLocaleString("tr-TR")} TL</td>
                     </tr>
                 `).join('');
         }
@@ -1620,126 +1695,108 @@
             e.preventDefault();
             const tip = document.getElementById("yemTip").value;
             const tutar = parseFloat(document.getElementById("yemTutar").value);
-            const aciklama = document.getElementById("yemAciklama").value;
+            const aciklama = document.getElementById("yemAciklama").value || (tip === "YEM_ALIM" ? "Yem Alımı" : "Yem Ödemesi");
 
             let yemler = [...cloudData.ozlem_yem];
             yemler.unshift({
                 id: Date.now(),
                 tarih: new Date().toLocaleDateString("tr-TR"),
                 tip: tip,
-                tutar: tip === "YEM_ALIM" ? tutar : -tutar,
-                aciklama: aciklama || (tip === "YEM_ALIM" ? "Yem Alımı" : "Yem Ödemesi")
+                aciklama: aciklama,
+                tutar: tip === "YEM_ALIM" ? tutar : -tutar
             });
             saveData("ozlem_yem", yemler);
-            alert("Kayıt eklendi.");
+            alert("Özlem Yem işlemi kaydedildi.");
             e.target.reset();
+            refreshAll();
         };
 
         function renderYemTablosu() {
-            const list = cloudData.ozlem_yem;
-            const tbody = document.getElementById("yemTablosu");
-            const bakiye = list.reduce((acc, curr) => acc + curr.tutar, 0);
+            const yemler = cloudData.ozlem_yem;
+            const bakiye = yemler.reduce((acc, curr) => acc + curr.tutar, 0);
             document.getElementById("yemBakiyeYazi").innerText = `${bakiye.toLocaleString("tr-TR")} TL`;
+            document.getElementById("statYem").innerText = `${bakiye.toLocaleString("tr-TR")} TL`;
 
-            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="4" class="py-4 text-center text-slate-400">Yem hareketi yok.</td></tr>` :
-                list.map(i => {
-                    const renk = i.tutar > 0 ? "text-rose-600" : "text-emerald-600";
+            const tbody = document.getElementById("yemTablosu");
+            tbody.innerHTML = yemler.length === 0 ? `<tr><td colspan="4" class="py-4 text-center text-slate-400">İşlem yok.</td></tr>` :
+                yemler.map(y => {
+                    const renk = y.tutar > 0 ? "text-rose-600" : "text-emerald-600";
                     return `
                         <tr class="border-b last:border-0">
-                            <td class="py-3">${i.tarih}</td>
-                            <td class="py-3 font-semibold">${i.tip === "YEM_ALIM" ? "Yem Alındı" : "Ödeme Yapıldı"}</td>
-                            <td class="py-3">${i.aciklama}</td>
-                            <td class="py-3 text-right font-bold ${renk}">${i.tutar.toLocaleString("tr-TR")} TL</td>
+                            <td class="py-3">${y.tarih}</td>
+                            <td class="py-3 font-semibold ${renk}">${y.tip === 'YEM_ALIM' ? 'ALIM (Borç)' : 'ÖDEME'}</td>
+                            <td class="py-3">${y.aciklama}</td>
+                            <td class="py-3 text-right font-bold ${renk}">${Math.abs(y.tutar).toLocaleString("tr-TR")} TL</td>
                         </tr>
                     `;
                 }).join('');
         }
 
         function renderDashboardStats() {
-            const toplamBorc = cloudData.islemler.reduce((acc, curr) => acc + curr.tutar, 0);
-            document.getElementById("statBorc").innerText = `${toplamBorc.toLocaleString("tr-TR")} TL`;
-            document.getElementById("statStok").innerText = `${cloudData.depo_stoklari.length} Çeşit`;
-            const yemBakiye = cloudData.ozlem_yem.reduce((acc, curr) => acc + curr.tutar, 0);
-            document.getElementById("statYem").innerText = `${yemBakiye.toLocaleString("tr-TR")} TL`;
+            const bakiye = cloudData.islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            document.getElementById("statBorc").innerText = `${bakiye.toLocaleString("tr-TR")} TL`;
+            document.getElementById("statStok").innerText = `${cloudData.depo_stoklari.length} Kalem Stok (Tüm Depolar)`;
         }
 
         window.processAI = async function() {
-            const apiKey = localStorage.getItem("tarim_gemini_key") || document.getElementById("apiKeyInput").value.trim();
-            if(!apiKey) return alert("Lütfen Gemini API Key girin.");
-            const promptText = document.getElementById("aiPrompt").value.trim();
-            if(!promptText) return;
+            const prompt = document.getElementById("aiPrompt").value.trim();
+            const apiKey = localStorage.getItem("tarim_gemini_key");
+            
+            if(!prompt) return alert("Lütfen işlenecek metni yazın veya sesli komut verin!");
+            if(!apiKey) return alert("Önce Gemini API Key kaydetmelisiniz!");
 
-            const btn = document.getElementById("aiBtn");
-            btn.innerText = "Yapay Zeka İşliyor...";
-            btn.disabled = true;
+            const aiBtn = document.getElementById("aiBtn");
+            aiBtn.innerText = "İşleniyor...";
+            aiBtn.disabled = true;
+
+            const systemPrompt = `
+                Sen bir tarım ve cari hesap yazılımı asistanısın. Görevin, kullanıcının girdiği doğal dil metninden satış veya tahsilat bilgilerini çıkarmak ve sadece JSON formatında yanıt dönmektir. Asla başka bir metin ekleme.
+                Şu JSON şemasını kullan:
+                {
+                    "islemTipi": "SATIS" veya "TAHSILAT",
+                    "musteri": "Kişi Adı",
+                    "urun": "Ürün Adı" (sadece satış için),
+                    "adet": Sayı (sadece satış için),
+                    "fiyat": Sayı (birim fiyat, opsiyonel),
+                    "tutar": Sayı (toplam tutar veya tahsilat tutarı)
+                }
+                Örnek 1: "Ali Koç'a 5 adet buğday tohumu sattım fiyatı 100 lira"
+                Yanıt: {"islemTipi": "SATIS", "musteri": "Ali Koç", "urun": "buğday tohumu", "adet": 5, "fiyat": 100, "tutar": 500}
+                Örnek 2: "Mehmet'ten 5000 tl aldım"
+                Yanıt: {"islemTipi": "TAHSILAT", "musteri": "Mehmet", "tutar": 5000}
+                Sadece JSON dön.
+            `;
 
             try {
-                const ai = new GoogleGenAI({ apiKey });
-                const prompt = `
-                Bu cümle bir tarımsal ticaret işlemidir. Analiz et ve TAM OLARAK şu JSON formatında cevap ver, başka hiçbir metin ekleme:
-                {"musteri": "Müşteri Adı", "tur": "SATIŞ veya TAHSİLAT", "urun": "Ürün Adı", "adet": 0.0, "fiyat": 0.0, "pesinat": 0.0, "tutar": 0.0}
-                Cümle: "${promptText}"
-                `;
-
-                const res = await ai.models.generateContent({
+                const ai = new GoogleGenAI({ apiKey: apiKey });
+                const response = await ai.models.generateContent({
                     model: 'gemini-2.5-flash',
-                    contents: prompt,
-                    config: { responseMimeType: "application/json" }
+                    contents: systemPrompt + "\nKullanıcı Metni: " + prompt
                 });
 
-                let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
-                const data = JSON.parse(text);
-                const tarihStr = new Date().toLocaleDateString("tr-TR");
-                let islemler = [...cloudData.islemler];
-                const islemId = Date.now();
+                const rawText = response.text;
+                const jsonStr = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const data = JSON.parse(jsonStr);
 
-                kontrolVeMusteriEkle(data.musteri);
-
-                if(data.tur === "SATIŞ") {
-                    const toplam = (data.adet * data.fiyat) || data.tutar || 0;
-                    const pesin = data.pesinat || 0;
-                    
-                    islemler.unshift({
-                        id: islemId,
-                        tarih: tarihStr,
-                        vade: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
-                        musteri: data.musteri,
-                        tur: "SATIŞ",
-                        detay: `${data.adet || 1} adet ${data.urun || 'Ürün'} (AI Sesli/Yazılı)`,
-                        tutar: toplam
-                    });
-
-                    if(pesin > 0) {
-                        islemler.unshift({
-                            id: islemId + 1,
-                            tarih: tarihStr,
-                            vade: "",
-                            musteri: data.musteri,
-                            tur: "TAHSİLAT",
-                            detay: `Peşin ödeme (AI)`,
-                            tutar: -pesin
-                        });
-                    }
-                } else {
-                    islemler.unshift({
-                        id: islemId,
-                        tarih: tarihStr,
-                        vade: "",
-                        musteri: data.musteri,
-                        tur: "TAHSİLAT",
-                        detay: "Yapay zeka tahsilat",
-                        tutar: -data.tutar
-                    });
+                if(data.islemTipi === "SATIS") {
+                    switchTab('tab-satis');
+                    document.getElementById("satisMusteri").value = data.musteri;
+                    document.getElementById("satisAdet").value = data.adet;
+                    if(data.fiyat) document.getElementById("satisFiyat").value = data.fiyat;
+                    setTimeout(() => alert(`AI Satışı algıladı. Lütfen ürünü depodan seçip onaylayın.`), 500);
+                } else if(data.islemTipi === "TAHSILAT") {
+                    switchTab('tab-tahsilat');
+                    document.getElementById("tahsilatMusteri").value = data.musteri;
+                    document.getElementById("tahsilatTutar").value = data.tutar;
+                    setTimeout(() => alert(`AI Tahsilatı algıladı. Onaylayıp işlemi bitirebilirsiniz.`), 500);
                 }
-
-                saveData("islemler", islemler);
-                alert("Yapay zeka işlemi başarıyla kaydetti! 🎉");
-                document.getElementById("aiPrompt").value = "";
-            } catch (err) {
-                alert("AI işleme hatası.");
+            } catch(error) {
+                console.error(error);
+                alert("AI İşlem Hatası: Lütfen API anahtarınızı ve metninizi kontrol edin.");
             } finally {
-                btn.innerText = "Yapay Zeka ile İşle";
-                btn.disabled = false;
+                aiBtn.innerText = "Yapay Zeka ile İşle";
+                aiBtn.disabled = false;
+                document.getElementById("aiPrompt").value = "";
             }
         };
     </script>
