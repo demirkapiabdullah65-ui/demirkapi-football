@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Demirkapı Tarım Ürünleri - Ticari Cari Hesap Otomasyonu</title>
+    <title>Profesyonel Tarım ve Ticari Cari Hesap Otomasyonu (Bulut Senkronize)</title>
     <!-- PWA Manifest & Service Worker Desteği İçin Meta -->
     <meta name="theme-color" content="#312e81">
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Demirkap%C4%B1%20Tar%C4%B1m%20Otomasyonu%22%2C%22short_name%22%3A%22Demirkap%C4%B1App%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%23312e81%22%7D">
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22Tar%C4%B1m%20Otomasyonu%22%2C%22short_name%22%3A%22Tar%C4%B1mApp%22%2C%22start_url%22%3A%22%2F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%23312e81%22%7D">
 
     <!-- Tailwind CSS v4 -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
@@ -23,63 +23,45 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <!-- Turf.js (Alan hesabı için) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
-    <!-- jsPDF & AutoTable (Profesyonel PDF Fatura için) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 
     <!-- Yazdırma (Print) Stilleri -->
     <style>
         @media print {
-            body { background: white !important; color: black !important; }
-            header, .tab-btn, button, input, select, .no-print { display: none !important; }
-            .tab-content { display: block !important; }
-            #fisModal { position: absolute !important; inset: 0 !important; background: white !important; padding: 0 !important; }
-            #fisModal > div { box-shadow: none !important; max-height: none !important; width: 100% !important; max-width: 100% !important; padding: 0 !important; }
+            body {
+                background: white !important;
+                color: black !important;
+            }
+            header, .tab-btn, button, input, select, .no-print {
+                display: none !important;
+            }
+            .tab-content {
+                display: block !important;
+            }
+            #fisModal {
+                position: absolute !important;
+                inset: 0 !important;
+                background: white !important;
+                padding: 0 !important;
+            }
+            #fisModal > div {
+                box-shadow: none !important;
+                max-height: none !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
         }
         #map { height: 350px; width: 100%; border-radius: 0.75rem; z-index: 10; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-12">
 
-    <!-- MÜŞTERİ / ÇİFTÇİ ÖZ-PORTAL GİRİŞ MODALI -->
-    <div id="musteriPortalModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm flex justify-center items-center p-4 z-50 hidden">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-8 shadow-2xl space-y-6">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-xl font-bold text-slate-800">🌾 Demirkapı Tarım - Çiftçi Portalı</h3>
-                <button onclick="kapatMusteriPortal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
-            </div>
-            <div id="musteriPortalGirisEkrani" class="space-y-4">
-                <p class="text-sm text-slate-500">Borçlarınızı ve tarlalarınızı görmek için kayıtlı telefon numaranızı girin.</p>
-                <div>
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Cep Telefonu Numarası</label>
-                    <input type="text" id="portalTelefon" placeholder="0555..." class="w-full px-4 py-3 border rounded-xl outline-none">
-                </div>
-                <button onclick="musteriPortalGirisYap()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Hesabımı Görüntüle</button>
-            </div>
-            <div id="musteriPortalDetayEkrani" class="hidden space-y-4">
-                <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-                    <h4 id="portalMusteriAdi" class="font-bold text-indigo-900 text-lg">Müşteri Adı</h4>
-                    <p class="text-xs text-indigo-600">Güncel Borç Bakiyesi: <span id="portalMusteriBorc" class="font-bold text-rose-600 text-sm">0 TL</span></p>
-                </div>
-                <div>
-                    <h5 class="text-sm font-semibold text-slate-700 mb-2">📜 Son Hesap Hareketleriniz</h5>
-                    <div id="portalHareketler" class="max-h-48 overflow-y-auto space-y-2 text-xs border p-2 rounded-xl bg-slate-50"></div>
-                </div>
-                <div>
-                    <h5 class="text-sm font-semibold text-slate-700 mb-2">🗺️ Kayıtlı Tarlalarınız & Alanlar</h5>
-                    <div id="portalTarlalar" class="max-h-48 overflow-y-auto space-y-2 text-xs border p-2 rounded-xl bg-slate-50"></div>
-                </div>
-                <button onclick="musteriPortalCikis()" class="w-full bg-rose-100 text-rose-700 hover:bg-rose-200 py-2.5 rounded-xl font-semibold text-sm transition cursor-pointer">Çıkış Yap / Başka Numara Gir</button>
-            </div>
-        </div>
-    </div>
-
     <!-- GİRİŞ VE KAYIT EKRANI MODALI -->
     <div id="loginModal" class="fixed inset-0 bg-indigo-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-4">
-            <div class="text-center mb-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-8 shadow-2xl">
+            <div class="text-center mb-6">
                 <span class="text-4xl">🌾</span>
-                <h2 class="text-2xl font-bold text-slate-800 mt-2">Demirkapı Tarım Giriş</h2>
+                <h2 class="text-2xl font-bold text-slate-800 mt-2">Tarım Otomasyon Giriş</h2>
                 <p id="modalAltBaslik" class="text-slate-500 text-sm">Lütfen rolünüzü seçin ve şifrenizi girin</p>
             </div>
             
@@ -114,10 +96,6 @@
 
                 <button type="submit" id="girisKayitBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer shadow-lg shadow-indigo-200">Sisteme Giriş Yap</button>
             </form>
-
-            <div class="text-center pt-2 border-t">
-                <button onclick="acMusteriPortal()" class="text-xs text-emerald-600 font-bold hover:underline cursor-pointer">🌐 Çiftçi / Müşteri Portalı (Kendi Hesabınızı Görün)</button>
-            </div>
         </div>
     </div>
 
@@ -125,11 +103,11 @@
     <header class="bg-indigo-900 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Demirkapı Tarım Ürünleri</h1>
+                <h1 class="text-2xl font-bold flex items-center gap-2">🌾 Tarım & Cari Yönetim (Depo, PWA & Sesli Asistan)</h1>
                 <p class="text-indigo-200 text-xs flex items-center gap-2 flex-wrap">
                     <span id="userBadge" class="bg-emerald-500 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">YÖNETİCİ</span>
                     <span id="offlineStatus" class="bg-emerald-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold">🟢 Çevrimiçi</span>
-                    Cari, Stok, Uydu Takip ve Kurumsal PDF Sistemi
+                    Harita, Çoklu Depo, Çevrimdışı Mod & Sesli AI Aktif
                 </p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
@@ -158,16 +136,64 @@
 
         <!-- 1. DASHBOARD & AI & SESLİ ASİSTAN -->
         <div id="tab-dashboard" class="tab-content space-y-6">
+            
+            <!-- VADESİ GEÇEN / YAKLAŞAN BORÇLAR UYARI KUTUSU -->
+            <div id="vadeUyarilariBolumu" class="bg-rose-50 border border-rose-200 p-6 rounded-2xl shadow-sm hidden">
+                <h2 class="text-lg font-bold text-rose-800 mb-2 flex items-center gap-2">⏰ Vadesi Gelen veya Geçen Ödemeler</h2>
+                <p class="text-rose-700 text-sm mb-4">Aşağıdaki satışların vade tarihi gelmiş veya geçmiştir. Müşterilerle iletişime geçebilirsiniz.</p>
+                <div class="overflow-x-auto bg-white rounded-xl border border-rose-100 p-2">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b text-slate-400">
+                                <th class="p-2">Vade Tarihi</th>
+                                <th class="p-2">Müşteri</th>
+                                <th class="p-2">İşlem Detayı</th>
+                                <th class="p-2 text-right">Tutar</th>
+                                <th class="p-2 text-center">Durum</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vadeUyarilariTablosu"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ÇALIŞAN SATIŞ ONAY KUTUSU (SADECE PATRON GÖRÜR) -->
+            <div id="patronOnayBolumu" class="bg-amber-50 border border-amber-200 p-6 rounded-2xl shadow-sm hidden">
+                <h2 class="text-lg font-bold text-amber-800 mb-2 flex items-center gap-2">⚠️ Çalışanlardan Gelen Onay Bekleyen Satışlar</h2>
+                <p class="text-amber-700 text-sm mb-4">Personelin girdiği ve onayınızı bekleyen satışlar aşağıdadır. Onayladığınızda stoktan düşer ve hesaba işlenir.</p>
+                <div class="overflow-x-auto bg-white rounded-xl border border-amber-100 p-2">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b text-slate-400">
+                                <th class="p-2">Tarih</th>
+                                <th class="p-2">Çalışan</th>
+                                <th class="p-2">Müşteri</th>
+                                <th class="p-2">İşlem Detayı</th>
+                                <th class="p-2 text-right">Tutar</th>
+                                <th class="p-2 text-center">İşlem Onayı</th>
+                            </tr>
+                        </thead>
+                        <tbody id="onayBekleyenlerTablosu"></tbody>
+                    </table>
+                </div>
+            </div>
+
             <div class="bg-indigo-900 text-white p-6 rounded-2xl shadow-lg space-y-4">
                 <div class="flex justify-between items-center flex-wrap gap-2">
                     <div>
-                        <h2 class="text-lg font-semibold mb-1">✨ Gemini Yapay Zeka Asistanı</h2>
-                        <p class="text-indigo-200 text-sm">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL"</p>
+                        <h2 class="text-lg font-semibold mb-1">✨ Gemini Yapay Zeka & 🎙️ Sesli Asistan</h2>
+                        <p class="text-indigo-200 text-sm">Örn: "Ahmet Çiftçi'ye 10 torba gübre satıldı adet fiyatı 600 TL" veya mikrofona basıp konuşun.</p>
                     </div>
+                    <button type="button" onclick="sesliDinlemeyiBaslat()" id="micBtn" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition cursor-pointer shadow-md">
+                        🎙️ Sesli Komut Ver
+                    </button>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="aiPrompt" placeholder="İşleminizi doğal dille yazın..." class="flex-1 px-4 py-3 rounded-xl bg-indigo-800 border border-indigo-700 text-white placeholder-indigo-400 outline-none">
+                    <input type="text" id="aiPrompt" placeholder="İşleminizi doğal dille yazın veya sesli komut kullanın..." class="flex-1 px-4 py-3 rounded-xl bg-indigo-800 border border-indigo-700 text-white placeholder-indigo-400 outline-none">
                     <button onclick="processAI()" id="aiBtn" class="bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-xl font-semibold transition cursor-pointer">Yapay Zeka ile İşle</button>
+                </div>
+                <div id="sesliDurumKutusu" class="hidden text-xs bg-indigo-950 p-3 rounded-xl border border-indigo-700 text-emerald-400 font-medium">
+                    Dinleniyor... Konuşmanızı bekliyorum.
                 </div>
             </div>
 
@@ -191,6 +217,9 @@
         <div id="tab-satis" class="tab-content hidden space-y-6">
             <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-xl mx-auto">
                 <h2 class="text-xl font-semibold mb-4 text-slate-700">🛒 Ürün Satış Ekranı</h2>
+                <div id="calisanBilgiNotu" class="mb-4 p-3 bg-blue-50 border border-blue-100 text-blue-800 text-xs rounded-xl hidden">
+                    ℹ️ <b>Çalışan Modu:</b> Girdiğiniz satışlar patronun onayına gönderilir.
+                </div>
                 <form onsubmit="handleSatis(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-600 mb-1">Satış Yapılacak Depo / Şube</label>
@@ -215,7 +244,21 @@
                             <input type="number" step="0.01" id="satisFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
                     </div>
-                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Satışı Tamamla</button>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Peşin Ödeme (TL)</label>
+                            <input type="number" step="0.01" id="satisPesinat" value="0" min="0" class="w-full px-4 py-2 border rounded-xl outline-none bg-emerald-50 text-emerald-700 font-semibold">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Vade Tarihi</label>
+                            <input type="date" id="satisVade" class="w-full px-4 py-2 border rounded-xl outline-none bg-amber-50 text-amber-800 font-semibold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama / Not</label>
+                        <input type="text" id="satisAciklama" placeholder="Örn: Vadeli satış" class="w-full px-4 py-2 border rounded-xl outline-none">
+                    </div>
+                    <button type="submit" id="satisBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Satışı Tamamla</button>
                 </form>
             </div>
         </div>
@@ -234,7 +277,7 @@
                         <input type="number" step="0.01" id="tahsilatTutar" required class="w-full px-4 py-2 border rounded-xl outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama</label>
+                        <label class="block text-sm font-medium text-slate-600 mb-1">Ödeme Türü / Açıklama</label>
                         <input type="text" id="tahsilatAciklama" placeholder="Örn: Nakit / Havale ile ödeme" class="w-full px-4 py-2 border rounded-xl outline-none">
                     </div>
                     <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Tahsilatı Al ve Borçtan Düş</button>
@@ -242,30 +285,64 @@
             </div>
         </div>
 
-        <!-- 4. STOK YÖNETİMİ -->
+        <!-- 4. STOK YÖNETİMİ & ÇOKLU DEPO SEVKİYAT -->
         <div id="tab-stok" class="tab-content hidden space-y-6">
+            <!-- DEPO ARASI SEVKİYAT PANELİ -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-lg font-semibold mb-3 text-slate-700">🚚 Depolar Arası Ürün Sevkiyatı</h2>
+                <form onsubmit="handleSevkiyat(event)" class="grid grid-cols-1 md:grid-cols-5 gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Çıkış Deposu</label>
+                        <select id="sevkKaynakDepo" required class="w-full px-3 py-2 border rounded-xl outline-none bg-white text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Varış Deposu</label>
+                        <select id="sevkHedefDepo" required class="w-full px-3 py-2 border rounded-xl outline-none bg-white text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Ürün</label>
+                        <select id="sevkUrun" required class="w-full px-3 py-2 border rounded-xl outline-none bg-white text-sm"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Miktar</label>
+                        <input type="number" step="0.01" id="sevkMiktar" required min="0.01" placeholder="Miktar" class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
+                    </div>
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 px-4 rounded-xl text-sm font-semibold transition cursor-pointer">Sevk Et</button>
+                </form>
+            </div>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit space-y-4">
-                    <h2 class="text-lg font-semibold mb-2 text-slate-700">📦 Yeni Ürün / Stok Ekle</h2>
-                    <form onsubmit="handleStokEkle(event)" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Hangi Depoya Eklenecek?</label>
-                            <select id="stokDepoSec" required class="w-full px-3 py-2 border rounded-xl outline-none bg-white text-sm"></select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Ürün Adı</label>
-                            <input type="text" id="stokAd" required placeholder="Örn: Buğday Tohumu" class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Miktar / Adet</label>
-                            <input type="number" step="0.01" id="stokMiktar" required class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Satış Birim Fiyatı (TL)</label>
-                            <input type="number" step="0.01" id="stokFiyat" required class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
-                        </div>
-                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer">Stok Ekle</button>
-                    </form>
+                    <div>
+                        <h2 class="text-lg font-semibold mb-2 text-slate-700">📦 Yeni Ürün / Stok Ekle</h2>
+                        <form onsubmit="handleStokEkle(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Hangi Depoya Eklenecek?</label>
+                                <select id="stokDepoSec" required class="w-full px-3 py-2 border rounded-xl outline-none bg-white text-sm"></select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Ürün Adı</label>
+                                <input type="text" id="stokAd" required placeholder="Örn: Buğday Tohumu" class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Miktar / Adet</label>
+                                <input type="number" step="0.01" id="stokMiktar" required class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-600 mb-1">Satış Birim Fiyatı (TL)</label>
+                                <input type="number" step="0.01" id="stokFiyat" required class="w-full px-3 py-2 border rounded-xl outline-none text-sm">
+                            </div>
+                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl text-sm font-semibold transition cursor-pointer">Stok Ekle</button>
+                        </form>
+                    </div>
+
+                    <div class="pt-4 border-t">
+                        <h3 class="text-sm font-semibold mb-2 text-slate-700">➕ Yeni Depo / Şube Tanımla</h3>
+                        <form onsubmit="handleDepoEkle(event)" class="flex gap-2">
+                            <input type="text" id="yeniDepoAdi" required placeholder="Depo Adı..." class="flex-1 px-3 py-2 border rounded-xl outline-none text-sm">
+                            <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer">Ekle</button>
+                        </form>
+                    </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
@@ -298,7 +375,7 @@
                             <input type="text" id="yeniMusteriAd" required placeholder="Örn: Ali Yılmaz" class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Telefon</label>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Telefon (WhatsApp için örn: 0555...)</label>
                             <input type="text" id="yeniMusteriTel" placeholder="0555..." class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
                         <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Müşteri Ekle</button>
@@ -312,7 +389,7 @@
                                 <tr class="border-b text-slate-400 text-sm">
                                     <th class="pb-2">Müşteri Adı</th>
                                     <th class="pb-2 text-right">Güncel Bakiye (Borç)</th>
-                                    <th class="pb-2 text-center">İşlemler / Fiş / PDF</th>
+                                    <th class="pb-2 text-center">İşlemler / Fiş / Sil</th>
                                 </tr>
                             </thead>
                             <tbody id="musteriTablosu"></tbody>
@@ -324,9 +401,56 @@
 
         <!-- 6. ALINAN MALLAR -->
         <div id="tab-alinan" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-semibold mb-2 text-slate-700">📥 Alınan Mallar</h2>
-                <p class="text-slate-500 text-sm">Bu alanda alınan mahsul ve ürün kayıtları tutulur.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📥 Alınan Mal Kaydı Ekle</h2>
+                    <form onsubmit="handleAlinanMalEkle(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tarih</label>
+                            <input type="date" id="malTarih" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Malı Veren / İsim</label>
+                            <input type="text" id="malIsim" required placeholder="Örn: Hasan Demir" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Köy</label>
+                            <input type="text" id="malKoy" required placeholder="Örn: Dereköy" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Dönüm (Varsa)</label>
+                                <input type="number" step="0.01" id="malDonum" placeholder="0" oninput="document.getElementById('malKilo').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Kilo (Varsa)</label>
+                                <input type="number" step="0.01" id="malKilo" placeholder="0" oninput="document.getElementById('malDonum').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Birim Fiyat (TL)</label>
+                            <input type="number" step="0.01" id="malFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Mal Kaydını Ekle</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">📋 Alınan Mallar Listesi</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b text-slate-400">
+                                    <th class="pb-2">Tarih</th>
+                                    <th class="pb-2">İsim / Köy</th>
+                                    <th class="pb-2 text-center">Ölçü (Dönüm/Kilo)</th>
+                                    <th class="pb-2 text-right">Birim Fiyat</th>
+                                    <th class="pb-2 text-right">Toplam Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alinanMalTablosu"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -342,17 +466,23 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Tarla Sahibi / İsim</label>
-                            <input type="text" id="tarlaIsim" list="musteriListesi" required placeholder="Örn: Veli Koç" class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                            <input type="text" id="tarlaIsim" required placeholder="Örn: Veli Koç" class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Köy / Mevkii</label>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Köy</label>
                             <input type="text" id="tarlaKoy" required placeholder="Örn: Yeniköy" class="w-full px-4 py-2 border rounded-xl outline-none">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-600 mb-1">Dönüm</label>
-                            <input type="number" step="0.01" id="tarlaDonum" required placeholder="0" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        <div class="grid grid-cols-2 gap-2 bg-slate-50 p-3 rounded-xl border">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Dönüm</label>
+                                <input type="number" step="0.01" id="tarlaDonum" placeholder="0" oninput="document.getElementById('tarlaKilo').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Kilo (Pay)</label>
+                                <input type="number" step="0.01" id="tarlaKilo" placeholder="0" oninput="document.getElementById('tarlaDonum').value=''" class="w-full px-3 py-1.5 border rounded-lg bg-white outline-none text-sm">
+                            </div>
                         </div>
-                        <button type="button" onclick="acHaritaModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1">🗺️ Uydu Haritadan Alan Ölç</button>
+                        <button type="button" onclick="acHaritaModal()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center justify-center gap-1">🗺️ Haritadan Alan Ölç / Dönüm Hesapla</button>
                         <div>
                             <label class="block text-sm font-medium text-slate-600 mb-1">Birim Fiyat (TL)</label>
                             <input type="number" step="0.01" id="tarlaFiyat" required class="w-full px-4 py-2 border rounded-xl outline-none">
@@ -368,7 +498,8 @@
                                 <tr class="border-b text-slate-400">
                                     <th class="pb-2">Tarih</th>
                                     <th class="pb-2">İsim / Köy</th>
-                                    <th class="pb-2 text-center">Ölçü</th>
+                                    <th class="pb-2 text-center">Ölçü (Dönüm/Kilo)</th>
+                                    <th class="pb-2 text-right">Birim Fiyat</th>
                                     <th class="pb-2 text-right">Toplam Tutar</th>
                                 </tr>
                             </thead>
@@ -381,9 +512,50 @@
 
         <!-- 8. ÖZLEM YEM BAYİLİK -->
         <div id="tab-yem" class="tab-content hidden space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                <h2 class="text-lg font-semibold mb-2 text-slate-700">🐄 Özlem Yem Bayilik Takibi</h2>
-                <p class="text-slate-500 text-sm">Bayilik borç alacak kayıtları burada tutulur.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h2 class="text-lg font-semibold mb-4 text-slate-700">🐄 Özlem Yem İşlem Ekle</h2>
+                    <form onsubmit="handleYemIslem(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">İşlem Türü</label>
+                            <select id="yemTip" class="w-full px-4 py-2 border rounded-xl outline-none bg-white">
+                                <option value="YEM_ALIM">Yem Alındı (Borç Artar)</option>
+                                <option value="YEM_ODEME">Yem Ödemesi Yapıldı (Borç Düşer)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Tutar (TL)</label>
+                            <input type="number" step="0.01" id="yemTutar" required class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Açıklama</label>
+                            <input type="text" id="yemAciklama" placeholder="Örn: 50 çuval buzağı yemi" class="w-full px-4 py-2 border rounded-xl outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-semibold transition cursor-pointer">Kaydet</button>
+                    </form>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 md:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold text-slate-700">📋 Özlem Yem Hesap Hareketleri</h2>
+                        <div class="text-right">
+                            <span class="text-xs text-slate-400 block">Kalan Bayilik Borcu</span>
+                            <span id="yemBakiyeYazi" class="text-xl font-bold text-indigo-600">0,00 TL</span>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b text-slate-400">
+                                    <th class="pb-2">Tarih</th>
+                                    <th class="pb-2">Tür</th>
+                                    <th class="pb-2">Açıklama</th>
+                                    <th class="pb-2 text-right">Tutar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="yemTablosu"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -393,111 +565,509 @@
     <div id="fisModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-4 mb-4">
-                <h3 id="fisBaslik" class="text-xl font-bold text-slate-800">Demirkapı Tarım Ürünleri - Hesap Fişi</h3>
+                <h3 id="fisBaslik" class="text-xl font-bold text-slate-800">Müşteri Hesap Fişi</h3>
                 <button onclick="kapatFisModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
             </div>
             <div id="fisIcerik" class="space-y-4 text-sm"></div>
             <div class="mt-6 pt-4 border-t flex flex-wrap justify-end gap-3">
-                <button onclick="musteriHesapPdfIndir()" class="bg-rose-600 hover:bg-rose-700 text-white px-5 py-2 rounded-xl font-semibold transition cursor-pointer flex items-center gap-2">📄 Kurumsal PDF İndir</button>
-                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Yazdır</button>
+                <button id="whatsappGonderBtn" onclick="" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl font-semibold transition cursor-pointer flex items-center gap-2">📱 WhatsApp ile Gönder</button>
+                <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Yazdır / PDF Kaydet</button>
                 <button onclick="kapatFisModal()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2 rounded-xl font-semibold transition cursor-pointer">Kapat</button>
             </div>
         </div>
     </div>
 
-    <!-- UYDU HARİTA MODALI -->
+    <!-- HARİTA & ALAN ÖLÇÜM MODALI -->
     <div id="haritaModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
-        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl space-y-3">
-            <div class="flex justify-between items-center border-b pb-2">
-                <h3 class="text-lg font-bold text-slate-800">🗺️ Uydu Haritası Üzerinden Alan Ölçümü</h3>
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3 mb-3">
+                <h3 class="text-lg font-bold text-slate-800">🗺️ Harita Üzerinden Tarlayı İşaretleyip Dönüm Hesapla</h3>
                 <button onclick="kapatHaritaModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
             </div>
+            <p class="text-xs text-slate-500 mb-3">Tarlanın sınırlarına harita üzerinde sırasıyla tıklayarak noktalar koyun. Alan otomatik hesaplanacaktır.</p>
             <div id="map"></div>
-            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-xl border">
-                <span id="hesaplananDonumYazi" class="text-lg font-bold text-emerald-600">0.00 Dönüm (Dekar)</span>
+            <div class="mt-4 flex justify-between items-center bg-slate-50 p-3 rounded-xl border">
+                <div>
+                    <span class="text-xs text-slate-400 block">Hesaplanan Alan</span>
+                    <span id="hesaplananDonumYazi" class="text-lg font-bold text-emerald-600">0.00 Dönüm (Dekar)</span>
+                </div>
                 <div class="flex gap-2">
-                    <button type="button" onclick="haritaNoktalariSifirla()" class="bg-rose-100 text-rose-700 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">Sıfırla</button>
-                    <button type="button" onclick="haritaSonucuAktar()" class="bg-emerald-600 text-white px-5 py-2 rounded-xl text-xs font-semibold cursor-pointer">Aktar</button>
+                    <button type="button" onclick="haritaNoktalariSifirla()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-4 py-2 rounded-xl text-xs font-semibold cursor-pointer">Sıfırla</button>
+                    <button type="button" onclick="haritaSonucuAktar()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-xs font-semibold cursor-pointer">Tarlaya Aktar</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- YEDEKLEME MODALI -->
+    <!-- YEDEKLEME & GERİ YÜKLEME MODALI -->
     <div id="yedekModal" class="fixed inset-0 bg-black/50 hidden flex justify-center items-center p-4 z-50">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3 mb-4">
-                <h3 class="text-lg font-bold text-slate-800">💾 Veri Yedekleme</h3>
+                <h3 class="text-lg font-bold text-slate-800">💾 Bulut / Lokal Veri Yedekleme</h3>
                 <button onclick="kapatYedeklemeModal()" class="text-slate-400 hover:text-slate-600 font-bold text-lg">&times;</button>
             </div>
-            <button onclick="yedegiDisariAktar()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition cursor-pointer">JSON Yedeği İndir</button>
+            <div class="space-y-4 text-sm">
+                <div class="bg-slate-50 p-4 rounded-xl border">
+                    <h4 class="font-semibold text-slate-700 mb-1">1. Bilgisayara / Telefona Yedek İndir</h4>
+                    <p class="text-xs text-slate-500 mb-3">Tüm müşteri, stok ve işlem verilerinizi tek dosya olarak kaydedin.</p>
+                    <button onclick="yedegiDisariAktar()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-semibold transition cursor-pointer">JSON Yedeği İndir</button>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border">
+                    <h4 class="font-semibold text-slate-700 mb-1">2. Yedekten Geri Yükle</h4>
+                    <p class="text-xs text-slate-500 mb-3">Daha önce aldığınız yedek dosyasını seçerek verileri geri yükleyin.</p>
+                    <input type="file" id="yedekDosyaInput" accept=".json" class="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer mb-2">
+                    <button onclick="yedegiIceAktar()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-xl font-semibold transition cursor-pointer">Yedeği Yükle</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- JAVASCRIPT & PDF MOTORU -->
+    <!-- JAVASCRIPT & FIREBASE & PWA & SESLİ ASİSTAN ENTEGRASYONU -->
     <script type="module">
         import { GoogleGenAI } from "@google/genai";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, get, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getDatabase, ref, set, get, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        const firebaseConfig = { apiKey: "", authDomain: "", databaseURL: "", projectId: "", storageBucket: "", messagingSenderId: "", appId: "" };
+        // 🔥 BURAYA KENDİ FIREBASE BİLGİLERİNİZİ YAPIŞTIRIN 🔥
+        const firebaseConfig = {
+            apiKey: "BURAYA_API_KEY_GIRIN",
+            authDomain: "BURAYA_AUTH_DOMAIN_GIRIN",
+            databaseURL: "BURAYA_DATABASE_URL_GIRIN",
+            projectId: "BURAYA_PROJECT_ID_GIRIN",
+            storageBucket: "BURAYA_STORAGE_BUCKET_GIRIN",
+            messagingSenderId: "BURAYA_MESSAGING_SENDER_ID_GIRIN",
+            appId: "BURAYA_APP_ID_GIRIN"
+        };
 
         let db = null;
         try {
             const app = initializeApp(firebaseConfig);
             db = getDatabase(app);
-        } catch(e) {}
-
-        const IBAN_NUMARASI = "TR00 0000 0000 0000 0000 0000 00 (Demirkapı Tarım)";
+        } catch(e) {
+            console.warn("Firebase bağlantı bilgileri girilmediği için geçici olarak yerel modda çalışıyor.");
+        }
 
         let cloudData = {
-            musteriler: [
-                { id: 1, ad: "Ali Çiftçi", tel: "05551112233" },
-                { id: 2, ad: "Mehmet Ağa", tel: "05324445566" }
-            ],
-            depolar: [{ id: 'depo_merkez', ad: 'Merkez Depo' }],
-            depo_stoklari: [{ depoId: 'depo_merkez', ad: "20-20 Kompoze Gübre", miktar: 100, fiyat: 650 }],
+            musteriler: [],
+            stoklar: [],
             islemler: [],
+            onay_bekleyen_satislar: [],
+            kayitli_calisanlar: [],
+            alinan_mallar: [],
             bicilen_tarlalar: [],
-            kayitli_calisanlar: []
+            ozlem_yem: [],
+            depolar: [
+                { id: 'depo_merkez', ad: 'Merkez Depo' },
+                { id: 'depo_koy', ad: 'Köy Satış Noktası' }
+            ],
+            depo_stoklari: [] // {depoId, urunAd, miktar, fiyat}
         };
 
-        let aktifFisMusteri = "";
-        let map = null, mapPolygon = null, mapMarkers = [], mapLatlngs = [], hesaplananSonucDonum = 0;
+        // Harita Değişkenleri
+        let map = null;
+        let mapPolygon = null;
+        let mapMarkers = [];
+        let mapLatlngs = [];
+        let hesaplananSonucDonum = 0;
 
         window.onload = function() {
-            const keys = ['musteriler', 'depolar', 'depo_stoklari', 'islemler', 'bicilen_tarlalar', 'kayitli_calisanlar'];
-            keys.forEach(k => {
-                cloudData[k] = JSON.parse(localStorage.getItem(k)) || cloudData[k];
-            });
+            const savedKey = localStorage.getItem("tarim_gemini_key");
+            if(savedKey) document.getElementById("apiKeyInput").value = savedKey;
+
+            // Çevrimdışı (Offline) Durum Takibi
+            window.addEventListener('online', updateOnlineStatus);
+            window.addEventListener('offline', updateOnlineStatus);
+            updateOnlineStatus();
+
+            const keys = ['musteriler', 'stoklar', 'islemler', 'onay_bekleyen_satislar', 'kayitli_calisanlar', 'alinan_mallar', 'bicilen_tarlalar', 'ozlem_yem', 'depolar', 'depo_stoklari'];
+
+            if(db && navigator.onLine) {
+                keys.forEach(key => {
+                    onValue(ref(db, 'tarim_app/' + key), (snapshot) => {
+                        const val = snapshot.val();
+                        cloudData[key] = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+                        
+                        baslangicVerileriniKontrolEt();
+                        refreshAll();
+                    });
+                });
+            } else {
+                keys.forEach(k => {
+                    cloudData[k] = JSON.parse(localStorage.getItem(k)) || [];
+                });
+                baslangicVerileriniKontrolEt();
+                refreshAll();
+            }
+
             checkAuthSession();
-            refreshAll();
             document.getElementById("tarlaTarih").valueAsDate = new Date();
+            document.getElementById("malTarih").valueAsDate = new Date();
+            document.getElementById("satisVade").valueAsDate = new Date(Date.now() + 30*24*60*60*1000);
         };
+
+        function baslangicVerileriniKontrolEt() {
+            if(cloudData.musteriler.length === 0) {
+                cloudData.musteriler = [
+                    { id: 1, ad: "Ali Çiftçi", tel: "05551112233" },
+                    { id: 2, ad: "Mehmet Ağa", tel: "05324445566" }
+                ];
+            }
+            if(cloudData.depolar.length === 0) {
+                cloudData.depolar = [
+                    { id: 'depo_merkez', ad: 'Merkez Depo' },
+                    { id: 'depo_koy', ad: 'Köy Satış Noktası' }
+                ];
+            }
+            if(cloudData.stoklar.length === 0 && cloudData.depo_stoklari.length === 0) {
+                cloudData.stoklar = [
+                    { id: 1, ad: "20-20 Kompoze Gübre", miktar: 100, fiyat: 650 },
+                    { id: 2, ad: "Sertifikalı Buğday Tohumu", miktar: 500, fiyat: 25 }
+                ];
+                // Varsayılan stokları Merkez depoya ata
+                cloudData.depo_stoklari = [
+                    { depoId: 'depo_merkez', ad: "20-20 Kompoze Gübre", miktar: 100, fiyat: 650 },
+                    { depoId: 'depo_merkez', ad: "Sertifikalı Buğday Tohumu", miktar: 500, fiyat: 25 }
+                ];
+            }
+        }
+
+        function updateOnlineStatus() {
+            const statusEl = document.getElementById("offlineStatus");
+            if (navigator.onLine) {
+                statusEl.innerText = "🟢 Çevrimiçi";
+                statusEl.className = "bg-emerald-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
+            } else {
+                statusEl.innerText = "🔴 Çevrimdışı (Offline Mod)";
+                statusEl.className = "bg-rose-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
+            }
+        }
 
         function saveData(key, val) {
             cloudData[key] = val;
-            localStorage.setItem(key, JSON.stringify(val));
+            localStorage.setItem(key, JSON.stringify(val)); // Her durumda offline için sakla
+            if(db && navigator.onLine) {
+                set(ref(db, 'tarim_app/' + key), val).catch(err => console.warn("Bulut senkronizasyon hatası (Offline olabilir):", err));
+            }
         }
+
+        // --- DEPO & ŞUBE YÖNETİMİ & SEVKİYAT ---
+        window.handleDepoEkle = function(e) {
+            e.preventDefault();
+            const ad = document.getElementById("yeniDepoAdi").value.trim();
+            if(!ad) return;
+            let depolar = [...cloudData.depolar];
+            const id = 'depo_' + Date.now();
+            depolar.push({ id, ad });
+            saveData("depolar", depolar);
+            alert("Yeni depo başarıyla eklendi!");
+            e.target.reset();
+            refreshAll();
+        };
+
+        window.handleSevkiyat = function(e) {
+            e.preventDefault();
+            const kaynakDepoId = document.getElementById("sevkKaynakDepo").value;
+            const hedefDepoId = document.getElementById("sevkHedefDepo").value;
+            const urunAd = document.getElementById("sevkUrun").value;
+            const miktar = parseFloat(document.getElementById("sevkMiktar").value);
+
+            if(kaynakDepoId === hedefDepoId) {
+                alert("Çıkış deposu ile varış deposu aynı olamaz!");
+                return;
+            }
+
+            let depoStoklari = [...cloudData.depo_stoklari];
+            let kaynakStok = depoStoklari.find(s => s.depoId === kaynakDepoId && s.ad === urunAd);
+
+            if(!kaynakStok || kaynakStok.miktar < miktar) {
+                alert(`Kaynak depoda yeterli ürün bulunmuyor! (Mevcut: ${kaynakStok ? kaynakStok.miktar : 0})`);
+                return;
+            }
+
+            // Kaynak depodan düş
+            kaynakStok.miktar -= miktar;
+
+            // Hedef depoya ekle veya güncelle
+            let hedefStok = depoStoklari.find(s => s.depoId === hedefDepoId && s.ad === urunAd);
+            if(hedefStok) {
+                hedefStok.miktar += miktar;
+            } else {
+                depoStoklari.push({
+                    depoId: hedefDepoId,
+                    ad: urunAd,
+                    miktar: miktar,
+                    fiyat: kaynakStok.fiyat
+                });
+            }
+
+            saveData("depo_stoklari", depoStoklari);
+            alert("Depolar arası sevkiyat başarıyla tamamlandı! 🚚");
+            e.target.reset();
+            refreshAll();
+        };
+
+        // --- SESLİ ASİSTAN (WEB SPEECH API) ---
+        window.sesliDinlemeyiBaslat = function() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if(!SpeechRecognition) {
+                alert("Tarayıcınız sesli komut özelliğini desteklemiyor. Lütfen Chrome kullanın.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'tr-TR';
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            const durumKutusu = document.getElementById("sesliDurumKutusu");
+            durumKutusu.classList.remove("hidden");
+            durumKutusu.innerText = "🎙️ Dinleniyor... Konuşun (Örn: Ahmet'e 5 torba gübre sat)";
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                document.getElementById("aiPrompt").value = speechResult;
+                durumKutusu.innerText = `✅ Algılandı: "${speechResult}". Yapay zeka işliyor...`;
+                setTimeout(() => {
+                    durumKutusu.classList.add("hidden");
+                    processAI();
+                }, 1000);
+            };
+
+            recognition.onerror = function(event) {
+                durumKutusu.innerText = "❌ Ses algılanamadı, tekrar deneyin.";
+                setTimeout(() => durumKutusu.classList.add("hidden"), 3000);
+            };
+
+            recognition.start();
+        };
+
+        // --- YEDEKLEME FONKSİYONLARI ---
+        window.acYedeklemeModal = function() { document.getElementById("yedekModal").classList.remove("hidden"); };
+        window.kapatYedeklemeModal = function() { document.getElementById("yedekModal").classList.add("hidden"); };
+
+        window.yedegiDisariAktar = function() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cloudData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `tarim_cari_yedek_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        };
+
+        window.yedegiIceAktar = function() {
+            const fileInput = document.getElementById("yedekDosyaInput");
+            if(fileInput.files.length === 0) return alert("Lütfen bir yedek dosyası seçin.");
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    Object.keys(parsed).forEach(key => {
+                        saveData(key, parsed[key]);
+                    });
+                    alert("Yedek başarıyla yüklendi ve veriler senkronize edildi!");
+                    kapatYedeklemeModal();
+                    refreshAll();
+                } catch(err) {
+                    alert("Geçersiz yedek dosyası!");
+                }
+            };
+            reader.readAsText(fileInput.files[0]);
+        };
+
+        // --- HARİTA & ALAN ÖLÇÜMü FONKSİYONLARI ---
+        window.acHaritaModal = function() {
+            document.getElementById("haritaModal").classList.remove("hidden");
+            setTimeout(() => {
+                if(!map) {
+                    map = L.map('map').setView([39.9334, 32.8597], 13);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    map.on('click', function(e) {
+                        const latlng = e.latlng;
+                        mapLatlngs.push([latlng.lat, latlng.lng]);
+                        const marker = L.marker([latlng.lat, latlng.lng]).addTo(map);
+                        mapMarkers.push(marker);
+                        guncelleHaritaCizim();
+                    });
+
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(position => {
+                            const lat = position.coords.latitude;
+                            const lng = position.coords.longitude;
+                            map.setView([lat, lng], 16);
+                        });
+                    }
+                }
+                map.invalidateSize();
+            }, 200);
+        };
+
+        window.kapatHaritaModal = function() {
+            document.getElementById("haritaModal").classList.add("hidden");
+        };
+
+        function guncelleHaritaCizim() {
+            if(mapPolygon) map.removeLayer(mapPolygon);
+            if(mapLatlngs.length >= 3) {
+                mapPolygon = L.polygon(mapLatlngs, {color: 'emerald', fillColor: '#10b981', fillOpacity: 0.4}).addTo(map);
+                let coords = mapLatlngs.map(pt => [pt[1], pt[0]]);
+                coords.push(coords[0]);
+                const polygonGeo = turf.polygon([coords]);
+                const areaSqMeters = turf.area(polygonGeo);
+                hesaplananSonucDonum = (areaSqMeters / 1000).toFixed(2);
+                document.getElementById("hesaplananDonumYazi").innerText = `${hesaplananSonucDonum} Dönüm (Dekar) (${Math.round(areaSqMeters)} m²)`;
+            } else {
+                hesaplananSonucDonum = 0;
+                document.getElementById("hesaplananDonumYazi").innerText = "0.00 Dönüm (En az 3 nokta işaretleyin)";
+            }
+        }
+
+        window.haritaNoktalariSifirla = function() {
+            mapMarkers.forEach(m => map.removeLayer(m));
+            mapMarkers = [];
+            mapLatlngs = [];
+            if(mapPolygon) map.removeLayer(mapPolygon);
+            hesaplananSonucDonum = 0;
+            document.getElementById("hesaplananDonumYazi").innerText = "0.00 Dönüm (Dekar)";
+        };
+
+        window.haritaSonucuAktar = function() {
+            if(hesaplananSonucDonum <= 0) return alert("Lütfen harita üzerinde alan oluşturun.");
+            document.getElementById("tarlaDonum").value = hesaplananSonucDonum;
+            kapatHaritaModal();
+        };
+
+        window.toggleKayitModu = function() {
+            const role = document.getElementById("loginRole").value;
+            const isimAlani = document.getElementById("isimAlani");
+            const kayitSifreAlani = document.getElementById("kayitSifreAlani");
+            const sifreAlani = document.getElementById("sifreAlani");
+            const kayitMesaj = document.getElementById("kayitMesaj");
+            const btn = document.getElementById("girisKayitBtn");
+            const altBaslik = document.getElementById("modalAltBaslik");
+
+            kayitMesaj.classList.add("hidden");
+
+            if(role === "yeni_kayit") {
+                isimAlani.classList.remove("hidden");
+                kayitSifreAlani.classList.remove("hidden");
+                sifreAlani.classList.add("hidden");
+                btn.innerText = "Kayıt Ol";
+                altBaslik.innerText = "Adınızı, soyadınızı ve şifrenizi belirleyin";
+            } else {
+                isimAlani.classList.add("hidden");
+                kayitSifreAlani.classList.add("hidden");
+                sifreAlani.classList.remove("hidden");
+                btn.innerText = "Sisteme Giriş Yap";
+                altBaslik.innerText = "Lütfen rolünüzü seçin ve şifrenizi girin";
+            }
+        };
 
         window.handleLoginOrRegister = function(e) {
             e.preventDefault();
-            localStorage.setItem("tarim_user_role", "patron");
+            const role = document.getElementById("loginRole").value;
+
+            if(role === "yeni_kayit") {
+                const adSoyad = document.getElementById("kayitAdSoyad").value.trim();
+                const sifre = document.getElementById("kayitSifre").value.trim();
+                
+                if(!adSoyad || !sifre) {
+                    alert("Lütfen ad-soyad ve şifre alanlarını eksiksiz doldurun.");
+                    return;
+                }
+
+                let calisanlar = [...cloudData.kayitli_calisanlar];
+                calisanlar.push({ id: Date.now(), ad: adSoyad, sifre: sifre, tarih: new Date().toLocaleDateString("tr-TR") });
+                saveData("kayitli_calisanlar", calisanlar);
+
+                const kayitMesaj = document.getElementById("kayitMesaj");
+                kayitMesaj.classList.remove("hidden");
+                document.getElementById("kayitAdSoyad").value = "";
+                document.getElementById("kayitSifre").value = "";
+
+                setTimeout(() => {
+                    kayitMesaj.classList.add("hidden");
+                    document.getElementById("loginRole").value = "calisan";
+                    toggleKayitModu();
+                }, 2000);
+                return;
+            }
+
+            const pass = document.getElementById("loginPass").value.trim();
+
+            if(role === "patron") {
+                if(pass === "995425") {
+                    localStorage.setItem("tarim_user_role", "patron");
+                    localStorage.setItem("tarim_aktif_kullanici", "Yönetici (Patron)");
+                } else {
+                    alert("Hatalı patron şifresi! Şifre: 995425");
+                    return;
+                }
+            } else if(role === "calisan") {
+                let bulunan = cloudData.kayitli_calisanlar.find(c => c.sifre === pass);
+                if(!bulunan) {
+                    alert("Girdiğiniz şifre eşleşmedi! Lütfen kayıt olun.");
+                    return;
+                }
+                localStorage.setItem("tarim_user_role", "calisan");
+                localStorage.setItem("tarim_aktif_kullanici", bulunan.ad);
+            }
+
             checkAuthSession();
         };
 
         window.logout = function() {
             localStorage.removeItem("tarim_user_role");
+            localStorage.removeItem("tarim_aktif_kullanici");
             document.getElementById("loginModal").classList.remove("hidden");
+            document.getElementById("loginPass").value = "";
+            document.getElementById("loginRole").value = "patron";
+            toggleKayitModu();
         };
 
         function checkAuthSession() {
-            if(!localStorage.getItem("tarim_user_role")) {
-                document.getElementById("loginModal").classList.remove("hidden");
-            } else {
-                document.getElementById("loginModal").classList.add("hidden");
+            const role = localStorage.getItem("tarim_user_role");
+            const aktifIsim = localStorage.getItem("tarim_aktif_kullanici") || "";
+            const modal = document.getElementById("loginModal");
+            const badge = document.getElementById("userBadge");
+            const onayBolumu = document.getElementById("patronOnayBolumu");
+            const calisanNotu = document.getElementById("calisanBilgiNotu");
+            const satisBtn = document.getElementById("satisBtn");
+
+            if(!role) {
+                modal.classList.remove("hidden");
+                return;
             }
+
+            modal.classList.add("hidden");
+
+            if(role === "patron") {
+                badge.innerText = "YÖNETİCİ (PATRON)";
+                badge.className = "bg-purple-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
+                onayBolumu.classList.remove("hidden");
+                calisanNotu.classList.add("hidden");
+                satisBtn.innerText = "Satışı Tamamla ve Borçlandır";
+            } else {
+                badge.innerText = `PERSONEL: ${aktifIsim}`;
+                badge.className = "bg-blue-600 text-white px-2 py-0.5 rounded-md text-[10px] font-bold";
+                onayBolumu.classList.add("hidden");
+                calisanNotu.classList.remove("hidden");
+                satisBtn.innerText = "Satışı Patron Onayına Gönder";
+            }
+
+            refreshAll();
         }
+
+        window.saveApiKey = function() {
+            const key = document.getElementById("apiKeyInput").value.trim();
+            if(!key) return alert("Lütfen anahtar girin.");
+            localStorage.setItem("tarim_gemini_key", key);
+            alert("API Key kaydedildi!");
+        };
 
         window.switchTab = function(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -507,6 +1077,7 @@
             });
             document.getElementById(tabId).classList.remove('hidden');
             event.currentTarget.classList.add('bg-indigo-800', 'text-white');
+            event.currentTarget.classList.remove('text-indigo-200');
         };
 
         function refreshAll() {
@@ -514,77 +1085,295 @@
             renderDepoSelects();
             renderStokTablosu();
             renderMusterilerTablosu();
+            renderAlinanMallar();
             renderBicilenTarlalar();
+            renderYemTablosu();
             renderDashboardStats();
+            renderVadeUyarilari();
+            if(localStorage.getItem("tarim_user_role") === "patron") {
+                renderOnayBekleyenler();
+            }
         }
 
         function renderMusteriDatalist() {
-            document.getElementById("musteriListesi").innerHTML = cloudData.musteriler.map(m => `<option value="${m.ad}">`).join('');
+            const opts = cloudData.musteriler.map(m => `<option value="${m.ad}">`).join('');
+            document.getElementById("musteriListesi").innerHTML = opts;
         }
 
         function renderDepoSelects() {
-            const depoOpts = cloudData.depolar.map(d => `<option value="${d.id}">${d.ad}</option>`).join('');
+            const depolar = cloudData.depolar;
+            const depoOpts = depolar.map(d => `<option value="${d.id}">${d.ad}</option>`).join('');
+            
             document.getElementById("satisDepo").innerHTML = depoOpts;
             document.getElementById("stokDepoSec").innerHTML = depoOpts;
+            document.getElementById("sevkKaynakDepo").innerHTML = depoOpts;
+            document.getElementById("sevkHedefDepo").innerHTML = depoOpts;
+
+            // Benzersiz ürün listesi
+            const benzersizUrunler = [...new Set(cloudData.stoklar.map(s => s.ad).concat(cloudData.depo_stoklari.map(s => s.ad)))];
+            const urunOpts = benzersizUrunler.map(u => `<option value="${u}">${u}</option>`).join('');
+            document.getElementById("sevkUrun").innerHTML = urunOpts;
+
             updateSatisFiyat();
         }
 
         window.updateSatisFiyat = function() {
             const depoId = document.getElementById("satisDepo").value;
-            const depoUrunleri = cloudData.depo_stoklari.filter(s => s.depoId === depoId);
+            const depoStoklari = cloudData.depo_stoklari;
+            
+            // Seçilen depodaki ürünler
+            const depoUrunleri = depoStoklari.filter(s => s.depoId === depoId);
             const selectEl = document.getElementById("satisUrun");
-            selectEl.innerHTML = depoUrunleri.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}">${s.ad} (Kalan: ${s.miktar})</option>`).join('');
+
+            if(depoUrunleri.length === 0) {
+                // Eğer depo stoklarında yoksa genel stokları göster
+                selectEl.innerHTML = cloudData.stoklar.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}">${s.ad}</option>`).join('');
+            } else {
+                selectEl.innerHTML = depoUrunleri.map(s => `<option value="${s.ad}" data-fiyat="${s.fiyat}">${s.ad} (Kalan: ${s.miktar})</option>`).join('');
+            }
+
             const opt = selectEl.options[selectEl.selectedIndex];
-            if(opt) document.getElementById("satisFiyat").value = opt.getAttribute("data-fiyat") || 0;
+            if(opt) {
+                document.getElementById("satisFiyat").value = opt.getAttribute("data-fiyat") || 0;
+            }
         };
 
         function kontrolVeMusteriEkle(ad) {
             if(!ad) return;
-            if(!cloudData.musteriler.some(m => m.ad.toLowerCase() === ad.toLowerCase())) {
-                cloudData.musteriler.push({ id: Date.now(), ad: ad.trim(), tel: "" });
-                saveData("musteriler", cloudData.musteriler);
+            let musteriler = [...cloudData.musteriler];
+            const temizAd = ad.trim();
+            if(!musteriler.some(m => m.ad.toLowerCase() === temizAd.toLowerCase())) {
+                musteriler.push({ id: Date.now(), ad: temizAd, tel: "" });
+                saveData("musteriler", musteriler);
             }
         }
 
+        window.musteriTamamenSil = function(musteriAd) {
+            if(localStorage.getItem("tarim_user_role") !== "patron") {
+                alert("Bu işlem için Patron yetkisi gerekiyor!");
+                return;
+            }
+            if(!confirm(`DİKKAT! "${musteriAd}" isimli müşteriyi ve tüm geçmişini silmek istediğinize emin misiniz?`)) return;
+
+            saveData("musteriler", cloudData.musteriler.filter(m => m.ad.toLowerCase() !== musteriAd.toLowerCase()));
+            saveData("islemler", cloudData.islemler.filter(i => i.musteri.toLowerCase() !== musteriAd.toLowerCase()));
+            saveData("alinan_mallar", cloudData.alinan_mallar.filter(a => a.isim.toLowerCase() !== musteriAd.toLowerCase()));
+            saveData("bicilen_tarlalar", cloudData.bicilen_tarlalar.filter(t => t.isim.toLowerCase() !== musteriAd.toLowerCase()));
+
+            alert(`"${musteriAd}" ve tüm verileri silindi.`);
+            kapatFisModal();
+            refreshAll();
+        };
+
         window.handleSatis = function(e) {
             e.preventDefault();
+            const role = localStorage.getItem("tarim_user_role");
+            const aktifKullanici = localStorage.getItem("tarim_aktif_kullanici") || "Çalışan";
+            const depoId = document.getElementById("satisDepo").value;
             const musteriAd = document.getElementById("satisMusteri").value.trim();
             const urun = document.getElementById("satisUrun").value;
             const adet = parseFloat(document.getElementById("satisAdet").value);
             const fiyat = parseFloat(document.getElementById("satisFiyat").value);
+            const pesinat = parseFloat(document.getElementById("satisPesinat").value) || 0;
+            const vade = document.getElementById("satisVade").value;
+            const aciklama = document.getElementById("satisAciklama").value;
             const toplamTutar = adet * fiyat;
-            const depoId = document.getElementById("satisDepo").value;
 
             kontrolVeMusteriEkle(musteriAd);
 
-            let st = cloudData.depo_stoklari.find(s => s.depoId === depoId && s.ad === urun);
-            if(!st || st.miktar < adet) return alert("Depoda yeterli stok yok!");
-            st.miktar -= adet;
-            saveData("depo_stoklari", cloudData.depo_stoklari);
+            if(role === "calisan") {
+                let bekleyenler = [...cloudData.onay_bekleyen_satislar];
+                bekleyenler.unshift({
+                    id: Date.now(),
+                    tarih: new Date().toLocaleDateString("tr-TR"),
+                    calisan: aktifKullanici,
+                    depoId: depoId,
+                    musteri: musteriAd,
+                    urun: urun,
+                    adet: adet,
+                    fiyat: fiyat,
+                    pesinat: pesinat,
+                    vade: vade,
+                    aciklama: aciklama,
+                    toplam: toplamTutar
+                });
+                saveData("onay_bekleyen_satislar", bekleyenler);
+                alert("Satış başarıyla oluşturuldu ve patron onayına gönderildi!");
+                e.target.reset();
+                return;
+            }
 
-            cloudData.islemler.unshift({
-                id: Date.now(),
-                tarih: new Date().toLocaleDateString("tr-TR"),
+            // Depo stok kontrolü ve düşüşü
+            let depoStoklari = [...cloudData.depo_stoklari];
+            let st = depoStoklari.find(s => s.depoId === depoId && s.ad === urun);
+            if(st) {
+                if(st.miktar < adet) {
+                    alert(`Seçilen depoda stok yetersiz! Kalan miktar: ${st.miktar}`);
+                    return;
+                }
+                st.miktar -= adet;
+                saveData("depo_stoklari", depoStoklari);
+            } else {
+                alert("Seçilen depoda bu ürüne ait stok bulunamadı!");
+                return;
+            }
+
+            let islemler = [...cloudData.islemler];
+            const tarihStr = new Date().toLocaleDateString("tr-TR");
+            const islemGrupId = Date.now();
+
+            islemler.unshift({
+                id: islemGrupId,
+                tarih: tarihStr,
+                vade: vade,
                 musteri: musteriAd,
                 tur: "SATIŞ",
-                detay: `${adet} adet ${urun}`,
+                detay: `${adet} adet ${urun} (${toplamTutar.toLocaleString("tr-TR")} TL) ${aciklama ? '- ' + aciklama : ''}`,
                 tutar: toplamTutar
             });
-            saveData("islemler", cloudData.islemler);
-            alert("Satış tamamlandı!");
+
+            if(pesinat > 0) {
+                islemler.unshift({
+                    id: islemGrupId + 1,
+                    tarih: tarihStr,
+                    vade: vade,
+                    musteri: musteriAd,
+                    tur: "TAHSİLAT",
+                    detay: `Satış esnasında peşin ödeme`,
+                    tutar: -pesinat
+                });
+            }
+
+            saveData("islemler", islemler);
+            alert(`Satış başarıyla işlendi ve ilgili depodan düşüldü!`);
             e.target.reset();
             refreshAll();
         };
+
+        window.satisOnayla = function(id) {
+            let bekleyenler = [...cloudData.onay_bekleyen_satislar];
+            const item = bekleyenler.find(b => b.id === id);
+            if(!item) return;
+
+            let depoStoklari = [...cloudData.depo_stoklari];
+            const depoId = item.depoId || 'depo_merkez';
+            let st = depoStoklari.find(s => s.depoId === depoId && s.ad === item.urun);
+
+            if(!st || st.miktar < item.adet) {
+                alert(`Stok yetersiz (${st ? st.miktar : 0} kaldı)!`);
+                return;
+            }
+            st.miktar -= item.adet;
+            saveData("depo_stoklari", depoStoklari);
+
+            let islemler = [...cloudData.islemler];
+            const islemGrupId = Date.now();
+            islemler.unshift({
+                id: islemGrupId,
+                tarih: item.tarih,
+                vade: item.vade,
+                musteri: item.musteri,
+                tur: "SATIŞ",
+                detay: `${item.adet} adet ${item.urun} (${item.toplam.toLocaleString("tr-TR")} TL) ${item.aciklama ? '- ' + item.aciklama : ''}`,
+                tutar: item.toplam
+            });
+
+            if(item.pesinat > 0) {
+                islemler.unshift({
+                    id: islemGrupId + 1,
+                    tarih: item.tarih,
+                    vade: item.vade,
+                    musteri: item.musteri,
+                    tur: "TAHSİLAT",
+                    detay: `Satış esnasında peşin ödeme`,
+                    tutar: -item.pesinat
+                });
+            }
+
+            saveData("islemler", islemler);
+            saveData("onay_bekleyen_satislar", bekleyenler.filter(b => b.id !== id));
+
+            alert("Satış onaylandı ve stoktan düşüldü!");
+            refreshAll();
+        };
+
+        window.satisReddet = function(id) {
+            if(!confirm("Bu satışı reddetmek istediğinize emin misiniz?")) return;
+            saveData("onay_bekleyen_satislar", cloudData.onay_bekleyen_satislar.filter(b => b.id !== id));
+            refreshAll();
+        };
+
+        function renderOnayBekleyenler() {
+            const list = cloudData.onay_bekleyen_satislar;
+            const tbody = document.getElementById("onayBekleyenlerTablosu");
+            const bolum = document.getElementById("patronOnayBolumu");
+
+            if(list.length === 0) {
+                bolum.classList.add("hidden");
+                return;
+            }
+
+            bolum.classList.remove("hidden");
+            tbody.innerHTML = list.map(i => `
+                <tr class="border-b last:border-0">
+                    <td class="p-2">${i.tarih}</td>
+                    <td class="p-2 text-indigo-600 font-semibold">${i.calisan}</td>
+                    <td class="p-2 font-medium">${i.musteri}</td>
+                    <td class="p-2">${i.adet} adet ${i.urun}</td>
+                    <td class="p-2 text-right font-bold text-slate-700">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                    <td class="p-2 text-center flex justify-center gap-2">
+                        <button onclick="satisOnayla(${i.id})" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Onayla</button>
+                        <button onclick="satisReddet(${i.id})" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer">Reddet</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderVadeUyarilari() {
+            const today = new Date().toISOString().split('T')[0];
+            const list = cloudData.islemler.filter(i => i.tur === "SATIŞ" && i.vade);
+            const tbody = document.getElementById("vadeUyarilariTablosu");
+            const bolum = document.getElementById("vadeUyarilariBolumu");
+
+            const gecikenler = list.filter(i => i.vade <= today);
+
+            if(gecikenler.length === 0) {
+                bolum.classList.add("hidden");
+                return;
+            }
+
+            bolum.classList.remove("hidden");
+            tbody.innerHTML = gecikenler.map(i => `
+                <tr class="border-b last:border-0">
+                    <td class="p-2 font-semibold text-rose-600">${i.vade}</td>
+                    <td class="p-2 font-medium">${i.musteri}</td>
+                    <td class="p-2">${i.detay}</td>
+                    <td class="p-2 text-right font-bold text-slate-700">${i.tutar.toLocaleString("tr-TR")} TL</td>
+                    <td class="p-2 text-center"><span class="bg-rose-100 text-rose-700 px-2 py-0.5 rounded text-xs font-bold">Vadesi Geldi/Geçti</span></td>
+                </tr>
+            `).join('');
+        }
 
         window.handleTahsilat = function(e) {
             e.preventDefault();
             const musteri = document.getElementById("tahsilatMusteri").value.trim();
             const tutar = parseFloat(document.getElementById("tahsilatTutar").value);
+            const aciklama = document.getElementById("tahsilatAciklama").value;
+
             kontrolVeMusteriEkle(musteri);
 
-            cloudData.islemler.unshift({ id: Date.now(), tarih: new Date().toLocaleDateString("tr-TR"), musteri, tur: "TAHSİLAT", detay: "Borç Ödemesi", tutar: -tutar });
-            saveData("islemler", cloudData.islemler);
-            alert("Tahsilat alındı.");
+            let islemler = [...cloudData.islemler];
+            islemler.unshift({
+                id: Date.now(),
+                tarih: new Date().toLocaleDateString("tr-TR"),
+                musteri: musteri,
+                tur: "TAHSİLAT",
+                detay: aciklama || "Borç Ödemesi",
+                tutar: -tutar
+            });
+            saveData("islemler", islemler);
+
+            alert("Tahsilat kaydedildi.");
             e.target.reset();
             refreshAll();
         };
@@ -596,179 +1385,363 @@
             const miktar = parseFloat(document.getElementById("stokMiktar").value);
             const fiyat = parseFloat(document.getElementById("stokFiyat").value);
 
-            let mevcut = cloudData.depo_stoklari.find(s => s.depoId === depoId && s.ad === ad);
-            if(mevcut) { mevcut.miktar += miktar; mevcut.fiyat = fiyat; }
-            else { cloudData.depo_stoklari.push({ depoId, ad, miktar, fiyat }); }
-            saveData("depo_stoklari", cloudData.depo_stoklari);
-            alert("Stok eklendi.");
-            refreshAll();
-        };
+            let depoStoklari = [...cloudData.depo_stoklari];
+            const mevcut = depoStoklari.find(s => s.depoId === depoId && s.ad.toLowerCase() === ad.toLowerCase());
+            
+            if(mevcut) {
+                mevcut.miktar += miktar;
+                mevcut.fiyat = fiyat;
+            } else {
+                depoStoklari.push({ depoId, ad, miktar, fiyat });
+            }
+            saveData("depo_stoklari", depoStoklari);
 
-        window.handleMusteriEkle = function(e) {
-            e.preventDefault();
-            const ad = document.getElementById("yeniMusteriAd").value.trim();
-            const tel = document.getElementById("yeniMusteriTel").value;
-            cloudData.musteriler.push({ id: Date.now(), ad, tel });
-            saveData("musteriler", cloudData.musteriler);
-            alert("Müşteri eklendi.");
-            refreshAll();
-        };
+            // Genel stok listesini de güncelle
+            let stoklar = [...cloudData.stoklar];
+            if(!stoklar.some(s => s.ad.toLowerCase() === ad.toLowerCase())) {
+                stoklar.push({ id: Date.now(), ad, miktar, fiyat });
+                saveData("stoklar", stoklar);
+            }
 
-        window.handleBicilenTarlaEkle = function(e) {
-            e.preventDefault();
-            const tarih = document.getElementById("tarlaTarih").value;
-            const isim = document.getElementById("tarlaIsim").value.trim();
-            const koy = document.getElementById("tarlaKoy").value;
-            const donum = parseFloat(document.getElementById("tarlaDonum").value) || 0;
-            const fiyat = parseFloat(document.getElementById("tarlaFiyat").value);
-            const toplam = donum * fiyat;
-
-            kontrolVeMusteriEkle(isim);
-            cloudData.bicilen_tarlalar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu: `${donum} Dönüm`, fiyat, toplam });
-            saveData("bicilen_tarlalar", cloudData.bicilen_tarlalar);
-            alert("Tarla eklendi!");
+            alert("Stok depoya eklendi.");
             e.target.reset();
             refreshAll();
         };
 
         function renderStokTablosu() {
-            document.getElementById("stokTablosu").innerHTML = cloudData.depo_stoklari.map(s => {
-                const dep = cloudData.depolar.find(d => d.id === s.depoId);
-                return `<tr class="border-b text-sm"><td class="py-3 font-semibold text-indigo-700">${dep?.ad}</td><td class="py-3">${s.ad}</td><td class="py-3 text-center font-bold text-emerald-600">${s.miktar}</td><td class="py-3 text-right">${s.fiyat} TL</td></tr>`;
+            const depoStoklari = cloudData.depo_stoklari;
+            const depolar = cloudData.depolar;
+            const tbody = document.getElementById("stokTablosu");
+
+            if(depoStoklari.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-400">Depo stoku bulunmuyor.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = depoStoklari.map(s => {
+                const depo = depolar.find(d => d.id === s.depoId);
+                return `
+                    <tr class="border-b last:border-0 text-sm">
+                        <td class="py-3 font-semibold text-indigo-700">${depo ? depo.ad : 'Bilinmeyen Depo'}</td>
+                        <td class="py-3 font-medium">${s.ad}</td>
+                        <td class="py-3 text-center font-bold text-emerald-600">${s.miktar}</td>
+                        <td class="py-3 text-right">${s.fiyat.toLocaleString("tr-TR")} TL</td>
+                    </tr>
+                `;
             }).join('');
         }
+
+        window.handleMusteriEkle = function(e) {
+            e.preventDefault();
+            const ad = document.getElementById("yeniMusteriAd").value.trim();
+            const tel = document.getElementById("yeniMusteriTel").value;
+            let musteriler = [...cloudData.musteriler];
+            if(musteriler.some(m => m.ad.toLowerCase() === ad.toLowerCase())) {
+                alert("Bu müşteri zaten kayıtlı!");
+                return;
+            }
+            musteriler.push({ id: Date.now(), ad, tel });
+            saveData("musteriler", musteriler);
+            alert("Müşteri eklendi.");
+            e.target.reset();
+            refreshAll();
+        };
 
         function renderMusterilerTablosu() {
-            document.getElementById("musteriTablosu").innerHTML = cloudData.musteriler.map(m => {
-                const bakiye = cloudData.islemler.filter(i => i.musteri === m.ad).reduce((acc, curr) => acc + curr.tutar, 0);
-                return `<tr class="border-b"><td class="py-3">${m.ad}<br><span class="text-xs text-slate-400">${m.tel || 'Tel yok'}</span></td><td class="py-3 text-right font-bold ${bakiye>0?'text-rose-600':'text-emerald-600'}">${bakiye.toLocaleString("tr-TR")} TL</td><td class="py-3 text-center"><button onclick="acFisModal('${m.ad}')" class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded text-xs font-semibold cursor-pointer">Fiş / PDF</button></td></tr>`;
-            }).join('');
-        }
+            const musteriler = cloudData.musteriler;
+            const islemler = cloudData.islemler;
+            const tbody = document.getElementById("musteriTablosu");
+            const role = localStorage.getItem("tarim_user_role");
 
-        function renderBicilenTarlalar() {
-            document.getElementById("bicilenTarlaTablosu").innerHTML = cloudData.bicilen_tarlalar.map(i => `<tr class="border-b"><td class="py-3">${i.tarih}</td><td class="py-3 font-medium">${i.isim}<br><span class="text-xs text-slate-400">${i.koy}</span></td><td class="py-3 text-center">${i.miktarOlcu}</td><td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td></tr>`).join('');
-        }
-
-        function renderDashboardStats() {
-            document.getElementById("statBorc").innerText = cloudData.islemler.reduce((a,c)=>a+c.tutar,0).toLocaleString("tr-TR") + " TL";
-            document.getElementById("statStok").innerText = cloudData.depo_stoklari.length + " Çeşit";
+            tbody.innerHTML = musteriler.length === 0 ? `<tr><td colspan="3" class="py-4 text-center text-slate-400">Müşteri bulunmuyor.</td></tr>` :
+                musteriler.map(m => {
+                    const musteriIslemleri = islemler.filter(i => i.musteri === m.ad);
+                    const bakiye = musteriIslemleri.reduce((acc, curr) => acc + curr.tutar, 0);
+                    const renk = bakiye > 0 ? "text-rose-600" : "text-emerald-600";
+                    return `
+                        <tr class="border-b last:border-0">
+                            <td class="py-3 font-medium">${m.ad} <br><span class="text-xs text-slate-400">${m.tel || 'Tel yok'}</span></td>
+                            <td class="py-3 text-right font-bold ${renk}">${bakiye.toLocaleString("tr-TR")} TL</td>
+                            <td class="py-3 text-center flex justify-center items-center gap-2">
+                                <button onclick="acFisModal('${m.ad}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Fiş</button>
+                                ${role === 'patron' ? `<button onclick="musteriTamamenSil('${m.ad}')" class="bg-rose-100 hover:bg-rose-200 text-rose-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer">Sil</button>` : ''}
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
         }
 
         window.acFisModal = function(musteriAd) {
-            aktifFisMusteri = musteriAd;
             const islemler = cloudData.islemler.filter(i => i.musteri === musteriAd);
+            const musteri = cloudData.musteriler.find(m => m.ad === musteriAd);
             const toplamBorc = islemler.reduce((acc, curr) => acc + curr.tutar, 0);
-            document.getElementById("fisBaslik").innerText = `Demirkapı Tarım Ürünleri - ${musteriAd} Hesap Fişi`;
-            
-            document.getElementById("fisIcerik").innerHTML = `
-                <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100 mb-2 text-xs">
-                    <p class="font-bold text-indigo-900 text-sm">DEMİRKAPI TARIM ÜRÜNLERİ</p>
-                    <p class="text-indigo-700 mt-1"><b>Ödeme İBAN:</b> ${IBAN_NUMARASI}</p>
+
+            document.getElementById("fisBaslik").innerText = `${musteriAd} - Hesap Fişi`;
+            let html = `
+                <div class="mb-4 text-xs text-slate-500 flex justify-between items-center">
+                    <div>
+                        <p><strong>Telefon:</strong> ${musteri?.tel || '-'}</p>
+                    </div>
                 </div>
-            ` + islemler.map(i => `<div class="p-2 border-b flex justify-between"><span>${i.tarih} - ${i.tur}: ${i.detay}</span><span class="font-bold ${i.tutar>0?'text-rose-600':'text-emerald-600'}">${i.tutar.toLocaleString("tr-TR")} TL</span></div>`).join('') + 
-            `<div class="p-3 bg-slate-50 text-right font-bold text-rose-600 text-base">Güncel Toplam Borç: ${toplamBorc.toLocaleString("tr-TR")} TL</div>`;
-            
+                <table class="w-full text-left border-collapse text-xs mb-4">
+                    <thead>
+                        <tr class="border-b bg-slate-50 text-slate-500">
+                            <th class="p-2">Tarih</th>
+                            <th class="p-2">Tür</th>
+                            <th class="p-2">Detay</th>
+                            <th class="p-2 text-right">Tutar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            let waMetni = `Sayın ${musteriAd}, güncel hesap dökümünüz aşağıdadır:\n\n`;
+
+            if(islemler.length === 0) {
+                html += `<tr><td colspan="4" class="p-4 text-center text-slate-400">İşlem hareketi yok.</td></tr>`;
+                waMetni += `Hesap hareketiniz bulunmamaktadır.\n`;
+            } else {
+                islemler.forEach(item => {
+                    const renk = item.tutar > 0 ? "text-rose-600" : "text-emerald-600";
+                    html += `
+                        <tr class="border-b">
+                            <td class="p-2">${item.tarih}</td>
+                            <td class="p-2 font-semibold">${item.tur}</td>
+                            <td class="p-2">${item.detay}</td>
+                            <td class="p-2 text-right font-bold ${renk}">${item.tutar.toLocaleString("tr-TR")} TL</td>
+                        </tr>
+                    `;
+                    waMetni += `- ${item.tarih} | ${item.tur}: ${item.detay} (${item.tutar.toLocaleString("tr-TR")} TL)\n`;
+                });
+            }
+
+            waMetni += `\n*TOPLAM GÜNCEL BAKİYE (BORÇ): ${toplamBorc.toLocaleString("tr-TR")} TL*`;
+
+            html += `
+                    </tbody>
+                </table>
+                <div class="text-right p-3 bg-slate-50 rounded-xl">
+                    <span class="text-sm font-medium">Toplam Bakiye (Borç): </span>
+                    <span class="text-lg font-bold text-rose-600">${toplamBorc.toLocaleString("tr-TR")} TL</span>
+                </div>
+            `;
+
+            document.getElementById("fisIcerik").innerHTML = html;
+
+            const waBtn = document.getElementById("whatsappGonderBtn");
+            const telNo = musteri?.tel ? musteri.tel.replace(/\D/g, '') : '';
+            waBtn.onclick = function() {
+                const encoded = encodeURIComponent(waMetni);
+                if(telNo) {
+                    window.open(`https://wa.me/${telNo.startsWith('90') ? telNo : '9' + telNo}?text=${encoded}`, '_blank');
+                } else {
+                    window.open(`https://wa.me/?text=${encoded}`, '_blank');
+                }
+            };
+
             document.getElementById("fisModal").classList.remove("hidden");
         };
 
-        window.kapatFisModal = function() { document.getElementById("fisModal").classList.add("hidden"); };
-
-        // 🌟 DEMİRKAPI TARIM ÜRÜNLERİ KURUMSAL PDF MOTORU 🌟
-        window.musteriHesapPdfIndir = function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            const musteriAdi = aktifFisMusteri;
-            const musteriIslemleri = cloudData.islemler.filter(i => i.musteri === musteriAdi);
-            const toplamBorc = musteriIslemleri.reduce((acc, curr) => acc + curr.tutar, 0);
-
-            // Başlık & Tasarım
-            doc.setFillColor(49, 46, 129); // Koyu İndigo
-            doc.rect(0, 0, 210, 40, "F");
-
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(18);
-            doc.text("DEMİRKAPI TARIM ÜRÜNLERİ", 14, 18);
-
-            doc.setFontSize(11);
-            doc.text("Cari Hesap Özeti ve Fişi", 14, 26);
-
-            doc.setFontSize(10);
-            doc.text(`Tarih: ${new Date().toLocaleDateString("tr-TR")}`, 150, 18);
-
-            // Müşteri Bilgileri
-            doc.setTextColor(50, 50, 50);
-            doc.setFontSize(13);
-            doc.text(`Müşteri / Çiftçi: ${musteriAdi}`, 14, 50);
-
-            doc.setFontSize(11);
-            doc.text(`Güncel Borç Bakiyesi: ${toplamBorc.toLocaleString("tr-TR")} TL`, 14, 58);
-
-            // Tablo Verileri
-            const tableData = musteriIslemleri.map(i => [
-                i.tarih,
-                i.tur,
-                i.detay,
-                `${i.tutar.toLocaleString("tr-TR")} TL`
-            ]);
-
-            doc.autoTable({
-                startY: 65,
-                head: [['Tarih', 'İşlem Türü', 'Açıklama / Detay', 'Tutar']],
-                body: tableData,
-                headStyles: { fillColor: [49, 46, 129] },
-                styles: { fontSize: 10, cellPadding: 4 },
-                alternateRowStyles: { fillColor: [241, 245, 249] }
-            });
-
-            // IBAN ve Alt Bilgi Alanı
-            const finalY = doc.lastAutoTable.finalY + 15;
-            doc.setFontSize(10);
-            doc.setTextColor(30, 30, 30);
-            doc.text(`Ödemeleriniz İçin Banka IBAN:`, 14, finalY);
-            doc.setFont("helvetica", "bold");
-            doc.text(`${IBAN_NUMARASI}`, 14, finalY + 6);
-
-            doc.setFont("helvetica", "normal");
-            doc.text("Demirkapı Tarım Kaşe / İmza", 14, finalY + 22);
-            doc.text("Müşteri İmza", 150, finalY + 22);
-
-            // PDF İndir
-            doc.save(`${musteriAdi.replace(/\s+/g, '_')}_Demirkapi_Tarim_Hesap_Ozeti.pdf`);
+        window.kapatFisModal = function() {
+            document.getElementById("fisModal").classList.add("hidden");
         };
 
-        window.acHaritaModal = function() {
-            document.getElementById("haritaModal").classList.remove("hidden");
-            setTimeout(() => {
-                if(!map) {
-                    map = L.map('map').setView([39.9334, 32.8597], 13);
-                    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }).addTo(map);
-                    map.on('click', function(e) {
-                        mapLatlngs.push([e.latlng.lat, e.latlng.lng]);
-                        mapMarkers.push(L.marker([e.latlng.lat, e.latlng.lng]).addTo(map));
-                        if(mapPolygon) map.removeLayer(mapPolygon);
-                        if(mapLatlngs.length >= 3) {
-                            mapPolygon = L.polygon(mapLatlngs, {color: '#10b981', fillOpacity: 0.4}).addTo(map);
-                            hesaplananSonucDonum = (turf.area(turf.polygon([mapLatlngs.map(pt=>[pt[1],pt[0]]).concat([mapLatlngs[0][1], mapLatlngs[0][0]])])) / 1000).toFixed(2);
-                            document.getElementById("hesaplananDonumYazi").innerText = `${hesaplananSonucDonum} Dönüm (Dekar)`;
-                        }
+        window.handleAlinanMalEkle = function(e) {
+            e.preventDefault();
+            const tarih = document.getElementById("malTarih").value;
+            const isim = document.getElementById("malIsim").value;
+            const koy = document.getElementById("malKoy").value;
+            const donum = parseFloat(document.getElementById("malDonum").value) || 0;
+            const kilo = parseFloat(document.getElementById("malKilo").value) || 0;
+            const fiyat = parseFloat(document.getElementById("malFiyat").value);
+            const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
+            const toplam = (donum > 0 ? donum : kilo) * fiyat;
+
+            let alinanlar = [...cloudData.alinan_mallar];
+            alinanlar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
+            saveData("alinan_mallar", alinanlar);
+
+            alert("Kayıt eklendi.");
+            e.target.reset();
+            document.getElementById("malTarih").valueAsDate = new Date();
+        };
+
+        function renderAlinanMallar() {
+            const list = cloudData.alinan_mallar;
+            const tbody = document.getElementById("alinanMalTablosu");
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
+                list.map(i => `
+                    <tr class="border-b last:border-0">
+                        <td class="py-3">${i.tarih}</td>
+                        <td class="py-3 font-medium">${i.isim} <br><span class="text-xs text-slate-400">${i.koy}</span></td>
+                        <td class="py-3 text-center">${i.miktarOlcu}</td>
+                        <td class="py-3 text-right">${i.fiyat.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                    </tr>
+                `).join('');
+        }
+
+        window.handleBicilenTarlaEkle = function(e) {
+            e.preventDefault();
+            const tarih = document.getElementById("tarlaTarih").value;
+            const isim = document.getElementById("tarlaIsim").value;
+            const koy = document.getElementById("tarlaKoy").value;
+            const donum = parseFloat(document.getElementById("tarlaDonum").value) || 0;
+            const kilo = parseFloat(document.getElementById("tarlaKilo").value) || 0;
+            const fiyat = parseFloat(document.getElementById("tarlaFiyat").value);
+            const miktarOlcu = donum > 0 ? `${donum} Dönüm` : `${kilo} Kilo`;
+            const toplam = (donum > 0 ? donum : kilo) * fiyat;
+
+            let tarlalar = [...cloudData.bicilen_tarlalar];
+            tarlalar.unshift({ id: Date.now(), tarih, isim, koy, miktarOlcu, fiyat, toplam });
+            saveData("bicilen_tarlalar", tarlalar);
+
+            alert("Kayıt eklendi.");
+            e.target.reset();
+            document.getElementById("tarlaTarih").valueAsDate = new Date();
+        };
+
+        function renderBicilenTarlalar() {
+            const list = cloudData.bicilen_tarlalar;
+            const tbody = document.getElementById("bicilenTarlaTablosu");
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="5" class="py-4 text-center text-slate-400">Kayıt yok.</td></tr>` :
+                list.map(i => `
+                    <tr class="border-b last:border-0">
+                        <td class="py-3">${i.tarih}</td>
+                        <td class="py-3 font-medium">${i.isim} <br><span class="text-xs text-slate-400">${i.koy}</span></td>
+                        <td class="py-3 text-center">${i.miktarOlcu}</td>
+                        <td class="py-3 text-right">${i.fiyat.toLocaleString("tr-TR")} TL</td>
+                        <td class="py-3 text-right font-bold text-emerald-600">${i.toplam.toLocaleString("tr-TR")} TL</td>
+                    </tr>
+                `).join('');
+        }
+
+        window.handleYemIslem = function(e) {
+            e.preventDefault();
+            const tip = document.getElementById("yemTip").value;
+            const tutar = parseFloat(document.getElementById("yemTutar").value);
+            const aciklama = document.getElementById("yemAciklama").value;
+
+            let yemler = [...cloudData.ozlem_yem];
+            yemler.unshift({
+                id: Date.now(),
+                tarih: new Date().toLocaleDateString("tr-TR"),
+                tip: tip,
+                tutar: tip === "YEM_ALIM" ? tutar : -tutar,
+                aciklama: aciklama || (tip === "YEM_ALIM" ? "Yem Alımı" : "Yem Ödemesi")
+            });
+            saveData("ozlem_yem", yemler);
+            alert("Kayıt eklendi.");
+            e.target.reset();
+        };
+
+        function renderYemTablosu() {
+            const list = cloudData.ozlem_yem;
+            const tbody = document.getElementById("yemTablosu");
+            const bakiye = list.reduce((acc, curr) => acc + curr.tutar, 0);
+            document.getElementById("yemBakiyeYazi").innerText = `${bakiye.toLocaleString("tr-TR")} TL`;
+
+            tbody.innerHTML = list.length === 0 ? `<tr><td colspan="4" class="py-4 text-center text-slate-400">Yem hareketi yok.</td></tr>` :
+                list.map(i => {
+                    const renk = i.tutar > 0 ? "text-rose-600" : "text-emerald-600";
+                    return `
+                        <tr class="border-b last:border-0">
+                            <td class="py-3">${i.tarih}</td>
+                            <td class="py-3 font-semibold">${i.tip === "YEM_ALIM" ? "Yem Alındı" : "Ödeme Yapıldı"}</td>
+                            <td class="py-3">${i.aciklama}</td>
+                            <td class="py-3 text-right font-bold ${renk}">${i.tutar.toLocaleString("tr-TR")} TL</td>
+                        </tr>
+                    `;
+                }).join('');
+        }
+
+        function renderDashboardStats() {
+            const toplamBorc = cloudData.islemler.reduce((acc, curr) => acc + curr.tutar, 0);
+            document.getElementById("statBorc").innerText = `${toplamBorc.toLocaleString("tr-TR")} TL`;
+            document.getElementById("statStok").innerText = `${cloudData.depo_stoklari.length} Çeşit`;
+            const yemBakiye = cloudData.ozlem_yem.reduce((acc, curr) => acc + curr.tutar, 0);
+            document.getElementById("statYem").innerText = `${yemBakiye.toLocaleString("tr-TR")} TL`;
+        }
+
+        window.processAI = async function() {
+            const apiKey = localStorage.getItem("tarim_gemini_key") || document.getElementById("apiKeyInput").value.trim();
+            if(!apiKey) return alert("Lütfen Gemini API Key girin.");
+            const promptText = document.getElementById("aiPrompt").value.trim();
+            if(!promptText) return;
+
+            const btn = document.getElementById("aiBtn");
+            btn.innerText = "Yapay Zeka İşliyor...";
+            btn.disabled = true;
+
+            try {
+                const ai = new GoogleGenAI({ apiKey });
+                const prompt = `
+                Bu cümle bir tarımsal ticaret işlemidir. Analiz et ve TAM OLARAK şu JSON formatında cevap ver, başka hiçbir metin ekleme:
+                {"musteri": "Müşteri Adı", "tur": "SATIŞ veya TAHSİLAT", "urun": "Ürün Adı", "adet": 0.0, "fiyat": 0.0, "pesinat": 0.0, "tutar": 0.0}
+                Cümle: "${promptText}"
+                `;
+
+                const res = await ai.models.generateContent({
+                    model: 'gemini-2.5-flash',
+                    contents: prompt,
+                    config: { responseMimeType: "application/json" }
+                });
+
+                let text = res.text.replace(/```json/g, '').replace(/```/g, '').trim();
+                const data = JSON.parse(text);
+                const tarihStr = new Date().toLocaleDateString("tr-TR");
+                let islemler = [...cloudData.islemler];
+                const islemId = Date.now();
+
+                kontrolVeMusteriEkle(data.musteri);
+
+                if(data.tur === "SATIŞ") {
+                    const toplam = (data.adet * data.fiyat) || data.tutar || 0;
+                    const pesin = data.pesinat || 0;
+                    
+                    islemler.unshift({
+                        id: islemId,
+                        tarih: tarihStr,
+                        vade: new Date(Date.now() + 30*24*60*60*1000).toISOString().split('T')[0],
+                        musteri: data.musteri,
+                        tur: "SATIŞ",
+                        detay: `${data.adet || 1} adet ${data.urun || 'Ürün'} (AI Sesli/Yazılı)`,
+                        tutar: toplam
+                    });
+
+                    if(pesin > 0) {
+                        islemler.unshift({
+                            id: islemId + 1,
+                            tarih: tarihStr,
+                            vade: "",
+                            musteri: data.musteri,
+                            tur: "TAHSİLAT",
+                            detay: `Peşin ödeme (AI)`,
+                            tutar: -pesin
+                        });
+                    }
+                } else {
+                    islemler.unshift({
+                        id: islemId,
+                        tarih: tarihStr,
+                        vade: "",
+                        musteri: data.musteri,
+                        tur: "TAHSİLAT",
+                        detay: "Yapay zeka tahsilat",
+                        tutar: -data.tutar
                     });
                 }
-                map.invalidateSize();
-            }, 200);
+
+                saveData("islemler", islemler);
+                alert("Yapay zeka işlemi başarıyla kaydetti! 🎉");
+                document.getElementById("aiPrompt").value = "";
+            } catch (err) {
+                alert("AI işleme hatası.");
+            } finally {
+                btn.innerText = "Yapay Zeka ile İşle";
+                btn.disabled = false;
+            }
         };
-        window.kapatHaritaModal = function() { document.getElementById("haritaModal").classList.add("hidden"); };
-        window.haritaNoktalariSifirla = function() { mapMarkers.forEach(m=>map.removeLayer(m)); mapMarkers=[]; mapLatlngs=[]; if(mapPolygon) map.removeLayer(mapPolygon); };
-        window.haritaSonucuAktar = function() { document.getElementById("tarlaDonum").value = hesaplananSonucDonum; kapatHaritaModal(); };
-        window.acYedeklemeModal = function() { document.getElementById("yedekModal").classList.remove("hidden"); };
-        window.kapatYedeklemeModal = function() { document.getElementById("yedekModal").classList.add("hidden"); };
-        window.yedegiDisariAktar = function() {
-            const dl = document.createElement('a');
-            dl.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(cloudData));
-            dl.download = "demirkapi_tarim_yedek.json"; dl.click();
-        };
-        window.saveApiKey = function() { alert("Kaydedildi."); };
-        window.processAI = function() { alert("AI aktif."); };
     </script>
 </body>
 </html>
