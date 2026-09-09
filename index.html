@@ -1,194 +1,208 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Müşteri Veresiye & Cari Defteri</title>
-  <style>
-    :root {
-      --primary: #1565c0;
-      --success: #2e7d32;
-      --danger: #c62828;
-      --bg: #f4f6f8;
-      --card-bg: #ffffff;
-      --text: #222;
-    }
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 12px;
-      display: flex;
-      justify-content: center;
-    }
-    .container {
-      width: 100%;
-      max-width: 550px;
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      box-sizing: border-box;
-    }
-    h2 { text-align: center; color: var(--primary); margin-top: 0; }
-    .form-group { margin-bottom: 10px; }
-    label { font-size: 0.85rem; font-weight: 600; display: block; margin-bottom: 4px; }
-    input, select {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-      font-size: 0.95rem;
-    }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .full-width { grid-column: span 2; }
-    button {
-      width: 100%;
-      background: var(--primary);
-      color: white;
-      border: none;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    .total-box {
-      background: #e3f2fd;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
-      color: var(--primary);
-    }
-    .card {
-      background: #fafafa;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 10px;
-    }
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-    .card-body { font-size: 0.85rem; color: #555; }
-    .badge-borc { color: var(--danger); font-weight: bold; }
-    .badge-odeme { color: var(--success); font-weight: bold; }
-    .btn-del {
-      background: var(--danger);
-      padding: 4px 8px;
-      font-size: 0.75rem;
-      width: auto;
-      margin-top: 8px;
-    }
-  </style>
-</head>
-<body>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>Demirkapı Çiftliği</title>
 
-<div class="container">
-  <h2>📖 Müşteri Cari & Veresiye Takibi</h2>
-
-  <form id="cariForm" onsubmit="addTransaction(event)">
-    <div class="grid">
-      <div class="form-group full-width">
-        <label>Müşteri Adı Soyadı:</label>
-        <input type="text" id="customerName" placeholder="Örn: Mustafa Ağa" required>
-      </div>
-
-      <div class="form-group">
-        <label>İşlem Türü:</label>
-        <select id="type">
-          <option value="borc">Borç Yaz (Satış Yapıldı)</option>
-          <option value="odeme">Tahsilat (Ödeme Aldım)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Tutar (TL):</label>
-        <input type="number" id="amount" placeholder="5000" required>
-      </div>
-
-      <div class="form-group full-width">
-        <label>Açıklama (Ürün / Detay):</label>
-        <input type="text" id="note" placeholder="Örn: 10 ton mısır silajı teslim edildi">
-      </div>
-    </div>
-    <button type="submit">Cari Kaydı Ekle</button>
-  </form>
-
-  <div class="total-box">
-    Piyasadan Toplam Alacak: <span id="totalDebt">0</span> TL
-  </div>
-
-  <h3 style="margin-top:20px;">Müşteri Hareketleri</h3>
-  <div id="recordList"></div>
-</div>
-
-<script>
-  let records = JSON.parse(localStorage.getItem('cariDefter')) || [];
-
-  function addTransaction(e) {
-    e.preventDefault();
-    const item = {
-      id: Date.now(),
-      name: document.getElementById('customerName').value,
-      type: document.getElementById('type').value,
-      amount: parseFloat(document.getElementById('amount').value),
-      note: document.getElementById('note').value,
-      date: new Date().toLocaleDateString('tr-TR')
-    };
-
-    records.push(item);
-    saveAndRender();
-    document.getElementById('cariForm').reset();
-  }
-
-  function deleteRecord(id) {
-    records = records.filter(r => r.id !== id);
-    saveAndRender();
-  }
-
-  function saveAndRender() {
-    localStorage.setItem('cariDefter', JSON.stringify(records));
-    const list = document.getElementById('recordList');
-    list.innerHTML = '';
-
-    let totalAlacak = 0;
-
-    records.forEach(r => {
-      if (r.type === 'borc') totalAlacak += r.amount;
-      if (r.type === 'odeme') totalAlacak -= r.amount;
-
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="card-header">
-          <span>${r.name}</span>
-          <span class="${r.type === 'borc' ? 'badge-borc' : 'badge-odeme'}">
-            ${r.type === 'borc' ? '+' : '-'}${r.amount.toLocaleString('tr-TR')} TL
-          </span>
-        </div>
-        <div class="card-body">
-          <p style="margin:2px 0;"><strong>Tür:</strong> ${r.type === 'borc' ? 'Veresiye Satış' : 'Tahsilat'}</p>
-          <p style="margin:2px 0;"><strong>Açıklama:</strong> ${r.note || 'Yok'}</p>
-          <p style="margin:2px 0;"><strong>Tarih:</strong> ${r.date}</p>
-          <button class="btn-del" onclick="deleteRecord(${r.id})">Sil</button>
-        </div>
-      `;
-      list.appendChild(card);
-    });
-
-    document.getElementById('totalDebt').innerText = totalAlacak.toLocaleString('tr-TR');
-  }
-
-  saveAndRender();
-</script>
-
-</body>
-</html>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f3f4f6;
+    color:#111827;
+}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:0}
+.app{
+    min-height:100vh;
+    display:flex;
+}
+.sidebar{
+    width:250px;
+    background:#111827;
+    color:white;
+    padding:20px 14px;
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    overflow-y:auto;
+    z-index:20;
+}
+.logo{
+    text-align:center;
+    padding:15px 5px 25px;
+}
+.logo-icon{
+    width:58px;
+    height:58px;
+    background:#16a34a;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    font-size:30px;
+}
+.logo h2{margin-top:10px;font-size:18px}
+.logo p{font-size:11px;color:#9ca3af;margin-top:4px}
+.menu-title{
+    font-size:10px;
+    color:#6b7280;
+    margin:18px 10px 8px;
+    font-weight:bold;
+}
+.nav-btn{
+    width:100%;
+    background:transparent;
+    color:#d1d5db;
+    padding:12px 13px;
+    margin:3px 0;
+    border-radius:10px;
+    text-align:left;
+    display:flex;
+    gap:11px;
+    align-items:center;
+}
+.nav-btn:hover,.nav-btn.active{
+    background:#1f2937;
+    color:white;
+}
+.nav-btn.active{border-left:3px solid #22c55e}
+.main{
+    margin-left:250px;
+    width:calc(100% - 250px);
+    min-height:100vh;
+}
+.topbar{
+    height:70px;
+    background:white;
+    border-bottom:1px solid #e5e7eb;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+.topbar h1{font-size:20px}
+.date{font-size:13px;color:#6b7280}
+.content{padding:25px}
+.page{display:none}
+.page.active{display:block}
+.cards{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:15px;
+    margin-bottom:20px;
+}
+.card{
+    background:white;
+    border-radius:15px;
+    padding:19px;
+    box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+.card-top{
+    display:flex;
+    justify-content:space-between;
+    color:#6b7280;
+    font-size:13px;
+}
+.card-value{
+    font-size:25px;
+    font-weight:bold;
+    margin-top:10px;
+}
+.card-icon{
+    width:38px;
+    height:38px;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#ecfdf5;
+    font-size:19px;
+}
+.grid2{
+    display:grid;
+    grid-template-columns:1.3fr .7fr;
+    gap:20px;
+}
+.panel{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,.04);
+}
+.panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+}
+.panel h3{font-size:16px}
+.btn{
+    padding:10px 14px;
+    border-radius:9px;
+    font-weight:bold;
+}
+.btn-green{background:#16a34a;color:white}
+.btn-green:hover{background:#15803d}
+.btn-dark{background:#111827;color:white}
+.btn-red{background:#dc2626;color:white}
+.btn-gray{background:#e5e7eb;color:#111827}
+.btn-blue{background:#2563eb;color:white}
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:14px;
+}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+.form-group label{
+    font-size:12px;
+    color:#4b5563;
+    font-weight:bold;
+}
+.form-group input,
+.form-group select,
+.form-group textarea,
+.search{
+    border:1px solid #d1d5db;
+    border-radius:9px;
+    padding:11px;
+    outline:none;
+    background:white;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus,
+.search:focus{
+    border-color:#16a34a;
+}
+.actions{
+    display:flex;
+    gap:8px;
+    margin-top:16px;
+    flex-wrap:wrap;
+}
+.table-wrap{overflow-x:auto}
+table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:650px;
+}
+th{
+    background:#f9fafb;
+    text-align:left;
+    font-size:11px;
+    color:#6b7280;
+    padding:12px;
+}
+td{
+    border-top
