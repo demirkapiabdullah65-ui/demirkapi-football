@@ -1,1686 +1,1193 @@
-/* =====================================================
-   DEMİRKAPI ÇİFTLİĞİ
-   SÜT TAKİP UYGULAMASI
-   ===================================================== */
-
-
-/* ================= VERİLER ================= */
-
 let animals = JSON.parse(localStorage.getItem("animals")) || [];
-
 let milkRecords = JSON.parse(localStorage.getItem("milkRecords")) || [];
-
 let sales = JSON.parse(localStorage.getItem("sales")) || [];
 
 let settings = JSON.parse(localStorage.getItem("settings")) || {
-  farmName: "Demirkapı Çiftliği",
-  defaultPrice: 0
+    farmName: "Demirkapı Çiftliği",
+    defaultPrice: 20
 };
 
 
-/* ================= BAŞLANGIÇ ================= */
-
 document.addEventListener("DOMContentLoaded", function () {
 
-  setDefaultDates();
+    const today = getToday();
 
-  loadSettings();
+    document.getElementById("milkDate").value = today;
+    document.getElementById("saleDate").value = today;
 
-  renderAnimals();
+    document.getElementById("defaultPrice").value =
+        settings.defaultPrice || 20;
 
-  renderMilkRecords();
+    document.getElementById("farmName").value =
+        settings.farmName || "Demirkapı Çiftliği";
 
-  renderSales();
+    document.getElementById("milkPrice").value =
+        settings.defaultPrice || 20;
 
-  updateDashboard();
+    updateAnimalSelect();
 
-  updateReports();
+    renderAnimals();
+    renderMilk();
+    renderSales();
 
-  updateAnimalSelect();
+    updateDashboard();
+    updateReports();
 
-  setupSaleCalculator();
-
+    calculateMilk();
 });
 
 
-/* ================= MENÜ ================= */
+/* =========================
+   MENÜ
+========================= */
 
 function toggleMenu() {
 
-  const menu = document.getElementById("sideMenu");
-
-  menu.classList.toggle("open");
-
-}
-
-
-function showPage(pageId) {
-
-  document.querySelectorAll(".page").forEach(function (page) {
-
-    page.classList.remove("active");
-
-  });
-
-
-  const selectedPage = document.getElementById(pageId);
-
-  if (selectedPage) {
-
-    selectedPage.classList.add("active");
-
-  }
-
-
-  document.querySelectorAll(".bottom-nav button").forEach(function (button) {
-
-    button.classList.remove("active");
-
-  });
-
-
-  const menu = document.getElementById("sideMenu");
-
-  menu.classList.remove("open");
-
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+    document.getElementById("sidebar")
+        .classList.toggle("open");
 
 }
 
 
-/* ================= TARİH ================= */
+function showPage(page) {
+
+    document.querySelectorAll(".page")
+        .forEach(p => p.classList.remove("active"));
+
+    document.getElementById(page)
+        .classList.add("active");
+
+    document.getElementById("sidebar")
+        .classList.remove("open");
+
+    updateDashboard();
+    updateReports();
+
+}
+
+
+/* =========================
+   TARİH
+========================= */
 
 function getToday() {
 
-  const date = new Date();
-
-  const year = date.getFullYear();
-
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-
-}
-
-
-function setDefaultDates() {
-
-  const today = getToday();
-
-  const milkDate = document.getElementById("milkDate");
-
-  const saleDate = document.getElementById("saleDate");
-
-  const reportStart = document.getElementById("reportStart");
-
-  const reportEnd = document.getElementById("reportEnd");
-
-
-  if (milkDate) milkDate.value = today;
-
-  if (saleDate) saleDate.value = today;
-
-  if (reportEnd) reportEnd.value = today;
-
-
-  if (reportStart) {
-
     const date = new Date();
 
-    date.setDate(1);
+    const y = date.getFullYear();
 
-    reportStart.value = formatDateInput(date);
+    const m = String(date.getMonth() + 1).padStart(2, "0");
 
-  }
+    const d = String(date.getDate()).padStart(2, "0");
 
+    return `${y}-${m}-${d}`;
 }
 
 
-function formatDateInput(date) {
+function formatDate(date) {
 
-  const year = date.getFullYear();
+    if (!date) return "";
 
-  const month = String(date.getMonth() + 1).padStart(2, "0");
+    const parts = date.split("-");
 
-  const day = String(date.getDate()).padStart(2, "0");
+    if (parts.length !== 3) return date;
 
-  return `${year}-${month}-${day}`;
-
+    return `${parts[2]}.${parts[1]}.${parts[0]}`;
 }
 
 
-function formatDate(dateString) {
-
-  if (!dateString) return "-";
-
-  const parts = dateString.split("-");
-
-  if (parts.length !== 3) return dateString;
-
-  return `${parts[2]}.${parts[1]}.${parts[0]}`;
-
-}
-
-
-/* ================= HAYVAN ================= */
-
-function openAnimalForm() {
-
-  document.getElementById("animalForm").classList.remove("hidden");
-
-  document.getElementById("animalTag").focus();
-
-}
-
-
-function closeAnimalForm() {
-
-  document.getElementById("animalForm").classList.add("hidden");
-
-}
-
+/* =========================
+   HAYVAN
+========================= */
 
 function addAnimal() {
 
-  const tag = document.getElementById("animalTag").value.trim();
+    const tag =
+        document.getElementById("animalTag").value.trim();
 
-  const name = document.getElementById("animalName").value.trim();
+    const name =
+        document.getElementById("animalName").value.trim();
 
-  const breed = document.getElementById("animalBreed").value.trim();
+    const breed =
+        document.getElementById("animalBreed").value.trim();
 
-  const birth = document.getElementById("animalBirth").value;
+    const birth =
+        document.getElementById("animalBirth").value;
 
+    if (!tag || !name) {
 
-  if (!tag) {
+        showToast("Küpe no ve hayvan adı gerekli.");
 
-    showToast("Küpe numarasını gir.");
+        return;
+    }
 
-    return;
+    const animal = {
 
-  }
+        id: Date.now(),
 
+        tag: tag,
 
-  const exists = animals.some(function (animal) {
+        name: name,
 
-    return animal.tag.toLowerCase() === tag.toLowerCase();
+        breed: breed,
 
-  });
+        birth: birth
 
+    };
 
-  if (exists) {
+    animals.push(animal);
 
-    showToast("Bu küpe numarası zaten kayıtlı.");
+    saveData();
 
-    return;
+    renderAnimals();
 
-  }
+    updateAnimalSelect();
 
+    document.getElementById("animalTag").value = "";
+    document.getElementById("animalName").value = "";
+    document.getElementById("animalBreed").value = "";
+    document.getElementById("animalBirth").value = "";
 
-  const animal = {
-
-    id: Date.now(),
-
-    tag: tag,
-
-    name: name || "İsimsiz",
-
-    breed: breed || "-",
-
-    birth: birth || ""
-
-  };
-
-
-  animals.push(animal);
-
-  saveData();
-
-
-  renderAnimals();
-
-  updateAnimalSelect();
-
-  updateDashboard();
-
-
-  document.getElementById("animalTag").value = "";
-
-  document.getElementById("animalName").value = "";
-
-  document.getElementById("animalBreed").value = "";
-
-  document.getElementById("animalBirth").value = "";
-
-
-  closeAnimalForm();
-
-
-  showToast("Hayvan başarıyla eklendi.");
+    showToast("Hayvan kaydedildi.");
 
 }
 
 
 function deleteAnimal(id) {
 
-  const animal = animals.find(function (item) {
+    if (!confirm("Bu hayvanı silmek istediğine emin misin?")) {
+        return;
+    }
 
-    return item.id === id;
+    animals = animals.filter(a => a.id !== id);
 
-  });
+    saveData();
 
+    renderAnimals();
 
-  if (!animal) return;
+    updateAnimalSelect();
 
-
-  if (!confirm(`${animal.name} adlı hayvan silinsin mi?`)) {
-
-    return;
-
-  }
-
-
-  animals = animals.filter(function (item) {
-
-    return item.id !== id;
-
-  });
-
-
-  saveData();
-
-  renderAnimals();
-
-  updateAnimalSelect();
-
-  updateDashboard();
-
-
-  showToast("Hayvan silindi.");
+    updateDashboard();
 
 }
 
 
 function renderAnimals() {
 
-  const container = document.getElementById("animalList");
+    const container =
+        document.getElementById("animalList");
 
-  if (!container) return;
+    if (!animals.length) {
 
+        container.innerHTML =
+            `<div class="empty">Henüz hayvan eklenmedi.</div>`;
 
-  if (animals.length === 0) {
+        return;
+    }
 
-    container.innerHTML = `
-      <div class="empty">
-        Henüz hayvan eklenmedi.
-      </div>
-    `;
+    container.innerHTML = animals.map(animal => `
 
-    return;
+        <div class="animal-card">
 
-  }
+            <div>
 
+                <strong>
+                    🐄 ${animal.name}
+                </strong>
 
-  container.innerHTML = animals.map(function (animal) {
+                <div>
+                    Küpe: ${animal.tag}
+                </div>
 
-    return `
+                <small>
+                    ${animal.breed || "Irk belirtilmedi"}
+                    ${animal.birth ? " • " + formatDate(animal.birth) : ""}
+                </small>
 
-      <div class="animal-card">
-
-        <div class="animal-head">
-
-          <div class="animal-icon">
-            🐄
-          </div>
-
-          <div>
-
-            <h3>${escapeHtml(animal.name)}</h3>
-
-            <div class="animal-tag">
-              Küpe: ${escapeHtml(animal.tag)}
             </div>
 
-          </div>
+            <button
+                class="delete-btn"
+                onclick="deleteAnimal(${animal.id})"
+            >
+                🗑️ Sil
+            </button>
 
         </div>
 
-
-        <div class="animal-info">
-
-          <p>
-            <strong>Irk:</strong>
-            ${escapeHtml(animal.breed)}
-          </p>
-
-          <p>
-            <strong>Doğum:</strong>
-            ${animal.birth ? formatDate(animal.birth) : "-"}
-          </p>
-
-        </div>
-
-
-        <button
-          class="delete-btn"
-          onclick="deleteAnimal(${animal.id})"
-        >
-          🗑 Hayvanı Sil
-        </button>
-
-      </div>
-
-    `;
-
-  }).join("");
+    `).join("");
 
 }
 
-
-/* ================= HAYVAN SEÇİMİ ================= */
 
 function updateAnimalSelect() {
 
-  const select = document.getElementById("milkAnimal");
+    const select =
+        document.getElementById("milkAnimal");
 
-  if (!select) return;
+    select.innerHTML =
+        `<option value="">Hayvan seç</option>`;
 
+    animals.forEach(animal => {
 
-  select.innerHTML = `
-    <option value="">
-      Genel Süt Kaydı
-    </option>
-  `;
+        select.innerHTML += `
 
+            <option value="${animal.id}">
+                ${animal.tag} - ${animal.name}
+            </option>
 
-  animals.forEach(function (animal) {
+        `;
 
-    const option = document.createElement("option");
-
-    option.value = animal.id;
-
-    option.textContent =
-      `${animal.name} - ${animal.tag}`;
-
-    select.appendChild(option);
-
-  });
+    });
 
 }
 
 
-/* ================= SÜT KAYDI ================= */
+/* =========================
+   SÜT HESAPLAMA
+========================= */
 
-function addMilkRecord() {
+document.addEventListener("input", function (e) {
 
-  const date =
-    document.getElementById("milkDate").value;
+    if (
+        e.target.id === "milkAmount" ||
+        e.target.id === "milkPrice"
+    ) {
 
-  const session =
-    document.getElementById("milkSession").value;
+        calculateMilk();
 
-  const animalId =
-    document.getElementById("milkAnimal").value;
+    }
 
-  const amount =
-    parseFloat(document.getElementById("milkAmount").value);
-
-  const fat =
-    parseFloat(document.getElementById("milkFat").value) || 0;
-
-  const protein =
-    parseFloat(document.getElementById("milkProtein").value) || 0;
-
-  const note =
-    document.getElementById("milkNote").value.trim();
+});
 
 
-  if (!date) {
+function calculateMilk() {
 
-    showToast("Tarih seç.");
+    const amount =
+        Number(document.getElementById("milkAmount").value) || 0;
 
-    return;
+    const price =
+        Number(document.getElementById("milkPrice").value) ||
+        Number(settings.defaultPrice) ||
+        0;
 
-  }
+    const total = amount * price;
 
-
-  if (!amount || amount <= 0) {
-
-    showToast("Geçerli bir süt miktarı gir.");
-
-    return;
-
-  }
-
-
-  const animal = animals.find(function (item) {
-
-    return String(item.id) === String(animalId);
-
-  });
-
-
-  const record = {
-
-    id: Date.now(),
-
-    date: date,
-
-    session: session,
-
-    animalId: animalId || "",
-
-    animalName: animal ? animal.name : "Genel",
-
-    amount: amount,
-
-    fat: fat,
-
-    protein: protein,
-
-    note: note
-
-  };
-
-
-  milkRecords.push(record);
-
-  saveData();
-
-
-  renderMilkRecords();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  document.getElementById("milkAmount").value = "";
-
-  document.getElementById("milkFat").value = "";
-
-  document.getElementById("milkProtein").value = "";
-
-  document.getElementById("milkNote").value = "";
-
-
-  showToast("Süt kaydı başarıyla eklendi.");
+    document.getElementById("milkCalculatedTotal")
+        .textContent = money(total);
 
 }
 
 
-function deleteMilkRecord(id) {
+/* =========================
+   SÜT KAYDI EKLE
+========================= */
 
-  if (!confirm("Bu süt kaydı silinsin mi?")) {
+function addMilk() {
 
-    return;
+    const date =
+        document.getElementById("milkDate").value;
 
-  }
+    const session =
+        document.getElementById("milkSession").value;
+
+    const animalId =
+        document.getElementById("milkAnimal").value;
+
+    const amount =
+        Number(document.getElementById("milkAmount").value);
+
+    let price =
+        Number(document.getElementById("milkPrice").value);
+
+    const fat =
+        document.getElementById("milkFat").value;
+
+    const protein =
+        document.getElementById("milkProtein").value;
+
+    const note =
+        document.getElementById("milkNote").value.trim();
 
 
-  milkRecords = milkRecords.filter(function (record) {
+    if (!date || !animalId || !amount) {
 
-    return record.id !== id;
+        showToast("Tarih, hayvan ve süt miktarı gerekli.");
 
-  });
-
-
-  saveData();
-
-  renderMilkRecords();
-
-  updateDashboard();
-
-  updateReports();
+        return;
+    }
 
 
-  showToast("Süt kaydı silindi.");
+    if (!price) {
+
+        price =
+            Number(settings.defaultPrice) || 0;
+
+    }
+
+
+    const total = amount * price;
+
+
+    const animal =
+        animals.find(a => String(a.id) === String(animalId));
+
+
+    const record = {
+
+        id: Date.now(),
+
+        date: date,
+
+        session: session,
+
+        animalId: animalId,
+
+        animalName: animal ? animal.name : "",
+
+        animalTag: animal ? animal.tag : "",
+
+        amount: amount,
+
+        price: price,
+
+        total: total,
+
+        fat: fat,
+
+        protein: protein,
+
+        note: note
+
+    };
+
+
+    milkRecords.push(record);
+
+    saveData();
+
+    renderMilk();
+
+    updateDashboard();
+
+    updateReports();
+
+
+    document.getElementById("milkAmount").value = "";
+    document.getElementById("milkFat").value = "";
+    document.getElementById("milkProtein").value = "";
+    document.getElementById("milkNote").value = "";
+
+    document.getElementById("milkPrice").value =
+        settings.defaultPrice || 20;
+
+    calculateMilk();
+
+    showToast("Süt kaydı kaydedildi.");
 
 }
 
 
-function renderMilkRecords() {
+/* =========================
+   SÜT SİL
+========================= */
 
-  const container =
-    document.getElementById("milkList");
+function deleteMilk(id) {
 
-  if (!container) return;
+    if (!confirm("Bu süt kaydını silmek istediğine emin misin?")) {
+        return;
+    }
 
+    milkRecords =
+        milkRecords.filter(item => item.id !== id);
 
-  if (milkRecords.length === 0) {
+    saveData();
 
-    container.innerHTML = `
-      <div class="empty">
-        Henüz süt kaydı bulunmuyor.
-      </div>
-    `;
+    renderMilk();
 
-    return;
+    updateDashboard();
 
-  }
+    updateReports();
 
+    showToast("Süt kaydı silindi.");
 
-  const records = [...milkRecords].sort(function (a, b) {
-
-    return new Date(b.date) - new Date(a.date);
-
-  });
+}
 
 
-  container.innerHTML = `
+/* =========================
+   SÜT LİSTESİ
+========================= */
 
-    <table class="data-table">
+function renderMilk() {
 
-      <thead>
+    const container =
+        document.getElementById("milkList");
 
-        <tr>
+    if (!milkRecords.length) {
 
-          <th>Tarih</th>
+        container.innerHTML =
+            `<div class="empty">Henüz süt kaydı yok.</div>`;
 
-          <th>Sağım</th>
-
-          <th>Hayvan</th>
-
-          <th>Süt</th>
-
-          <th>Yağ</th>
-
-          <th>Protein</th>
-
-          <th></th>
-
-        </tr>
-
-      </thead>
+        return;
+    }
 
 
-      <tbody>
+    const sorted =
+        [...milkRecords].sort(
+            (a, b) => b.date.localeCompare(a.date)
+        );
 
-        ${records.map(function (record) {
 
-          return `
+    container.innerHTML = sorted.map(item => `
 
-            <tr>
+        <div class="record">
 
-              <td>
-                ${formatDate(record.date)}
-              </td>
+            <div class="record-info">
 
-              <td>
-                ${record.session}
-              </td>
-
-              <td>
-                ${escapeHtml(record.animalName)}
-              </td>
-
-              <td>
                 <strong>
-                  ${formatNumber(record.amount)} L
+                    ${item.session === "Sabah" ? "🌅" : "🌙"}
+                    ${item.animalName}
                 </strong>
-              </td>
 
-              <td>
-                ${record.fat ? record.fat + "%" : "-"}
-              </td>
+                <small>
+                    ${formatDate(item.date)}
+                    • Küpe: ${item.animalTag}
+                </small>
 
-              <td>
-                ${record.protein ? record.protein + "%" : "-"}
-              </td>
+                <small>
+                    ${item.amount} L ×
+                    ${money(item.price)}
+                </small>
 
-              <td>
+            </div>
+
+
+            <div class="record-money">
+
+                <strong>
+                    ${money(item.total)}
+                </strong>
+
+                <br>
+
+                <small>
+                    ${item.amount} L
+                </small>
 
                 <button
-                  class="delete-btn"
-                  onclick="deleteMilkRecord(${record.id})"
+                    class="delete-btn"
+                    onclick="deleteMilk(${item.id})"
                 >
-                  Sil
+                    🗑️
                 </button>
 
-              </td>
+            </div>
 
-            </tr>
+        </div>
 
-          `;
-
-        }).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
+    `).join("");
 
 }
 
 
-/* ================= SÜT TEMİZLE ================= */
+/* =========================
+   ANA SAYFA
+========================= */
 
-function clearMilkRecords() {
+function updateDashboard() {
 
-  if (milkRecords.length === 0) {
+    const today =
+        getToday();
 
-    showToast("Silinecek kayıt yok.");
-
-    return;
-
-  }
-
-
-  if (!confirm("Tüm süt kayıtları silinsin mi?")) {
-
-    return;
-
-  }
+    const currentMonth =
+        today.substring(0, 7);
 
 
-  milkRecords = [];
-
-  saveData();
-
-  renderMilkRecords();
-
-  updateDashboard();
-
-  updateReports();
+    const todayRecords =
+        milkRecords.filter(
+            r => r.date === today
+        );
 
 
-  showToast("Süt kayıtları temizlendi.");
+    const monthRecords =
+        milkRecords.filter(
+            r => r.date.startsWith(currentMonth)
+        );
+
+
+    const todayMilk =
+        sum(todayRecords, "amount");
+
+
+    const morningMilk =
+        sum(
+            todayRecords.filter(
+                r => r.session === "Sabah"
+            ),
+            "amount"
+        );
+
+
+    const eveningMilk =
+        sum(
+            todayRecords.filter(
+                r => r.session === "Akşam"
+            ),
+            "amount"
+        );
+
+
+    const todayIncome =
+        sum(todayRecords, "total");
+
+
+    const monthMilk =
+        sum(monthRecords, "amount");
+
+
+    const monthIncome =
+        sum(monthRecords, "total");
+
+
+    document.getElementById("todayMilk")
+        .textContent = number(todayMilk) + " L";
+
+
+    document.getElementById("morningMilk")
+        .textContent = number(morningMilk) + " L";
+
+
+    document.getElementById("eveningMilk")
+        .textContent = number(eveningMilk) + " L";
+
+
+    document.getElementById("todayIncome")
+        .textContent = money(todayIncome);
+
+
+    document.getElementById("monthMilk")
+        .textContent = number(monthMilk) + " L";
+
+
+    document.getElementById("monthIncome")
+        .textContent = money(monthIncome);
+
+
+    document.getElementById("animalCount")
+        .textContent = animals.length;
+
+
+    renderRecentMilk();
 
 }
 
 
-/* ================= SATIŞ ================= */
+/* =========================
+   SON KAYITLAR
+========================= */
 
-function setupSaleCalculator() {
+function renderRecentMilk() {
 
-  const amount =
-    document.getElementById("saleAmount");
+    const container =
+        document.getElementById("recentMilk");
 
-  const price =
-    document.getElementById("salePrice");
-
-
-  if (!amount || !price) return;
-
-
-  amount.addEventListener("input", calculateSaleTotal);
-
-  price.addEventListener("input", calculateSaleTotal);
+    const records =
+        [...milkRecords]
+        .sort((a, b) => b.id - a.id)
+        .slice(0, 5);
 
 
-  if (settings.defaultPrice) {
+    if (!records.length) {
 
-    price.value = settings.defaultPrice;
+        container.innerHTML =
+            `<div class="empty">Henüz süt kaydı yok.</div>`;
 
-  }
+        return;
+    }
 
 
-  calculateSaleTotal();
+    container.innerHTML =
+        records.map(item => `
+
+        <div class="record">
+
+            <div class="record-info">
+
+                <strong>
+                    ${item.animalName}
+                    - ${item.session}
+                </strong>
+
+                <small>
+                    ${formatDate(item.date)}
+                </small>
+
+            </div>
+
+            <div class="record-money">
+
+                <strong>
+                    ${item.amount} L
+                </strong>
+
+                <br>
+
+                <small>
+                    ${money(item.total)}
+                </small>
+
+            </div>
+
+        </div>
+
+    `).join("");
 
 }
 
 
-function calculateSaleTotal() {
+/* =========================
+   SATIŞ
+========================= */
 
-  const amount =
-    parseFloat(document.getElementById("saleAmount").value) || 0;
+function calculateSale() {
 
-  const price =
-    parseFloat(document.getElementById("salePrice").value) || 0;
+    const amount =
+        Number(document.getElementById("saleAmount").value) || 0;
 
+    const price =
+        Number(document.getElementById("salePrice").value) || 0;
 
-  const total = amount * price;
-
-
-  const output =
-    document.getElementById("saleTotal");
-
-
-  if (output) {
-
-    output.textContent =
-      formatMoney(total);
-
-  }
+    document.getElementById("saleTotal")
+        .textContent = money(amount * price);
 
 }
 
 
 function addSale() {
 
-  const date =
-    document.getElementById("saleDate").value;
+    const date =
+        document.getElementById("saleDate").value;
 
-  const customer =
-    document.getElementById("saleCustomer").value.trim();
+    const customer =
+        document.getElementById("saleCustomer").value.trim();
 
-  const amount =
-    parseFloat(document.getElementById("saleAmount").value);
+    const amount =
+        Number(document.getElementById("saleAmount").value);
 
-  const price =
-    parseFloat(document.getElementById("salePrice").value);
+    const price =
+        Number(document.getElementById("salePrice").value);
 
-  const note =
-    document.getElementById("saleNote").value.trim();
-
-
-  if (!date) {
-
-    showToast("Tarih seç.");
-
-    return;
-
-  }
+    const note =
+        document.getElementById("saleNote").value.trim();
 
 
-  if (!customer) {
+    if (!date || !amount || !price) {
 
-    showToast("Alıcı adını gir.");
+        showToast("Tarih, litre ve fiyat gerekli.");
 
-    return;
-
-  }
-
-
-  if (!amount || amount <= 0) {
-
-    showToast("Süt miktarını gir.");
-
-    return;
-
-  }
+        return;
+    }
 
 
-  if (!price || price <= 0) {
-
-    showToast("Litre fiyatını gir.");
-
-    return;
-
-  }
+    const total =
+        amount * price;
 
 
-  const sale = {
+    sales.push({
 
-    id: Date.now(),
+        id: Date.now(),
 
-    date: date,
+        date: date,
 
-    customer: customer,
+        customer: customer,
 
-    amount: amount,
+        amount: amount,
 
-    price: price,
+        price: price,
 
-    total: amount * price,
+        total: total,
 
-    note: note
+        note: note
 
-  };
-
-
-  sales.push(sale);
-
-  saveData();
+    });
 
 
-  renderSales();
+    saveData();
 
-  updateDashboard();
+    renderSales();
 
-  updateReports();
+    updateReports();
 
+    document.getElementById("saleAmount").value = "";
+    document.getElementById("salePrice").value = "";
+    document.getElementById("saleCustomer").value = "";
+    document.getElementById("saleNote").value = "";
 
-  document.getElementById("saleCustomer").value = "";
+    calculateSale();
 
-  document.getElementById("saleAmount").value = "";
-
-  document.getElementById("saleNote").value = "";
-
-
-  calculateSaleTotal();
-
-
-  showToast("Süt satışı kaydedildi.");
+    showToast("Satış kaydedildi.");
 
 }
 
 
 function deleteSale(id) {
 
-  if (!confirm("Bu satış silinsin mi?")) {
+    if (!confirm("Bu satışı silmek istediğine emin misin?")) {
+        return;
+    }
 
-    return;
+    sales =
+        sales.filter(s => s.id !== id);
 
-  }
+    saveData();
 
+    renderSales();
 
-  sales = sales.filter(function (sale) {
-
-    return sale.id !== id;
-
-  });
-
-
-  saveData();
-
-  renderSales();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  showToast("Satış silindi.");
+    updateReports();
 
 }
 
 
 function renderSales() {
 
-  const container =
-    document.getElementById("salesList");
+    const container =
+        document.getElementById("salesList");
 
-  if (!container) return;
+    if (!sales.length) {
 
+        container.innerHTML =
+            `<div class="empty">Henüz satış yok.</div>`;
 
-  if (sales.length === 0) {
+        return;
+    }
 
-    container.innerHTML = `
-      <div class="empty">
-        Henüz satış kaydı bulunmuyor.
-      </div>
-    `;
 
-    return;
+    const sorted =
+        [...sales].sort(
+            (a, b) => b.date.localeCompare(a.date)
+        );
 
-  }
 
-
-  const sorted = [...sales].sort(function (a, b) {
-
-    return new Date(b.date) - new Date(a.date);
-
-  });
-
-
-  container.innerHTML = `
-
-    <table class="data-table">
-
-      <thead>
-
-        <tr>
-
-          <th>Tarih</th>
-
-          <th>Alıcı</th>
-
-          <th>Miktar</th>
-
-          <th>Litre Fiyatı</th>
-
-          <th>Toplam</th>
-
-          <th></th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody>
-
-        ${sorted.map(function (sale) {
-
-          return `
-
-            <tr>
-
-              <td>
-                ${formatDate(sale.date)}
-              </td>
-
-              <td>
-                ${escapeHtml(sale.customer)}
-              </td>
-
-              <td>
-                ${formatNumber(sale.amount)} L
-              </td>
-
-              <td>
-                ${formatMoney(sale.price)}
-              </td>
-
-              <td>
-                <strong>
-                  ${formatMoney(sale.total)}
-                </strong>
-              </td>
-
-              <td>
-
-                <button
-                  class="delete-btn"
-                  onclick="deleteSale(${sale.id})"
-                >
-                  Sil
-                </button>
-
-              </td>
-
-            </tr>
-
-          `;
-
-        }).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* ================= ANA SAYFA ================= */
-
-function updateDashboard() {
-
-  const today = getToday();
-
-  const now = new Date();
-
-  const currentMonth =
-    now.getFullYear() + "-" +
-    String(now.getMonth() + 1).padStart(2, "0");
-
-
-  const todayRecords =
-    milkRecords.filter(function (record) {
-
-      return record.date === today;
-
-    });
-
-
-  const morning =
-    todayRecords
-      .filter(function (record) {
-
-        return record.session === "Sabah";
-
-      })
-      .reduce(function (sum, record) {
-
-        return sum + Number(record.amount);
-
-      }, 0);
-
-
-  const evening =
-    todayRecords
-      .filter(function (record) {
-
-        return record.session === "Akşam";
-
-      })
-      .reduce(function (sum, record) {
-
-        return sum + Number(record.amount);
-
-      }, 0);
-
-
-  const todayTotal = morning + evening;
-
-
-  const monthMilk =
-    milkRecords
-      .filter(function (record) {
-
-        return record.date.startsWith(currentMonth);
-
-      })
-      .reduce(function (sum, record) {
-
-        return sum + Number(record.amount);
-
-      }, 0);
-
-
-  const monthIncome =
-    sales
-      .filter(function (sale) {
-
-        return sale.date.startsWith(currentMonth);
-
-      })
-      .reduce(function (sum, sale) {
-
-        return sum + Number(sale.total);
-
-      }, 0);
-
-
-  setText("todayMilk", formatNumber(todayTotal) + " L");
-
-  setText("morningMilk", formatNumber(morning) + " L");
-
-  setText("eveningMilk", formatNumber(evening) + " L");
-
-  setText("animalCount", animals.length);
-
-  setText("monthMilk", formatNumber(monthMilk) + " L");
-
-  setText("monthIncome", formatMoney(monthIncome));
-
-
-  renderRecentMilk();
-
-}
-
-
-function renderRecentMilk() {
-
-  const container =
-    document.getElementById("recentMilk");
-
-  if (!container) return;
-
-
-  if (milkRecords.length === 0) {
-
-    container.innerHTML = `
-      <div class="empty">
-        Henüz süt kaydı bulunmuyor.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const records =
-    [...milkRecords]
-      .sort(function (a, b) {
-
-        return b.id - a.id;
-
-      })
-      .slice(0, 5);
-
-
-  container.innerHTML =
-    records.map(function (record) {
-
-      return `
+    container.innerHTML =
+        sorted.map(sale => `
 
         <div class="record">
 
-          <div class="record-left">
+            <div class="record-info">
 
-            <div class="record-icon">
-              🥛
-            </div>
+                <strong>
+                    ${sale.customer || "Müşteri belirtilmedi"}
+                </strong>
 
-            <div>
+                <small>
+                    ${formatDate(sale.date)}
+                    • ${sale.amount} L
+                </small>
 
-              <div class="record-title">
-                ${escapeHtml(record.animalName)}
-                - ${record.session}
-              </div>
-
-              <div class="record-date">
-                ${formatDate(record.date)}
-              </div>
+                <small>
+                    ${money(sale.price)} / L
+                </small>
 
             </div>
 
-          </div>
+            <div class="record-money">
 
+                <strong>
+                    ${money(sale.total)}
+                </strong>
 
-          <div class="record-amount">
-            ${formatNumber(record.amount)} L
-          </div>
+                <button
+                    class="delete-btn"
+                    onclick="deleteSale(${sale.id})"
+                >
+                    🗑️
+                </button>
+
+            </div>
 
         </div>
 
-      `;
-
-    }).join("");
+    `).join("");
 
 }
 
 
-/* ================= RAPORLAR ================= */
+/* =========================
+   RAPORLAR
+========================= */
 
 function updateReports() {
 
-  const totalMilk =
-    milkRecords.reduce(function (sum, record) {
+    const today =
+        getToday();
 
-      return sum + Number(record.amount);
-
-    }, 0);
-
-
-  const totalSales =
-    sales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.total);
-
-    }, 0);
+    const month =
+        today.substring(0, 7);
 
 
-  const soldMilk =
-    sales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.amount);
-
-    }, 0);
+    const monthRecords =
+        milkRecords.filter(
+            r => r.date.startsWith(month)
+        );
 
 
-  const dates = new Set(
-    milkRecords.map(function (record) {
-
-      return record.date;
-
-    })
-  );
+    const totalMilk =
+        sum(monthRecords, "amount");
 
 
-  const average =
-    dates.size > 0
-      ? totalMilk / dates.size
-      : 0;
+    const totalIncome =
+        sum(monthRecords, "total");
 
 
-  setText(
-    "reportTotalMilk",
-    formatNumber(totalMilk) + " L"
-  );
+    const days =
+        new Set(
+            monthRecords.map(r => r.date)
+        ).size;
 
 
-  setText(
-    "reportAverageMilk",
-    formatNumber(average) + " L"
-  );
+    const average =
+        days ? totalMilk / days : 0;
 
 
-  setText(
-    "reportTotalSales",
-    formatMoney(totalSales)
-  );
+    document.getElementById("reportTotalMilk")
+        .textContent = number(totalMilk) + " L";
 
 
-  setText(
-    "reportSoldMilk",
-    formatNumber(soldMilk) + " L"
-  );
+    document.getElementById("reportAverageMilk")
+        .textContent = number(average) + " L";
+
+
+    document.getElementById("reportTotalSales")
+        .textContent = money(totalIncome);
+
+
+    const soldMilk =
+        sales
+        .filter(s => s.date.startsWith(month))
+        .reduce(
+            (total, s) => total + Number(s.amount || 0),
+            0
+        );
+
+
+    document.getElementById("reportSoldMilk")
+        .textContent = number(soldMilk) + " L";
 
 }
 
 
 function generateReport() {
 
-  const start =
-    document.getElementById("reportStart").value;
+    const start =
+        document.getElementById("reportStart").value;
 
-  const end =
-    document.getElementById("reportEnd").value;
-
-
-  if (!start || !end) {
-
-    showToast("Başlangıç ve bitiş tarihini seç.");
-
-    return;
-
-  }
+    const end =
+        document.getElementById("reportEnd").value;
 
 
-  const filteredMilk =
-    milkRecords.filter(function (record) {
+    if (!start || !end) {
 
-      return record.date >= start &&
-             record.date <= end;
+        showToast("Başlangıç ve bitiş tarihi seç.");
 
-    });
-
-
-  const filteredSales =
-    sales.filter(function (sale) {
-
-      return sale.date >= start &&
-             sale.date <= end;
-
-    });
+        return;
+    }
 
 
-  const totalMilk =
-    filteredMilk.reduce(function (sum, record) {
-
-      return sum + Number(record.amount);
-
-    }, 0);
+    const records =
+        milkRecords.filter(
+            r => r.date >= start && r.date <= end
+        );
 
 
-  const soldMilk =
-    filteredSales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.amount);
-
-    }, 0);
+    const totalMilk =
+        sum(records, "amount");
 
 
-  const income =
-    filteredSales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.total);
-
-    }, 0);
+    const totalIncome =
+        sum(records, "total");
 
 
-  const dates = new Set(
-    filteredMilk.map(function (record) {
-
-      return record.date;
-
-    })
-  );
+    const days =
+        new Set(records.map(r => r.date)).size;
 
 
-  const average =
-    dates.size > 0
-      ? totalMilk / dates.size
-      : 0;
+    const average =
+        days ? totalMilk / days : 0;
 
 
-  const result =
-    document.getElementById("reportResult");
+    document.getElementById("reportResult").innerHTML = `
 
+        <div class="report-box">
 
-  result.innerHTML = `
+            <h3>📊 Rapor Sonucu</h3>
 
-    <h3>📊 Rapor Sonucu</h3>
+            <p>
+                🥛 Toplam süt:
+                <strong>${number(totalMilk)} L</strong>
+            </p>
 
-    <p>
-      <strong>Tarih:</strong>
-      ${formatDate(start)}
-      -
-      ${formatDate(end)}
-    </p>
+            <p>
+                💰 Toplam gelir:
+                <strong>${money(totalIncome)}</strong>
+            </p>
 
-    <br>
+            <p>
+                📈 Günlük ortalama:
+                <strong>${number(average)} L</strong>
+            </p>
 
-    <p>
-      🥛 Toplam üretilen süt:
-      <strong>${formatNumber(totalMilk)} L</strong>
-    </p>
+            <p>
+                📝 Süt kayıt sayısı:
+                <strong>${records.length}</strong>
+            </p>
 
-    <p>
-      📅 Günlük ortalama:
-      <strong>${formatNumber(average)} L</strong>
-    </p>
+        </div>
 
-    <p>
-      🚚 Satılan süt:
-      <strong>${formatNumber(soldMilk)} L</strong>
-    </p>
-
-    <p>
-      💰 Satış geliri:
-      <strong>${formatMoney(income)}</strong>
-    </p>
-
-  `;
-
-
-  showToast("Rapor oluşturuldu.");
+    `;
 
 }
 
 
-/* ================= AYARLAR ================= */
-
-function loadSettings() {
-
-  const farmName =
-    document.getElementById("farmName");
-
-  const defaultPrice =
-    document.getElementById("defaultPrice");
-
-
-  if (farmName) {
-
-    farmName.value =
-      settings.farmName || "Demirkapı Çiftliği";
-
-  }
-
-
-  if (defaultPrice) {
-
-    defaultPrice.value =
-      settings.defaultPrice || "";
-
-  }
-
-}
-
+/* =========================
+   AYARLAR
+========================= */
 
 function saveSettings() {
 
-  const farmName =
-    document.getElementById("farmName").value.trim();
+    settings.farmName =
+        document.getElementById("farmName").value ||
+        "Demirkapı Çiftliği";
 
 
-  const defaultPrice =
-    parseFloat(
-      document.getElementById("defaultPrice").value
-    ) || 0;
+    settings.defaultPrice =
+        Number(
+            document.getElementById("defaultPrice").value
+        ) || 0;
 
 
-  settings = {
-
-    farmName:
-      farmName || "Demirkapı Çiftliği",
-
-    defaultPrice:
-      defaultPrice
-
-  };
+    localStorage.setItem(
+        "settings",
+        JSON.stringify(settings)
+    );
 
 
-  saveData();
+    document.getElementById("milkPrice").value =
+        settings.defaultPrice;
 
 
-  const priceInput =
-    document.getElementById("salePrice");
-
-
-  if (priceInput && settings.defaultPrice) {
-
-    priceInput.value =
-      settings.defaultPrice;
-
-    calculateSaleTotal();
-
-  }
-
-
-  showToast("Ayarlar kaydedildi.");
+    showToast("Ayarlar kaydedildi.");
 
 }
 
 
-/* ================= YEDEKLEME ================= */
+/* =========================
+   YEDEKLEME
+========================= */
 
 function exportData() {
 
-  const data = {
+    const data = {
 
-    version: 1,
+        animals: animals,
 
-    exportedAt: new Date().toISOString(),
+        milkRecords: milkRecords,
 
-    animals: animals,
+        sales: sales,
 
-    milkRecords: milkRecords,
+        settings: settings
 
-    sales: sales,
-
-    settings: settings
-
-  };
+    };
 
 
-  const blob =
-    new Blob(
-      [JSON.stringify(data, null, 2)],
-      { type: "application/json" }
-    );
+    const blob =
+        new Blob(
+            [JSON.stringify(data, null, 2)],
+            { type: "application/json" }
+        );
 
 
-  const url =
-    URL.createObjectURL(blob);
+    const url =
+        URL.createObjectURL(blob);
 
 
-  const link =
-    document.createElement("a");
+    const a =
+        document.createElement("a");
 
 
-  link.href = url;
+    a.href = url;
 
-  link.download =
-    "demirkapi-sut-yedek-" +
-    getToday() +
-    ".json";
+    a.download =
+        "demirkapi-sut-yedek.json";
 
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  link.remove();
+    a.click();
 
 
-  URL.revokeObjectURL(url);
-
-
-  showToast("Yedek dosyası hazırlandı.");
+    URL.revokeObjectURL(url);
 
 }
 
 
 function importData(event) {
 
-  const file =
-    event.target.files[0];
+    const file =
+        event.target.files[0];
+
+    if (!file) return;
 
 
-  if (!file) return;
+    const reader =
+        new FileReader();
 
 
-  const reader =
-    new FileReader();
+    reader.onload = function (e) {
+
+        try {
+
+            const data =
+                JSON.parse(e.target.result);
 
 
-  reader.onload = function (e) {
-
-    try {
-
-      const data =
-        JSON.parse(e.target.result);
+            animals =
+                data.animals || [];
 
 
-      if (!data || typeof data !== "object") {
-
-        throw new Error();
-
-      }
+            milkRecords =
+                data.milkRecords || [];
 
 
-      animals =
-        Array.isArray(data.animals)
-          ? data.animals
-          : [];
+            sales =
+                data.sales || [];
 
 
-      milkRecords =
-        Array.isArray(data.milkRecords)
-          ? data.milkRecords
-          : [];
+            settings =
+                data.settings || settings;
 
 
-      sales =
-        Array.isArray(data.sales)
-          ? data.sales
-          : [];
+            saveData();
 
 
-      settings =
-        data.settings || {
-          farmName: "Demirkapı Çiftliği",
-          defaultPrice: 0
-        };
+            renderAnimals();
+
+            renderMilk();
+
+            renderSales();
+
+            updateAnimalSelect();
+
+            updateDashboard();
+
+            updateReports();
 
 
-      saveData();
+            document.getElementById("defaultPrice").value =
+                settings.defaultPrice || 0;
 
 
-      loadSettings();
-
-      renderAnimals();
-
-      renderMilkRecords();
-
-      renderSales();
-
-      updateAnimalSelect();
-
-      updateDashboard();
-
-      updateReports();
+            document.getElementById("farmName").value =
+                settings.farmName || "Demirkapı Çiftliği";
 
 
-      showToast("Yedek başarıyla geri yüklendi.");
+            showToast("Yedek geri yüklendi.");
 
-    } catch (error) {
+        }
 
-      showToast("Yedek dosyası geçersiz.");
+        catch {
 
-    }
+            showToast("Yedek dosyası okunamadı.");
 
-  };
+        }
+
+    };
 
 
-  reader.readAsText(file);
+    reader.readAsText(file);
 
 }
 
 
-/* ================= LOCAL STORAGE ================= */
+/* =========================
+   LOCAL STORAGE
+========================= */
 
 function saveData() {
 
-  localStorage.setItem(
-    "animals",
-    JSON.stringify(animals)
-  );
+    localStorage.setItem(
+        "animals",
+        JSON.stringify(animals)
+    );
 
 
-  localStorage.setItem(
-    "milkRecords",
-    JSON.stringify(milkRecords)
-  );
+    localStorage.setItem(
+        "milkRecords",
+        JSON.stringify(milkRecords)
+    );
 
 
-  localStorage.setItem(
-    "sales",
-    JSON.stringify(sales)
-  );
+    localStorage.setItem(
+        "sales",
+        JSON.stringify(sales)
+    );
 
 
-  localStorage.setItem(
-    "settings",
-    JSON.stringify(settings)
-  );
-
-}
-
-
-/* ================= YARDIMCI ================= */
-
-function setText(id, value) {
-
-  const element =
-    document.getElementById(id);
-
-
-  if (element) {
-
-    element.textContent = value;
-
-  }
+    localStorage.setItem(
+        "settings",
+        JSON.stringify(settings)
+    );
 
 }
 
 
-function formatNumber(number) {
+/* =========================
+   YARDIMCI
+========================= */
 
-  return Number(number || 0).toLocaleString(
-    "tr-TR",
-    {
-      maximumFractionDigits: 2
-    }
-  );
+function sum(array, key) {
 
-}
-
-
-function formatMoney(number) {
-
-  return Number(number || 0).toLocaleString(
-    "tr-TR",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }
-  ) + " ₺";
+    return array.reduce(
+        (total, item) =>
+            total + Number(item[key] || 0),
+        0
+    );
 
 }
 
 
-function escapeHtml(value) {
+function number(value) {
 
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    return Number(value || 0)
+        .toLocaleString("tr-TR", {
+            maximumFractionDigits: 2
+        });
 
 }
 
 
-/* ================= BİLDİRİM ================= */
+function money(value) {
 
-let toastTimer;
+    return Number(value || 0)
+        .toLocaleString("tr-TR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " TL";
+
+}
 
 
 function showToast(message) {
 
-  const toast =
-    document.getElementById("toast");
+    const toast =
+        document.getElementById("toast");
 
 
-  if (!toast) return;
+    toast.textContent = message;
+
+    toast.style.display = "block";
 
 
-  toast.textContent = message;
+    setTimeout(() => {
 
-  toast.classList.add("show");
+        toast.style.display = "none";
 
-
-  clearTimeout(toastTimer);
-
-
-  toastTimer = setTimeout(function () {
-
-    toast.classList.remove("show");
-
-  }, 2500);
+    }, 2500);
 
 }
