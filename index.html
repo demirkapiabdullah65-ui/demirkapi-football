@@ -1,208 +1,644 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#111827">
-<title>Demirkapı Çiftliği</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#176b3a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <title>Demirkapı Çiftliği - Süt Takip</title>
 
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f3f4f6;
-    color:#111827;
-}
-button,input,select,textarea{font:inherit}
-button{cursor:pointer;border:0}
-.app{
-    min-height:100vh;
-    display:flex;
-}
-.sidebar{
-    width:250px;
-    background:#111827;
-    color:white;
-    padding:20px 14px;
-    position:fixed;
-    left:0;
-    top:0;
-    bottom:0;
-    overflow-y:auto;
-    z-index:20;
-}
-.logo{
-    text-align:center;
-    padding:15px 5px 25px;
-}
-.logo-icon{
-    width:58px;
-    height:58px;
-    background:#16a34a;
-    border-radius:18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    margin:auto;
-    font-size:30px;
-}
-.logo h2{margin-top:10px;font-size:18px}
-.logo p{font-size:11px;color:#9ca3af;margin-top:4px}
-.menu-title{
-    font-size:10px;
-    color:#6b7280;
-    margin:18px 10px 8px;
-    font-weight:bold;
-}
-.nav-btn{
-    width:100%;
-    background:transparent;
-    color:#d1d5db;
-    padding:12px 13px;
-    margin:3px 0;
-    border-radius:10px;
-    text-align:left;
-    display:flex;
-    gap:11px;
-    align-items:center;
-}
-.nav-btn:hover,.nav-btn.active{
-    background:#1f2937;
-    color:white;
-}
-.nav-btn.active{border-left:3px solid #22c55e}
-.main{
-    margin-left:250px;
-    width:calc(100% - 250px);
-    min-height:100vh;
-}
-.topbar{
-    height:70px;
-    background:white;
-    border-bottom:1px solid #e5e7eb;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 25px;
-    position:sticky;
-    top:0;
-    z-index:10;
-}
-.topbar h1{font-size:20px}
-.date{font-size:13px;color:#6b7280}
-.content{padding:25px}
-.page{display:none}
-.page.active{display:block}
-.cards{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:15px;
-    margin-bottom:20px;
-}
-.card{
-    background:white;
-    border-radius:15px;
-    padding:19px;
-    box-shadow:0 2px 10px rgba(0,0,0,.04);
-}
-.card-top{
-    display:flex;
-    justify-content:space-between;
-    color:#6b7280;
-    font-size:13px;
-}
-.card-value{
-    font-size:25px;
-    font-weight:bold;
-    margin-top:10px;
-}
-.card-icon{
-    width:38px;
-    height:38px;
-    border-radius:10px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#ecfdf5;
-    font-size:19px;
-}
-.grid2{
-    display:grid;
-    grid-template-columns:1.3fr .7fr;
-    gap:20px;
-}
-.panel{
-    background:white;
-    border-radius:15px;
-    padding:20px;
-    margin-bottom:20px;
-    box-shadow:0 2px 10px rgba(0,0,0,.04);
-}
-.panel-head{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-    margin-bottom:18px;
-}
-.panel h3{font-size:16px}
-.btn{
-    padding:10px 14px;
-    border-radius:9px;
-    font-weight:bold;
-}
-.btn-green{background:#16a34a;color:white}
-.btn-green:hover{background:#15803d}
-.btn-dark{background:#111827;color:white}
-.btn-red{background:#dc2626;color:white}
-.btn-gray{background:#e5e7eb;color:#111827}
-.btn-blue{background:#2563eb;color:white}
-.form-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:14px;
-}
-.form-group{display:flex;flex-direction:column;gap:6px}
-.form-group.full{grid-column:1/-1}
-.form-group label{
-    font-size:12px;
-    color:#4b5563;
-    font-weight:bold;
-}
-.form-group input,
-.form-group select,
-.form-group textarea,
-.search{
-    border:1px solid #d1d5db;
-    border-radius:9px;
-    padding:11px;
-    outline:none;
-    background:white;
-}
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus,
-.search:focus{
-    border-color:#16a34a;
-}
-.actions{
-    display:flex;
-    gap:8px;
-    margin-top:16px;
-    flex-wrap:wrap;
-}
-.table-wrap{overflow-x:auto}
-table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:650px;
-}
-th{
-    background:#f9fafb;
-    text-align:left;
-    font-size:11px;
-    color:#6b7280;
-    padding:12px;
-}
-td{
-    border-top
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ÜST BAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">🐄</div>
+      <div>
+        <h1>Demirkapı Çiftliği</h1>
+        <span>Süt Takip Sistemi</span>
+      </div>
+    </div>
+
+    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  </header>
+
+
+  <!-- MOBİL MENÜ -->
+  <nav id="sideMenu" class="side-menu">
+
+    <button onclick="showPage('dashboard')">
+      🏠 Ana Sayfa
+    </button>
+
+    <button onclick="showPage('animals')">
+      🐄 Hayvanlar
+    </button>
+
+    <button onclick="showPage('milk')">
+      🥛 Süt Kayıtları
+    </button>
+
+    <button onclick="showPage('sales')">
+      💰 Süt Satışı
+    </button>
+
+    <button onclick="showPage('reports')">
+      📊 Raporlar
+    </button>
+
+    <button onclick="showPage('settings')">
+      ⚙️ Ayarlar
+    </button>
+
+  </nav>
+
+
+  <!-- ANA İÇERİK -->
+  <main class="container">
+
+
+    <!-- ================= ANA SAYFA ================= -->
+
+    <section id="dashboard" class="page active">
+
+      <div class="welcome">
+        <div>
+          <p class="small-title">HOŞ GELDİN</p>
+          <h2>Demirkapı Çiftliği</h2>
+          <p>Bugünkü süt durumunu buradan takip edebilirsin.</p>
+        </div>
+
+        <div class="cow-big">🐄</div>
+      </div>
+
+
+      <div class="stats-grid">
+
+        <div class="stat-card">
+          <div class="stat-icon">🥛</div>
+          <div>
+            <span>Bugünkü Süt</span>
+            <strong id="todayMilk">0 L</strong>
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-icon">🌅</div>
+          <div>
+            <span>Sabah</span>
+            <strong id="morningMilk">0 L</strong>
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-icon">🌙</div>
+          <div>
+            <span>Akşam</span>
+            <strong id="eveningMilk">0 L</strong>
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-icon">🐄</div>
+          <div>
+            <span>Hayvan Sayısı</span>
+            <strong id="animalCount">0</strong>
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-icon">📅</div>
+          <div>
+            <span>Bu Ay</span>
+            <strong id="monthMilk">0 L</strong>
+          </div>
+        </div>
+
+
+        <div class="stat-card">
+          <div class="stat-icon">💰</div>
+          <div>
+            <span>Bu Ay Gelir</span>
+            <strong id="monthIncome">0 ₺</strong>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="section-header">
+        <div>
+          <h3>Son Süt Kayıtları</h3>
+          <p>En son eklenen kayıtlar</p>
+        </div>
+
+        <button class="primary-btn" onclick="showPage('milk')">
+          + Süt Ekle
+        </button>
+      </div>
+
+      <div id="recentMilk" class="records-list">
+        <div class="empty">
+          Henüz süt kaydı bulunmuyor.
+        </div>
+      </div>
+
+    </section>
+
+
+
+    <!-- ================= HAYVANLAR ================= -->
+
+    <section id="animals" class="page">
+
+      <div class="page-title">
+        <div>
+          <span class="small-title">HAYVAN TAKİBİ</span>
+          <h2>🐄 Hayvanlar</h2>
+          <p>Çiftlikteki hayvanlarını buradan yönet.</p>
+        </div>
+
+        <button class="primary-btn" onclick="openAnimalForm()">
+          + Hayvan Ekle
+        </button>
+      </div>
+
+
+      <div id="animalForm" class="form-card hidden">
+
+        <h3>Yeni Hayvan</h3>
+
+        <div class="form-grid">
+
+          <div class="input-group">
+            <label>Küpe No</label>
+            <input id="animalTag" type="text" placeholder="Örn: TR123456">
+          </div>
+
+          <div class="input-group">
+            <label>Hayvan Adı</label>
+            <input id="animalName" type="text" placeholder="Örn: Sarıkız">
+          </div>
+
+          <div class="input-group">
+            <label>Irk</label>
+            <input id="animalBreed" type="text" placeholder="Örn: Simental">
+          </div>
+
+          <div class="input-group">
+            <label>Doğum Tarihi</label>
+            <input id="animalBirth" type="date">
+          </div>
+
+        </div>
+
+        <div class="form-buttons">
+          <button class="secondary-btn" onclick="closeAnimalForm()">
+            Vazgeç
+          </button>
+
+          <button class="primary-btn" onclick="addAnimal()">
+            Kaydet
+          </button>
+        </div>
+
+      </div>
+
+
+      <div id="animalList" class="animal-grid">
+
+        <div class="empty">
+          Henüz hayvan eklenmedi.
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ================= SÜT KAYITLARI ================= -->
+
+    <section id="milk" class="page">
+
+      <div class="page-title">
+
+        <div>
+          <span class="small-title">SÜT TAKİBİ</span>
+          <h2>🥛 Süt Kayıtları</h2>
+          <p>Sabah ve akşam sağım kayıtlarını gir.</p>
+        </div>
+
+      </div>
+
+
+      <div class="form-card">
+
+        <h3>Yeni Süt Kaydı</h3>
+
+        <div class="form-grid">
+
+          <div class="input-group">
+            <label>Tarih</label>
+            <input id="milkDate" type="date">
+          </div>
+
+
+          <div class="input-group">
+            <label>Sağım</label>
+
+            <select id="milkSession">
+
+              <option value="Sabah">
+                🌅 Sabah
+              </option>
+
+              <option value="Akşam">
+                🌙 Akşam
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="input-group">
+            <label>Hayvan</label>
+
+            <select id="milkAnimal">
+
+              <option value="">
+                Genel Süt Kaydı
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="input-group">
+            <label>Süt Miktarı (Litre)</label>
+            <input id="milkAmount" type="number" step="0.1" placeholder="Örn: 18.5">
+          </div>
+
+
+          <div class="input-group">
+            <label>Yağ Oranı (%)</label>
+            <input id="milkFat" type="number" step="0.1" placeholder="Örn: 3.8">
+          </div>
+
+
+          <div class="input-group">
+            <label>Protein (%)</label>
+            <input id="milkProtein" type="number" step="0.1" placeholder="Örn: 3.2">
+          </div>
+
+        </div>
+
+
+        <div class="input-group">
+          <label>Açıklama</label>
+
+          <textarea
+            id="milkNote"
+            placeholder="İsteğe bağlı açıklama..."
+          ></textarea>
+
+        </div>
+
+
+        <button class="primary-btn full" onclick="addMilkRecord()">
+          🥛 Süt Kaydını Kaydet
+        </button>
+
+      </div>
+
+
+      <div class="section-header">
+
+        <div>
+          <h3>Süt Geçmişi</h3>
+          <p>Kaydedilen tüm süt kayıtları</p>
+        </div>
+
+        <button class="danger-btn" onclick="clearMilkRecords()">
+          Kayıtları Temizle
+        </button>
+
+      </div>
+
+
+      <div id="milkList" class="table-container">
+
+        <div class="empty">
+          Henüz süt kaydı bulunmuyor.
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ================= SATIŞ ================= -->
+
+    <section id="sales" class="page">
+
+      <div class="page-title">
+
+        <div>
+          <span class="small-title">SATIŞ</span>
+          <h2>💰 Süt Satışı</h2>
+          <p>Satılan sütleri ve gelirlerini takip et.</p>
+        </div>
+
+      </div>
+
+
+      <div class="form-card">
+
+        <h3>Yeni Süt Satışı</h3>
+
+        <div class="form-grid">
+
+          <div class="input-group">
+            <label>Tarih</label>
+            <input id="saleDate" type="date">
+          </div>
+
+          <div class="input-group">
+            <label>Alıcı</label>
+            <input id="saleCustomer" type="text" placeholder="Alıcı adı">
+          </div>
+
+          <div class="input-group">
+            <label>Süt Miktarı (L)</label>
+            <input id="saleAmount" type="number" step="0.1" placeholder="Örn: 500">
+          </div>
+
+          <div class="input-group">
+            <label>Litre Fiyatı (₺)</label>
+            <input id="salePrice" type="number" step="0.01" placeholder="Örn: 18.50">
+          </div>
+
+        </div>
+
+
+        <div class="sale-preview">
+
+          <span>Toplam Tutar</span>
+
+          <strong id="saleTotal">
+            0,00 ₺
+          </strong>
+
+        </div>
+
+
+        <div class="input-group">
+          <label>Açıklama</label>
+
+          <textarea
+            id="saleNote"
+            placeholder="İsteğe bağlı açıklama..."
+          ></textarea>
+
+        </div>
+
+
+        <button class="primary-btn full" onclick="addSale()">
+          💰 Satışı Kaydet
+        </button>
+
+      </div>
+
+
+      <div class="section-header">
+
+        <div>
+          <h3>Satış Geçmişi</h3>
+        </div>
+
+      </div>
+
+
+      <div id="salesList" class="table-container">
+
+        <div class="empty">
+          Henüz satış kaydı bulunmuyor.
+        </div>
+
+      </div>
+
+    </section>
+
+
+
+    <!-- ================= RAPORLAR ================= -->
+
+    <section id="reports" class="page">
+
+      <div class="page-title">
+
+        <div>
+          <span class="small-title">ANALİZ</span>
+          <h2>📊 Raporlar</h2>
+          <p>Süt üretimini ve satışlarını incele.</p>
+        </div>
+
+      </div>
+
+
+      <div class="report-cards">
+
+        <div class="report-card">
+          <span>Toplam Süt</span>
+          <strong id="reportTotalMilk">0 L</strong>
+        </div>
+
+        <div class="report-card">
+          <span>Ortalama Günlük Süt</span>
+          <strong id="reportAverageMilk">0 L</strong>
+        </div>
+
+        <div class="report-card">
+          <span>Toplam Satış</span>
+          <strong id="reportTotalSales">0 ₺</strong>
+        </div>
+
+        <div class="report-card">
+          <span>Satılan Süt</span>
+          <strong id="reportSoldMilk">0 L</strong>
+        </div>
+
+      </div>
+
+
+      <div class="form-card">
+
+        <h3>📅 Tarih Aralığı</h3>
+
+        <div class="form-grid">
+
+          <div class="input-group">
+            <label>Başlangıç</label>
+            <input id="reportStart" type="date">
+          </div>
+
+          <div class="input-group">
+            <label>Bitiş</label>
+            <input id="reportEnd" type="date">
+          </div>
+
+        </div>
+
+        <button class="primary-btn full" onclick="generateReport()">
+          Raporu Hesapla
+        </button>
+
+      </div>
+
+
+      <div id="reportResult" class="report-result"></div>
+
+    </section>
+
+
+
+    <!-- ================= AYARLAR ================= -->
+
+    <section id="settings" class="page">
+
+      <div class="page-title">
+
+        <div>
+          <span class="small-title">SİSTEM</span>
+          <h2>⚙️ Ayarlar</h2>
+          <p>Uygulama ayarlarını yönet.</p>
+        </div>
+
+      </div>
+
+
+      <div class="form-card">
+
+        <h3>Çiftlik Bilgileri</h3>
+
+        <div class="input-group">
+
+          <label>Çiftlik Adı</label>
+
+          <input
+            id="farmName"
+            type="text"
+            value="Demirkapı Çiftliği"
+          >
+
+        </div>
+
+
+        <div class="input-group">
+
+          <label>Varsayılan Litre Fiyatı (₺)</label>
+
+          <input
+            id="defaultPrice"
+            type="number"
+            step="0.01"
+            placeholder="0.00"
+          >
+
+        </div>
+
+
+        <button class="primary-btn full" onclick="saveSettings()">
+          Ayarları Kaydet
+        </button>
+
+      </div>
+
+
+      <div class="form-card">
+
+        <h3>💾 Veri Yönetimi</h3>
+
+        <p class="settings-info">
+          Kayıtların bu cihazın tarayıcısında saklanır.
+          İnternet olmasa da kayıt ekleyebilirsin.
+        </p>
+
+
+        <div class="settings-buttons">
+
+          <button class="secondary-btn" onclick="exportData()">
+            📥 Verileri Yedekle
+          </button>
+
+          <button class="secondary-btn" onclick="document.getElementById('importFile').click()">
+            📤 Yedek Geri Yükle
+          </button>
+
+          <input
+            id="importFile"
+            type="file"
+            accept=".json"
+            hidden
+            onchange="importData(event)"
+          >
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ALT MENÜ -->
+  <nav class="bottom-nav">
+
+    <button onclick="showPage('dashboard')">
+      <span>🏠</span>
+      <small>Ana Sayfa</small>
+    </button>
+
+    <button onclick="showPage('animals')">
+      <span>🐄</span>
+      <small>Hayvanlar</small>
+    </button>
+
+    <button onclick="showPage('milk')">
+      <span>🥛</span>
+      <small>Süt</small>
+    </button>
+
+    <button onclick="showPage('sales')">
+      <span>💰</span>
+      <small>Satış</small>
+    </button>
+
+    <button onclick="showPage('reports')">
+      <span>📊</span>
+      <small>Rapor</small>
+    </button>
+
+  </nav>
+
+
+  <!-- BİLDİRİM -->
+  <div id="toast" class="toast"></div>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>
