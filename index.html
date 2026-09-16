@@ -3,23 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Demirkapı Çiftliği - Süt Takip</title>
+
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
+<!-- ÜST MENÜ -->
 <header class="topbar">
+
     <div>
         <h1>🐄 Demirkapı Çiftliği</h1>
         <span>Süt Takip Sistemi</span>
     </div>
 
     <button class="menu-btn" onclick="toggleMenu()">☰</button>
+
 </header>
+
 
 <div class="layout">
 
+    <!-- SOL MENÜ -->
     <aside id="sidebar">
 
         <button onclick="showPage('dashboard')">
@@ -48,64 +55,267 @@
 
     </aside>
 
+
     <main>
 
+
+        <!-- ========================= -->
         <!-- ANA SAYFA -->
+        <!-- ========================= -->
 
         <section id="dashboard" class="page active">
 
             <div class="page-title">
-                <h2>🏠 Ana Sayfa</h2>
-                <p>Demirkapı Çiftliği süt durumu</p>
+
+                <h2>🏠 Hoş Geldin</h2>
+
+                <p>
+                    Demirkapı Çiftliği'nin bugünkü süt durumuna genel bakış
+                </p>
+
             </div>
+
+
+            <!-- ANA ÖZET -->
 
             <div class="cards">
 
                 <div class="card">
+
                     <span>🥛 Bugünkü Süt</span>
-                    <strong id="todayMilk">0 L</strong>
+
+                    <strong id="todayMilk">
+                        0 L
+                    </strong>
+
+                    <small>
+                        Günlük toplam
+                    </small>
+
                 </div>
 
-                <div class="card">
-                    <span>🌅 Sabah</span>
-                    <strong id="morningMilk">0 L</strong>
-                </div>
 
                 <div class="card">
-                    <span>🌙 Akşam</span>
-                    <strong id="eveningMilk">0 L</strong>
+
+                    <span>🌅 Sabah Sağımı</span>
+
+                    <strong id="morningMilk">
+                        0 L
+                    </strong>
+
+                    <small>
+                        Sabah toplamı
+                    </small>
+
                 </div>
 
+
                 <div class="card">
+
+                    <span>🌙 Akşam Sağımı</span>
+
+                    <strong id="eveningMilk">
+                        0 L
+                    </strong>
+
+                    <small>
+                        Akşam toplamı
+                    </small>
+
+                </div>
+
+
+                <div class="card">
+
                     <span>💰 Bugünkü Gelir</span>
-                    <strong id="todayIncome">0 TL</strong>
+
+                    <strong id="todayIncome">
+                        0 TL
+                    </strong>
+
+                    <small>
+                        Bugünkü süt değeri
+                    </small>
+
                 </div>
 
+
                 <div class="card">
+
                     <span>📅 Bu Ay Süt</span>
-                    <strong id="monthMilk">0 L</strong>
+
+                    <strong id="monthMilk">
+                        0 L
+                    </strong>
+
+                    <small>
+                        Aylık toplam
+                    </small>
+
                 </div>
 
+
                 <div class="card">
+
                     <span>💵 Bu Ay Gelir</span>
-                    <strong id="monthIncome">0 TL</strong>
+
+                    <strong id="monthIncome">
+                        0 TL
+                    </strong>
+
+                    <small>
+                        Aylık süt geliri
+                    </small>
+
                 </div>
 
+
                 <div class="card">
+
                     <span>🐄 Hayvan Sayısı</span>
-                    <strong id="animalCount">0</strong>
+
+                    <strong id="animalCount">
+                        0
+                    </strong>
+
+                    <small>
+                        Kayıtlı hayvan
+                    </small>
+
                 </div>
 
             </div>
 
+
+            <!-- HIZLI İŞLEMLER -->
+
             <div class="panel">
 
-                <h3>📋 Son Süt Kayıtları</h3>
+                <h3>⚡ Hızlı İşlemler</h3>
+
+                <div class="quick-actions">
+
+                    <button
+                        class="quick-btn"
+                        onclick="showPage('milk')">
+
+                        <div class="quick-icon">
+                            🥛
+                        </div>
+
+                        <div>
+                            <strong>
+                                Süt Kaydet
+                            </strong>
+
+                            <small>
+                                Yeni sağım kaydı ekle
+                            </small>
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="quick-btn"
+                        onclick="showPage('animals')">
+
+                        <div class="quick-icon">
+                            🐄
+                        </div>
+
+                        <div>
+                            <strong>
+                                Hayvan Ekle
+                            </strong>
+
+                            <small>
+                                Yeni hayvan kaydet
+                            </small>
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="quick-btn"
+                        onclick="showPage('sales')">
+
+                        <div class="quick-icon">
+                            💰
+                        </div>
+
+                        <div>
+                            <strong>
+                                Süt Satışı
+                            </strong>
+
+                            <small>
+                                Satış kaydı oluştur
+                            </small>
+                        </div>
+
+                    </button>
+
+
+                    <button
+                        class="quick-btn"
+                        onclick="showPage('reports')">
+
+                        <div class="quick-icon">
+                            📊
+                        </div>
+
+                        <div>
+                            <strong>
+                                Raporlar
+                            </strong>
+
+                            <small>
+                                Süt ve gelir raporları
+                            </small>
+                        </div>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SON SÜT KAYITLARI -->
+
+            <div class="panel">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <h3>🥛 Son Süt Kayıtları</h3>
+
+                        <p>
+                            En son eklenen sağım kayıtları
+                        </p>
+
+                    </div>
+
+                    <button
+                        class="secondary"
+                        onclick="showPage('milk')">
+
+                        Tümünü Gör
+
+                    </button>
+
+                </div>
+
 
                 <div id="recentMilk">
+
                     <div class="empty">
                         Henüz süt kaydı yok.
                     </div>
+
                 </div>
 
             </div>
@@ -113,7 +323,10 @@
         </section>
 
 
+
+        <!-- ========================= -->
         <!-- HAYVANLAR -->
+        <!-- ========================= -->
 
         <section id="animals" class="page">
 
@@ -121,9 +334,12 @@
 
                 <h2>🐄 Hayvanlar</h2>
 
-                <p>Çiftlikteki hayvanları yönet</p>
+                <p>
+                    Çiftlikteki hayvanları yönet
+                </p>
 
             </div>
+
 
             <div class="panel">
 
@@ -132,54 +348,75 @@
                 <div class="form-grid">
 
                     <div>
+
                         <label>Küpe No</label>
+
                         <input
                             id="animalTag"
                             type="text"
                             placeholder="001">
+
                     </div>
 
+
                     <div>
+
                         <label>Hayvan Adı</label>
+
                         <input
                             id="animalName"
                             type="text"
                             placeholder="Sarıkız">
+
                     </div>
 
+
                     <div>
+
                         <label>Irk</label>
+
                         <input
                             id="animalBreed"
                             type="text"
                             placeholder="Simental">
+
                     </div>
 
+
                     <div>
+
                         <label>Doğum Tarihi</label>
+
                         <input
                             id="animalBirth"
                             type="date">
+
                     </div>
 
                 </div>
 
+
                 <button
                     class="primary"
                     onclick="addAnimal()">
-                    Hayvanı Kaydet
+
+                    🐄 Hayvanı Kaydet
+
                 </button>
 
             </div>
+
 
             <div class="panel">
 
                 <h3>🐄 Kayıtlı Hayvanlar</h3>
 
                 <div id="animalList">
+
                     <div class="empty">
                         Henüz hayvan eklenmedi.
                     </div>
+
                 </div>
 
             </div>
@@ -187,7 +424,10 @@
         </section>
 
 
+
+        <!-- ========================= -->
         <!-- SÜT KAYITLARI -->
+        <!-- ========================= -->
 
         <section id="milk" class="page">
 
@@ -195,9 +435,12 @@
 
                 <h2>🥛 Süt Kayıtları</h2>
 
-                <p>Sabah ve akşam sütlerini kaydet</p>
+                <p>
+                    Sabah ve akşam sağım kayıtlarını tut
+                </p>
 
             </div>
+
 
             <div class="panel">
 
@@ -214,6 +457,7 @@
                             type="date">
 
                     </div>
+
 
                     <div>
 
@@ -233,6 +477,7 @@
 
                     </div>
 
+
                     <div>
 
                         <label>Hayvan</label>
@@ -247,6 +492,7 @@
 
                     </div>
 
+
                     <div>
 
                         <label>Süt Miktarı (Litre)</label>
@@ -258,6 +504,7 @@
                             placeholder="18">
 
                     </div>
+
 
                     <div>
 
@@ -271,6 +518,7 @@
 
                     </div>
 
+
                     <div>
 
                         <label>Yağ (%)</label>
@@ -283,6 +531,7 @@
 
                     </div>
 
+
                     <div>
 
                         <label>Protein (%)</label>
@@ -294,6 +543,7 @@
                             placeholder="3.2">
 
                     </div>
+
 
                     <div>
 
@@ -338,9 +588,11 @@
                 <h3>📋 Süt Geçmişi</h3>
 
                 <div id="milkList">
+
                     <div class="empty">
                         Henüz süt kaydı yok.
                     </div>
+
                 </div>
 
             </div>
@@ -348,7 +600,10 @@
         </section>
 
 
+
+        <!-- ========================= -->
         <!-- SÜT SATIŞI -->
+        <!-- ========================= -->
 
         <section id="sales" class="page">
 
@@ -356,9 +611,12 @@
 
                 <h2>💰 Süt Satışı</h2>
 
-                <p>Satılan sütleri takip et</p>
+                <p>
+                    Satılan sütleri ve gelirleri takip et
+                </p>
 
             </div>
+
 
             <div class="panel">
 
@@ -376,6 +634,7 @@
 
                     </div>
 
+
                     <div>
 
                         <label>Müşteri</label>
@@ -386,6 +645,7 @@
                             placeholder="Müşteri">
 
                     </div>
+
 
                     <div>
 
@@ -399,6 +659,7 @@
                             oninput="calculateSale()">
 
                     </div>
+
 
                     <div>
 
@@ -419,7 +680,7 @@
                 <div class="calculation-box">
 
                     <span>
-                        💰 Toplam
+                        💰 Toplam Satış
                     </span>
 
                     <strong id="saleTotal">
@@ -454,9 +715,11 @@
                 <h3>📋 Satış Geçmişi</h3>
 
                 <div id="salesList">
+
                     <div class="empty">
                         Henüz satış yok.
                     </div>
+
                 </div>
 
             </div>
@@ -464,7 +727,10 @@
         </section>
 
 
+
+        <!-- ========================= -->
         <!-- RAPORLAR -->
+        <!-- ========================= -->
 
         <section id="reports" class="page">
 
@@ -472,7 +738,9 @@
 
                 <h2>📊 Raporlar</h2>
 
-                <p>Süt ve gelir raporları</p>
+                <p>
+                    Süt üretimi ve gelir raporları
+                </p>
 
             </div>
 
@@ -571,7 +839,10 @@
         </section>
 
 
+
+        <!-- ========================= -->
         <!-- AYARLAR -->
+        <!-- ========================= -->
 
         <section id="settings" class="page">
 
@@ -579,7 +850,9 @@
 
                 <h2>⚙️ Ayarlar</h2>
 
-                <p>Çiftlik ayarları</p>
+                <p>
+                    Çiftlik ve süt fiyatı ayarları
+                </p>
 
             </div>
 
@@ -657,32 +930,62 @@
 </div>
 
 
+
+<!-- BİLDİRİM -->
+
 <div id="toast"></div>
 
+
+
+<!-- TELEFON ALT MENÜ -->
 
 <nav class="bottom-nav">
 
     <button onclick="showPage('dashboard')">
+
         🏠
-        <span>Ana Sayfa</span>
+
+        <span>
+            Ana Sayfa
+        </span>
+
     </button>
+
 
     <button onclick="showPage('animals')">
+
         🐄
-        <span>Hayvanlar</span>
+
+        <span>
+            Hayvanlar
+        </span>
+
     </button>
+
 
     <button onclick="showPage('milk')">
+
         🥛
-        <span>Süt</span>
+
+        <span>
+            Süt
+        </span>
+
     </button>
 
+
     <button onclick="showPage('reports')">
+
         📊
-        <span>Rapor</span>
+
+        <span>
+            Rapor
+        </span>
+
     </button>
 
 </nav>
+
 
 
 <script src="script.js"></script>
