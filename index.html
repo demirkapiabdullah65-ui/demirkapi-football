@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Demirkapı Çiftliği - Süt Takip</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -24,12 +22,29 @@
 
     <aside id="sidebar">
 
-        <button onclick="showPage('dashboard')">🏠 Ana Sayfa</button>
-        <button onclick="showPage('animals')">🐄 Hayvanlar</button>
-        <button onclick="showPage('milk')">🥛 Süt Kayıtları</button>
-        <button onclick="showPage('sales')">💰 Süt Satışı</button>
-        <button onclick="showPage('reports')">📊 Raporlar</button>
-        <button onclick="showPage('settings')">⚙️ Ayarlar</button>
+        <button onclick="showPage('dashboard')">
+            🏠 Ana Sayfa
+        </button>
+
+        <button onclick="showPage('animals')">
+            🐄 Hayvanlar
+        </button>
+
+        <button onclick="showPage('milk')">
+            🥛 Süt Kayıtları
+        </button>
+
+        <button onclick="showPage('sales')">
+            💰 Süt Satışı
+        </button>
+
+        <button onclick="showPage('reports')">
+            📊 Raporlar
+        </button>
+
+        <button onclick="showPage('settings')">
+            ⚙️ Ayarlar
+        </button>
 
     </aside>
 
@@ -41,7 +56,7 @@
 
             <div class="page-title">
                 <h2>🏠 Ana Sayfa</h2>
-                <p>Çiftliğin süt durumunu takip et</p>
+                <p>Demirkapı Çiftliği süt durumu</p>
             </div>
 
             <div class="cards">
@@ -87,7 +102,11 @@
 
                 <h3>📋 Son Süt Kayıtları</h3>
 
-                <div id="recentMilk"></div>
+                <div id="recentMilk">
+                    <div class="empty">
+                        Henüz süt kaydı yok.
+                    </div>
+                </div>
 
             </div>
 
@@ -99,8 +118,11 @@
         <section id="animals" class="page">
 
             <div class="page-title">
+
                 <h2>🐄 Hayvanlar</h2>
-                <p>Hayvanlarını kayıt altında tut</p>
+
+                <p>Çiftlikteki hayvanları yönet</p>
+
             </div>
 
             <div class="panel">
@@ -111,36 +133,54 @@
 
                     <div>
                         <label>Küpe No</label>
-                        <input id="animalTag" type="text" placeholder="001">
+                        <input
+                            id="animalTag"
+                            type="text"
+                            placeholder="001">
                     </div>
 
                     <div>
                         <label>Hayvan Adı</label>
-                        <input id="animalName" type="text" placeholder="Sarıkız">
+                        <input
+                            id="animalName"
+                            type="text"
+                            placeholder="Sarıkız">
                     </div>
 
                     <div>
                         <label>Irk</label>
-                        <input id="animalBreed" type="text" placeholder="Simental">
+                        <input
+                            id="animalBreed"
+                            type="text"
+                            placeholder="Simental">
                     </div>
 
                     <div>
                         <label>Doğum Tarihi</label>
-                        <input id="animalBirth" type="date">
+                        <input
+                            id="animalBirth"
+                            type="date">
                     </div>
 
                 </div>
 
-                <button class="primary" onclick="addAnimal()">Hayvanı Kaydet</button>
+                <button
+                    class="primary"
+                    onclick="addAnimal()">
+                    Hayvanı Kaydet
+                </button>
 
             </div>
-
 
             <div class="panel">
 
                 <h3>🐄 Kayıtlı Hayvanlar</h3>
 
-                <div id="animalList"></div>
+                <div id="animalList">
+                    <div class="empty">
+                        Henüz hayvan eklenmedi.
+                    </div>
+                </div>
 
             </div>
 
@@ -152,8 +192,11 @@
         <section id="milk" class="page">
 
             <div class="page-title">
+
                 <h2>🥛 Süt Kayıtları</h2>
-                <p>Sağım miktarlarını kaydet</p>
+
+                <p>Sabah ve akşam sütlerini kaydet</p>
+
             </div>
 
             <div class="panel">
@@ -163,59 +206,114 @@
                 <div class="form-grid">
 
                     <div>
+
                         <label>Tarih</label>
-                        <input id="milkDate" type="date">
+
+                        <input
+                            id="milkDate"
+                            type="date">
+
                     </div>
 
                     <div>
+
                         <label>Sağım</label>
 
                         <select id="milkSession">
-                            <option value="Sabah">🌅 Sabah</option>
-                            <option value="Akşam">🌙 Akşam</option>
+
+                            <option value="Sabah">
+                                🌅 Sabah
+                            </option>
+
+                            <option value="Akşam">
+                                🌙 Akşam
+                            </option>
+
                         </select>
 
                     </div>
 
                     <div>
+
                         <label>Hayvan</label>
 
                         <select id="milkAnimal">
-                            <option value="">Hayvan seç</option>
+
+                            <option value="">
+                                Hayvan seç
+                            </option>
+
                         </select>
 
                     </div>
 
                     <div>
+
                         <label>Süt Miktarı (Litre)</label>
-                        <input id="milkAmount" type="number" step="0.1" placeholder="18">
+
+                        <input
+                            id="milkAmount"
+                            type="number"
+                            step="0.1"
+                            placeholder="18">
+
                     </div>
 
                     <div>
+
                         <label>Süt Fiyatı (TL/L)</label>
-                        <input id="milkPrice" type="number" step="0.01" placeholder="20">
+
+                        <input
+                            id="milkPrice"
+                            type="number"
+                            step="0.01"
+                            placeholder="20">
+
                     </div>
 
                     <div>
+
                         <label>Yağ (%)</label>
-                        <input id="milkFat" type="number" step="0.1" placeholder="3.8">
+
+                        <input
+                            id="milkFat"
+                            type="number"
+                            step="0.1"
+                            placeholder="3.8">
+
                     </div>
 
                     <div>
+
                         <label>Protein (%)</label>
-                        <input id="milkProtein" type="number" step="0.1" placeholder="3.2">
+
+                        <input
+                            id="milkProtein"
+                            type="number"
+                            step="0.1"
+                            placeholder="3.2">
+
                     </div>
 
                     <div>
+
                         <label>Açıklama</label>
-                        <input id="milkNote" type="text" placeholder="Normal sağım">
+
+                        <input
+                            id="milkNote"
+                            type="text"
+                            placeholder="Açıklama">
+
                     </div>
 
                 </div>
 
+
                 <div class="calculation-box">
 
-                    <span>💰 Bu Sütün Tutarı</span>
+                    <span>
+                        💰 Süt Tutarı
+                    </span>
 
                     <strong id="milkCalculatedTotal">
                         0 TL
@@ -223,8 +321,13 @@
 
                 </div>
 
-                <button class="primary" onclick="addMilk()">
+
+                <button
+                    class="primary"
+                    onclick="addMilk()">
+
                     🥛 Süt Kaydını Kaydet
+
                 </button>
 
             </div>
@@ -234,7 +337,11 @@
 
                 <h3>📋 Süt Geçmişi</h3>
 
-                <div id="milkList"></div>
+                <div id="milkList">
+                    <div class="empty">
+                        Henüz süt kaydı yok.
+                    </div>
+                </div>
 
             </div>
 
@@ -249,7 +356,7 @@
 
                 <h2>💰 Süt Satışı</h2>
 
-                <p>Toplu süt satışlarını takip et</p>
+                <p>Satılan sütleri takip et</p>
 
             </div>
 
@@ -260,19 +367,325 @@
                 <div class="form-grid">
 
                     <div>
+
                         <label>Tarih</label>
-                        <input id="saleDate" type="date">
+
+                        <input
+                            id="saleDate"
+                            type="date">
+
                     </div>
 
                     <div>
+
                         <label>Müşteri</label>
-                        <input id="saleCustomer" type="text" placeholder="Sütçü / Fabrika">
+
+                        <input
+                            id="saleCustomer"
+                            type="text"
+                            placeholder="Müşteri">
+
                     </div>
 
                     <div>
+
                         <label>Süt Miktarı (Litre)</label>
-                        <input id="saleAmount" type="number" step="0.1" oninput="calculateSale()">
+
+                        <input
+                            id="saleAmount"
+                            type="number"
+                            step="0.1"
+                            placeholder="100"
+                            oninput="calculateSale()">
+
                     </div>
 
                     <div>
-                        <
+
+                        <label>Litre Fiyatı</label>
+
+                        <input
+                            id="salePrice"
+                            type="number"
+                            step="0.01"
+                            placeholder="20"
+                            oninput="calculateSale()">
+
+                    </div>
+
+                </div>
+
+
+                <div class="calculation-box">
+
+                    <span>
+                        💰 Toplam
+                    </span>
+
+                    <strong id="saleTotal">
+                        0 TL
+                    </strong>
+
+                </div>
+
+
+                <input
+                    id="saleNote"
+                    type="text"
+                    placeholder="Açıklama">
+
+
+                <br><br>
+
+
+                <button
+                    class="primary"
+                    onclick="addSale()">
+
+                    💰 Satışı Kaydet
+
+                </button>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>📋 Satış Geçmişi</h3>
+
+                <div id="salesList">
+                    <div class="empty">
+                        Henüz satış yok.
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- RAPORLAR -->
+
+        <section id="reports" class="page">
+
+            <div class="page-title">
+
+                <h2>📊 Raporlar</h2>
+
+                <p>Süt ve gelir raporları</p>
+
+            </div>
+
+
+            <div class="cards">
+
+                <div class="card">
+
+                    <span>🥛 Toplam Süt</span>
+
+                    <strong id="reportTotalMilk">
+                        0 L
+                    </strong>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span>📈 Ortalama Günlük Süt</span>
+
+                    <strong id="reportAverageMilk">
+                        0 L
+                    </strong>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span>💰 Toplam Gelir</span>
+
+                    <strong id="reportTotalSales">
+                        0 TL
+                    </strong>
+
+                </div>
+
+
+                <div class="card">
+
+                    <span>🥛 Satılan Süt</span>
+
+                    <strong id="reportSoldMilk">
+                        0 L
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>📅 Tarih Aralığı</h3>
+
+                <div class="form-grid">
+
+                    <div>
+
+                        <label>Başlangıç</label>
+
+                        <input
+                            id="reportStart"
+                            type="date">
+
+                    </div>
+
+
+                    <div>
+
+                        <label>Bitiş</label>
+
+                        <input
+                            id="reportEnd"
+                            type="date">
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="primary"
+                    onclick="generateReport()">
+
+                    📊 Rapor Oluştur
+
+                </button>
+
+
+                <div id="reportResult"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- AYARLAR -->
+
+        <section id="settings" class="page">
+
+            <div class="page-title">
+
+                <h2>⚙️ Ayarlar</h2>
+
+                <p>Çiftlik ayarları</p>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="form-grid">
+
+                    <div>
+
+                        <label>Çiftlik Adı</label>
+
+                        <input
+                            id="farmName"
+                            type="text"
+                            value="Demirkapı Çiftliği">
+
+                    </div>
+
+
+                    <div>
+
+                        <label>
+                            Varsayılan Süt Fiyatı (TL/L)
+                        </label>
+
+                        <input
+                            id="defaultPrice"
+                            type="number"
+                            step="0.01"
+                            placeholder="20">
+
+                    </div>
+
+                </div>
+
+
+                <button
+                    class="primary"
+                    onclick="saveSettings()">
+
+                    💾 Ayarları Kaydet
+
+                </button>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>💾 Veri Yedekleme</h3>
+
+                <button
+                    class="secondary"
+                    onclick="exportData()">
+
+                    ⬇️ Verileri Yedekle
+
+                </button>
+
+                <br><br>
+
+                <input
+                    type="file"
+                    id="importData"
+                    accept=".json"
+                    onchange="importData(event)">
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<div id="toast"></div>
+
+
+<nav class="bottom-nav">
+
+    <button onclick="showPage('dashboard')">
+        🏠
+        <span>Ana Sayfa</span>
+    </button>
+
+    <button onclick="showPage('animals')">
+        🐄
+        <span>Hayvanlar</span>
+    </button>
+
+    <button onclick="showPage('milk')">
+        🥛
+        <span>Süt</span>
+    </button>
+
+    <button onclick="showPage('reports')">
+        📊
+        <span>Rapor</span>
+    </button>
+
+</nav>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
