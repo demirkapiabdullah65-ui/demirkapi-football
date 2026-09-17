@@ -1,22 +1,27 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#111814">
-<title>Demirkapı Fit</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#111827">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Demirkapı Fit</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<header class="top">
-  <div class="logo">⚡</div>
-  <div class="logoText">
-    <b>DEMİRKAPI</b>
-    <span>FIT</span>
+<header class="topbar">
+  <div class="brand" onclick="showPage('home')">
+    <div class="brand-icon">D</div>
+    <div>
+      <b>DEMİRKAPI</b>
+      <span>FIT</span>
+    </div>
   </div>
-  <button id="settingsBtn">⚙️</button>
+
+  <button class="icon-btn" onclick="showPage('settings')">⚙️</button>
 </header>
 
 <main>
@@ -26,436 +31,438 @@
 
   <div class="hero">
     <div>
-      <small>DEMİRKAPI FIT</small>
-      <h1>Hazır mısın? 🔥</h1>
-      <p>Bugün kendin için bir adım at.</p>
+      <small>HAZIR MISIN?</small>
+      <h1>Bugün de<br><span>kendin için çalış. 🔥</span></h1>
+      <p id="homeGreeting">Güçlenmeye devam et.</p>
     </div>
-
     <div class="streak">
-      <b id="streakHome">0</b>
-      <span>GÜN<br>SERİ</span>
+      <strong id="streakNumber">0</strong>
+      <span>🔥 GÜN</span>
     </div>
   </div>
 
-  <div class="title">
-    <small>BUGÜNÜN ANTRENMANI</small>
-    <h2>Full Body</h2>
-  </div>
+  <div class="today-card">
+    <div class="card-top">
+      <div>
+        <span class="tag">BUGÜNÜN ANTRENMANI</span>
+        <h2>Full Body</h2>
+        <p>Evde • Ekipmansız • Orta Seviye</p>
+      </div>
+      <div class="workout-icon">💪</div>
+    </div>
 
-  <div class="mainWorkout">
-    <div class="workoutPicture">🏋️</div>
-
-    <h2>Evde Full Body</h2>
-    <p>Tüm vücudu çalıştıran günlük program.</p>
-
-    <div class="tags">
-      <span>💪 6 Hareket</span>
+    <div class="workout-info">
       <span>⏱️ 25 dk</span>
-      <span>🔥 Orta</span>
+      <span>🔥 ~180 kcal</span>
+      <span>🏋️ 8 hareket</span>
     </div>
 
-    <button class="greenBtn" id="startHomeWorkout">
-      ▶ ANTRENMANA BAŞLA
+    <button class="primary-btn" onclick="startTodayWorkout()">
+      ANTRENMANA BAŞLA <span>→</span>
     </button>
   </div>
 
-  <div class="title">
-    <small>HEDEF BÖLGENİ SEÇ</small>
-    <h2>Bölge Çalış</h2>
-  </div>
-
-  <div class="bodyGrid">
-
-    <button class="bodyBtn" data-body="Göğüs">
-      <strong>🏋️</strong>
-      <b>Göğüs</b>
-      <small>Hareketleri gör</small>
-    </button>
-
-    <button class="bodyBtn" data-body="Sırt">
-      <strong>🪽</strong>
-      <b>Sırt</b>
-      <small>Hareketleri gör</small>
-    </button>
-
-    <button class="bodyBtn" data-body="Kol">
-      <strong>💪</strong>
-      <b>Kol</b>
-      <small>Hareketleri gör</small>
-    </button>
-
-    <button class="bodyBtn" data-body="Omuz">
-      <strong>🏋️</strong>
-      <b>Omuz</b>
-      <small>Hareketleri gör</small>
-    </button>
-
-    <button class="bodyBtn" data-body="Bacak">
-      <strong>🦵</strong>
-      <b>Bacak</b>
-      <small>Hareketleri gör</small>
-    </button>
-
-    <button class="bodyBtn" data-body="Karın">
-      <strong>🔥</strong>
-      <b>Karın</b>
-      <small>Hareketleri gör</small>
-    </button>
-
-  </div>
-
-  <div class="title">
-    <small>GÜNLÜK TAKİP</small>
-    <h2>Durumun</h2>
-  </div>
-
-  <div class="quick">
+  <div class="section-head">
     <div>
+      <small>HIZLI BAŞLANGIÇ</small>
+      <h2>Bölge seç</h2>
+    </div>
+    <button onclick="showPage('programs')">Tümü</button>
+  </div>
+
+  <div class="body-grid">
+    <button class="body-card chest" onclick="openBodyPart('Göğüs')">
+      <span>🫀</span><b>Göğüs</b><small>12 hareket</small>
+    </button>
+
+    <button class="body-card back" onclick="openBodyPart('Sırt')">
+      <span>🔙</span><b>Sırt</b><small>10 hareket</small>
+    </button>
+
+    <button class="body-card arms" onclick="openBodyPart('Kollar')">
+      <span>💪</span><b>Kollar</b><small>14 hareket</small>
+    </button>
+
+    <button class="body-card shoulders" onclick="openBodyPart('Omuz')">
+      <span>🏋️</span><b>Omuz</b><small>9 hareket</small>
+    </button>
+
+    <button class="body-card legs" onclick="openBodyPart('Bacak')">
+      <span>🦵</span><b>Bacak</b><small>15 hareket</small>
+    </button>
+
+    <button class="body-card abs" onclick="openBodyPart('Karın')">
+      <span>🔥</span><b>Karın</b><small>13 hareket</small>
+    </button>
+  </div>
+
+  <div class="section-head">
+    <div>
+      <small>BUGÜNKÜ DURUM</small>
+      <h2>Hızlı bilgiler</h2>
+    </div>
+  </div>
+
+  <div class="quick-stats">
+    <div class="stat-card">
       <span>💧</span>
-      <b id="homeWater">0 ml</b>
-      <small>Su</small>
+      <b id="waterHome">0 / 8</b>
+      <small>Su bardağı</small>
     </div>
 
-    <div>
+    <div class="stat-card">
       <span>⚖️</span>
-      <b id="homeWeight">-- kg</b>
+      <b id="weightHome">-- kg</b>
       <small>Kilo</small>
     </div>
 
-    <div>
+    <div class="stat-card">
       <span>🏆</span>
-      <b id="homeWorkoutCount">0</b>
-      <small>Antrenman</small>
+      <b id="xpHome">0 XP</b>
+      <small>Toplam XP</small>
     </div>
   </div>
 
+  <div class="motivation">
+    <span>🔥</span>
+    <div>
+      <b>Bugünün sözü</b>
+      <p>Başlamak için mükemmel zamanı bekleme. Başla ve zamanı mükemmelleştir.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- PROGRAMLAR -->
+<section id="programs" class="page">
+  <div class="page-title">
+    <small>DEMİRKAPI FIT</small>
+    <h1>Programlar</h1>
+    <p>Kendine uygun antrenmanı oluştur.</p>
+  </div>
+
+  <div class="builder-card">
+    <h2>🧠 Anında Antrenman</h2>
+    <p>Seçimlerini yap, programını hemen oluşturalım.</p>
+
+    <label>Hedef</label>
+    <select id="buildGoal">
+      <option value="Kas geliştirme">💪 Kas geliştirme</option>
+      <option value="Yağ yakma">🔥 Yağ yakma</option>
+      <option value="Kondisyon">🏃 Kondisyon</option>
+      <option value="Form">⚡ Form kazanma</option>
+    </select>
+
+    <label>Süre</label>
+    <div class="choice-grid">
+      <button class="choice active" onclick="chooseBuild(this,'time','10')">10 dk</button>
+      <button class="choice" onclick="chooseBuild(this,'time','20')">20 dk</button>
+      <button class="choice" onclick="chooseBuild(this,'time','30')">30 dk</button>
+      <button class="choice" onclick="chooseBuild(this,'time','45')">45 dk</button>
+    </div>
+
+    <label>Seviye</label>
+    <div class="choice-grid">
+      <button class="choice active" onclick="chooseBuild(this,'level','Başlangıç')">Başlangıç</button>
+      <button class="choice" onclick="chooseBuild(this,'level','Orta')">Orta</button>
+      <button class="choice" onclick="chooseBuild(this,'level','İleri')">İleri</button>
+    </div>
+
+    <label>Ekipman</label>
+    <div class="choice-grid">
+      <button class="choice active" onclick="chooseBuild(this,'equipment','Ekipmansız')">🏠 Ekipmansız</button>
+      <button class="choice" onclick="chooseBuild(this,'equipment','Ekipmanlı')">🏋️ Ekipmanlı</button>
+    </div>
+
+    <button class="primary-btn full" onclick="createWorkout()">PROGRAMI OLUŞTUR 🔥</button>
+  </div>
+
+  <div class="program-card" onclick="openBodyPart('Tüm Vücut')">
+    <div class="program-emoji">🔥</div>
+    <div>
+      <span>POPÜLER</span>
+      <h3>Full Body</h3>
+      <p>25 dakika • 8 hareket</p>
+    </div>
+    <b>→</b>
+  </div>
+
+  <div class="program-card" onclick="openBodyPart('Karın')">
+    <div class="program-emoji">💥</div>
+    <div>
+      <span>CORE</span>
+      <h3>Güçlü Karın</h3>
+      <p>15 dakika • 6 hareket</p>
+    </div>
+    <b>→</b>
+  </div>
 </section>
 
 
 <!-- BÖLGE -->
-<section id="bodyPage" class="page">
+<section id="bodypart" class="page">
+  <button class="back-btn" onclick="showPage('home')">← Geri</button>
 
-  <button class="back" id="bodyBack">‹</button>
-
-  <div class="pageTitle">
-    <small>HEDEF BÖLGE</small>
-    <h1 id="bodyTitle">Göğüs</h1>
-    <p>İstediğin hareketi seç.</p>
+  <div class="page-title compact">
+    <small>ANTRENMAN</small>
+    <h1 id="bodyPartTitle">Göğüs</h1>
+    <p id="bodyPartDescription">Bölgeye özel hareketler.</p>
   </div>
 
-  <div class="bodyBanner">
-    <span id="bodyEmoji">💪</span>
-    <div>
-      <b id="bodyBannerTitle">Göğüs</b>
-      <small>Önerilen hareketler</small>
-    </div>
-  </div>
-
-  <div id="bodyExercises"></div>
-
+  <div id="exerciseList" class="exercise-list"></div>
 </section>
 
 
 <!-- HAREKET DETAY -->
-<section id="detailPage" class="page">
+<section id="exerciseDetail" class="page">
+  <button class="back-btn" onclick="showPage('bodypart')">← Geri</button>
 
-  <button class="back" id="detailBack">‹</button>
-
-  <div class="detail">
-
-    <div class="detailIcon" id="detailIcon">💪</div>
-
-    <span class="muscle" id="detailMuscle">Göğüs</span>
-
+  <div class="exercise-detail">
+    <div class="big-exercise-icon" id="detailIcon">💪</div>
+    <span class="tag" id="detailPart">GÖĞÜS</span>
     <h1 id="detailName">Şınav</h1>
+    <p id="detailDescription">Göğüs ve triceps kaslarını çalıştıran temel hareket.</p>
 
-    <div class="detailStats">
-
-      <div>
-        <b id="detailSets">4</b>
-        <small>SET</small>
-      </div>
-
-      <div>
-        <b id="detailReps">10</b>
-        <small>TEKRAR</small>
-      </div>
-
-      <div>
-        <b id="detailRest">60</b>
-        <small>SN DİNLENME</small>
-      </div>
-
+    <div class="detail-stats">
+      <div><b id="detailSets">3</b><small>SET</small></div>
+      <div><b id="detailReps">12</b><small>TEKRAR</small></div>
+      <div><b id="detailRest">45</b><small>SANİYE</small></div>
     </div>
 
-    <div class="instruction">
-      <b>Nasıl yapılır?</b>
-      <p id="detailDescription"></p>
+    <div class="how-box">
+      <h3>📌 Nasıl yapılır?</h3>
+      <p id="detailHow">Vücudunu düz tut. Kontrollü şekilde aşağı in ve tekrar yukarı çık.</p>
     </div>
 
-    <button class="greenBtn" id="startDetailWorkout">
-      ▶ BU HAREKETİ BAŞLAT
-    </button>
-
+    <button class="primary-btn full" onclick="startSelectedExercise()">HAREKETE BAŞLA 🔥</button>
   </div>
-
-</section>
-
-
-<!-- PROGRAM -->
-<section id="programPage" class="page">
-
-  <div class="pageTitle">
-    <small>DEMİRKAPI FIT</small>
-    <h1>Programlar</h1>
-    <p>Bugünkü antrenmanını seç.</p>
-  </div>
-
-  <div class="programChoice">
-
-    <button id="homeProgram" class="programBtn">
-      <strong>🤸</strong>
-      <b>Ekipmansız</b>
-      <small>Vücut ağırlığı</small>
-    </button>
-
-    <button id="equipmentProgram" class="programBtn">
-      <strong>🏋️</strong>
-      <b>Ekipmanlı</b>
-      <small>Dambıl ve ekipman</small>
-    </button>
-
-  </div>
-
-  <button class="greenBtn" id="startProgramWorkout">
-    ▶ PROGRAMI BAŞLAT
-  </button>
-
-  <div class="title">
-    <h2>Haftalık Plan</h2>
-  </div>
-
-  <div id="weekly"></div>
-
 </section>
 
 
 <!-- ANTRENMAN -->
-<section id="workoutPage" class="page">
-
-  <button class="back" id="workoutBack">‹</button>
-
-  <div class="pageTitle">
-    <small>ANTRENMAN</small>
-    <h1 id="workoutTitle">Full Body</h1>
+<section id="workout" class="page">
+  <div class="workout-header">
+    <button class="back-btn" onclick="showPage('home')">✕ Çıkış</button>
+    <span id="workoutCounter">1 / 8</span>
   </div>
 
-  <div class="timerBox">
-    <small>ANTRENMAN SÜRESİ</small>
-    <b id="timer">00:00</b>
-
-    <div>
-      <button id="timerStart">▶</button>
-      <button id="timerPause">Ⅱ</button>
-      <button id="timerReset">↻</button>
-    </div>
-  </div>
-
-  <div class="progressText">
-    <span>İlerleme</span>
-    <b id="progressText">0 / 6</b>
-  </div>
-
-  <div class="progress">
+  <div class="workout-progress">
     <div id="progressBar"></div>
   </div>
 
-  <div id="workoutExercises"></div>
+  <div class="active-workout">
+    <div class="active-icon" id="activeIcon">💪</div>
+    <span>ŞİMDİ</span>
+    <h1 id="activeExercise">Şınav</h1>
+    <p id="activeInstruction">Hareketi kontrollü şekilde yap.</p>
 
-  <button class="greenBtn finish" id="finishWorkout">
-    🏆 ANTRENMANI TAMAMLA
-  </button>
+    <div class="timer" id="timer">00:30</div>
 
+    <div class="timer-label">KALAN SÜRE</div>
+
+    <div class="workout-buttons">
+      <button onclick="toggleTimer()" id="timerBtn">▶ Başlat</button>
+      <button onclick="skipExercise()">Atla →</button>
+    </div>
+  </div>
+
+  <div class="next-exercise">
+    <small>SONRAKİ</small>
+    <b id="nextExercise">Squat</b>
+  </div>
+
+  <button class="finish-btn" onclick="finishWorkout()">ANTRENMANI TAMAMLA 🏆</button>
 </section>
 
 
 <!-- SU -->
-<section id="waterPage" class="page">
-
-  <div class="pageTitle">
+<section id="water" class="page">
+  <div class="page-title">
     <small>GÜNLÜK TAKİP</small>
-    <h1>Su Takibi 💧</h1>
+    <h1>💧 Su Takibi</h1>
+    <p>Bugün yeterince su içtin mi?</p>
   </div>
 
-  <div class="waterBox">
-    <b id="waterAmount">0</b>
-    <span>/ 2500 ml</span>
-
-    <div class="waterProgress">
-      <div id="waterBar"></div>
+  <div class="water-card">
+    <div class="water-circle">
+      <b id="waterCount">0</b>
+      <small>/ 8</small>
     </div>
 
-    <p id="waterPercent">%0 tamamlandı</p>
-  </div>
+    <h2>Günlük hedef</h2>
+    <p>8 bardak su</p>
 
-  <div class="waterButtons">
-    <button id="water250">+250 ml</button>
-    <button id="water500">+500 ml</button>
-    <button id="waterUndo">↶ Geri Al</button>
+    <div class="water-buttons">
+      <button onclick="removeWater()">−</button>
+      <button onclick="addWater()">+ Bir bardak içtim 💧</button>
+    </div>
   </div>
-
 </section>
 
 
-<!-- İLERLEME -->
-<section id="statsPage" class="page">
-
-  <div class="pageTitle">
-    <small>TAKİP</small>
-    <h1>İlerlemen 📊</h1>
+<!-- İSTATİSTİK -->
+<section id="stats" class="page">
+  <div class="page-title">
+    <small>İLERLEMEN</small>
+    <h1>📊 İstatistikler</h1>
+    <p>Gelişimini takip et.</p>
   </div>
 
-  <div class="statsGrid">
-
-    <div>
-      <span>🔥</span>
-      <b id="statStreak">0</b>
-      <small>Gün Seri</small>
-    </div>
-
-    <div>
-      <span>🏋️</span>
-      <b id="statWorkouts">0</b>
-      <small>Antrenman</small>
-    </div>
-
-    <div>
-      <span>💪</span>
-      <b id="statExercises">0</b>
-      <small>Hareket</small>
-    </div>
-
-    <div>
-      <span>⏱️</span>
-      <b id="statMinutes">0</b>
-      <small>Dakika</small>
-    </div>
-
+  <div class="stats-big">
+    <div><b id="totalWorkouts">0</b><small>Antrenman</small></div>
+    <div><b id="totalMinutes">0</b><small>Dakika</small></div>
+    <div><b id="totalCalories">0</b><small>Kalori</small></div>
   </div>
 
+  <div class="progress-card">
+    <div class="section-head">
+      <h2>🏆 Seviyen</h2>
+      <b id="levelText">Başlangıç</b>
+    </div>
+    <div class="xp-bar"><div id="xpBar"></div></div>
+    <p><span id="xpText">0</span> XP</p>
+  </div>
+
+  <div class="progress-card">
+    <h2>🔥 Günlük seri</h2>
+    <div class="streak-large">
+      <strong id="statsStreak">0</strong>
+      <span>gün üst üste</span>
+    </div>
+  </div>
+
+  <div class="badges">
+    <h2>🏅 Rozetler</h2>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
 </section>
 
 
 <!-- PROFİL -->
-<section id="profilePage" class="page">
-
-  <div class="pageTitle">
-    <small>HESABIM</small>
-    <h1>Profil 👤</h1>
+<section id="profile" class="page">
+  <div class="page-title">
+    <small>HESABIN</small>
+    <h1>👤 Profilim</h1>
+    <p>Bilgilerini kaydet, hedefini takip et.</p>
   </div>
 
-  <div class="profileCard">
+  <div class="profile-card">
+    <div class="avatar">D</div>
+    <h2 id="profilePreview">Demirkapı Fit</h2>
+    <p>Fitness profili</p>
+  </div>
 
-    <div class="avatar">💪</div>
-
-    <label>Ad Soyad</label>
+  <div class="form-card">
+    <label>Adın</label>
     <input id="profileName" type="text" placeholder="Adını yaz">
 
     <label>Yaş</label>
-    <input id="profileAge" type="number" placeholder="Yaş">
+    <input id="profileAge" type="number" placeholder="Örn. 25">
 
-    <label>Boy</label>
-    <input id="profileHeight" type="number" placeholder="Boy (cm)">
+    <label>Boy (cm)</label>
+    <input id="profileHeight" type="number" placeholder="Örn. 175">
 
-    <label>Kilo</label>
-    <input id="profileWeight" type="number" step="0.1" placeholder="Kilo (kg)">
+    <label>Kilo (kg)</label>
+    <input id="profileWeight" type="number" step="0.1" placeholder="Örn. 80">
 
-    <label>Hedef</label>
+    <label>Hedefin</label>
     <select id="profileGoal">
-      <option value="kas">Kas kazanmak</option>
-      <option value="kilo">Kilo vermek</option>
-      <option value="fit">Fit kalmak</option>
-      <option value="guc">Güçlenmek</option>
+      <option value="Kas geliştirme">💪 Kas geliştirme</option>
+      <option value="Yağ yakma">🔥 Yağ yakma</option>
+      <option value="Kondisyon">🏃 Kondisyon</option>
+      <option value="Form">⚡ Form kazanma</option>
     </select>
 
-    <label>Seviye</label>
+    <label>Seviyen</label>
     <select id="profileLevel">
-      <option value="beginner">Başlangıç</option>
-      <option value="medium">Orta</option>
-      <option value="advanced">İleri</option>
+      <option value="Başlangıç">Başlangıç</option>
+      <option value="Orta">Orta</option>
+      <option value="İleri">İleri</option>
     </select>
 
-    <button class="greenBtn" id="saveProfile">
-      💾 PROFİLİ KAYDET
-    </button>
-
-    <div id="saveMessage"></div>
-
+    <button class="primary-btn full" onclick="saveProfile()">PROFİLİ KAYDET 💾</button>
+    <p id="saveMessage" class="save-message"></p>
   </div>
 
+  <div class="measure-card">
+    <h2>📏 Vücut ölçüleri</h2>
+    <input id="waist" type="number" placeholder="Bel (cm)">
+    <input id="chest" type="number" placeholder="Göğüs (cm)">
+    <input id="arm" type="number" placeholder="Kol (cm)">
+    <input id="leg" type="number" placeholder="Bacak (cm)">
+    <button class="secondary-btn" onclick="saveMeasurements()">Ölçüleri Kaydet</button>
+  </div>
 </section>
 
 
 <!-- AYARLAR -->
-<section id="settingsPage" class="page">
-
-  <div class="pageTitle">
-    <small>DEMİRKAPI FIT</small>
-    <h1>Ayarlar ⚙️</h1>
+<section id="settings" class="page">
+  <div class="page-title">
+    <small>UYGULAMA</small>
+    <h1>⚙️ Ayarlar</h1>
   </div>
 
-  <div class="settings">
-
-    <button id="themeBtn">
-      🌙 <span>Koyu / Açık Tema</span> ›
+  <div class="settings-list">
+    <button onclick="toggleDarkMode()">
+      <span>🌙</span>
+      <div><b>Karanlık Mod</b><small>Görünümü değiştir</small></div>
+      <strong>→</strong>
     </button>
 
-    <button id="profileSettingsBtn">
-      👤 <span>Profil Bilgileri</span> ›
+    <button onclick="exportData()">
+      <span>💾</span>
+      <div><b>Verileri Yedekle</b><small>Kayıtlarını dosya olarak al</small></div>
+      <strong>→</strong>
     </button>
 
-    <button id="resetBtn" class="danger">
-      🗑️ <span>Verileri Sıfırla</span> ›
-    </button>
+    <label class="file-setting">
+      <span>📥</span>
+      <div><b>Verileri Geri Yükle</b><small>Yedek dosyanı seç</small></div>
+      <input type="file" accept=".json" onchange="importData(event)">
+    </label>
 
+    <button onclick="resetData()">
+      <span>🗑️</span>
+      <div><b>Verileri Sıfırla</b><small>Tüm kayıtları sil</small></div>
+      <strong>→</strong>
+    </button>
   </div>
 
+  <div class="app-info">
+    <b>DEMİRKAPI FIT</b>
+    <span>Evde fitness uygulaması</span>
+    <small>Versiyon 1.0</small>
+  </div>
 </section>
 
 </main>
 
 
 <!-- ALT MENÜ -->
-<nav class="bottom">
-
-  <button data-page="home" class="nav active">
-    <span>⌂</span>
-    <small>Ana Sayfa</small>
+<nav class="bottom-nav">
+  <button class="nav-item active" data-page="home" onclick="showPage('home')">
+    <span>⌂</span><small>Ana Sayfa</small>
   </button>
 
-  <button data-page="programPage" class="nav">
-    <span>▦</span>
-    <small>Program</small>
+  <button class="nav-item" data-page="programs" onclick="showPage('programs')">
+    <span>🏋️</span><small>Program</small>
   </button>
 
-  <button id="navWorkout" class="nav center">
-    <span>▶</span>
-    <small>Antrenman</small>
+  <button class="nav-item main-nav" data-page="workout" onclick="startTodayWorkout()">
+    <span>🔥</span>
   </button>
 
-  <button data-page="statsPage" class="nav">
-    <span>↗</span>
-    <small>İlerleme</small>
+  <button class="nav-item" data-page="stats" onclick="showPage('stats')">
+    <span>📊</span><small>İlerleme</small>
   </button>
 
-  <button data-page="profilePage" class="nav">
-    <span>●</span>
-    <small>Profil</small>
+  <button class="nav-item" data-page="profile" onclick="showPage('profile')">
+    <span>👤</span><small>Profil</small>
   </button>
-
 </nav>
 
-<script src="script.js"></script>
+<div id="toast" class="toast"></div>
 
+<script src="script.js"></script>
 </body>
 </html>
