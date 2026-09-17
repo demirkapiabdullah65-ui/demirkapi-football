@@ -1,22 +1,587 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <meta name="theme-color" content="#111827">
-  <title>Demirkapı Fit</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="manifest" href="manifest.json">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#111827">
+<title>DEMİRKAPI FIT</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+ --green:#16a34a;
+ --green2:#22c55e;
+ --dark:#111827;
+ --dark2:#1f2937;
+ --bg:#f4f6f8;
+ --card:#fff;
+ --text:#111827;
+ --muted:#64748b;
+ --border:#e5e7eb;
+}
+
+body{
+ font-family:Arial,Helvetica,sans-serif;
+ background:var(--bg);
+ color:var(--text);
+ padding-bottom:82px;
+ transition:.25s;
+}
+
+button,input,select{font:inherit}
+button{border:0;cursor:pointer}
+
+.topbar{
+ position:sticky;
+ top:0;
+ z-index:100;
+ background:var(--dark);
+ color:white;
+ padding:15px 17px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+}
+
+.brand{
+ font-size:21px;
+ font-weight:900;
+ letter-spacing:.4px;
+}
+
+.brand span{color:var(--green2)}
+
+.top-sub{
+ color:#94a3b8;
+ font-size:11px;
+ margin-top:3px;
+}
+
+.icon-btn{
+ width:42px;
+ height:42px;
+ border-radius:13px;
+ background:var(--dark2);
+ color:#fff;
+}
+
+main{
+ max-width:720px;
+ margin:auto;
+ padding:16px;
+}
+
+.page{display:none}
+.page.active{display:block}
+
+.hero{
+ background:var(--dark);
+ color:white;
+ border-radius:23px;
+ padding:25px 21px;
+ margin-bottom:20px;
+}
+
+.hero-small{
+ color:#94a3b8;
+ font-size:12px;
+ font-weight:bold;
+}
+
+.hero h1{
+ font-size:28px;
+ line-height:1.15;
+ margin:8px 0 13px;
+}
+
+.streak{
+ display:inline-flex;
+ background:#1f2937;
+ padding:8px 12px;
+ border-radius:20px;
+ font-size:13px;
+}
+
+.section-title{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin:20px 0 11px;
+}
+
+.section-title h2{font-size:18px}
+
+.card,
+.workout-card,
+.exercise-card,
+.stat,
+.motivation,
+.water-card,
+.challenge-card,
+.coach-card{
+ background:var(--card);
+ border-radius:19px;
+ padding:17px;
+ box-shadow:0 4px 18px #0000000a;
+ margin-bottom:12px;
+}
+
+.workout-card{
+ display:flex;
+ align-items:center;
+ gap:13px;
+}
+
+.workout-icon{
+ width:58px;
+ height:58px;
+ border-radius:17px;
+ background:#dcfce7;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:29px;
+}
+
+.workout-info{flex:1}
+.workout-info h3{font-size:18px}
+.workout-info p{
+ color:var(--muted);
+ font-size:12px;
+ margin-top:5px;
+}
+
+.primary{
+ background:var(--green);
+ color:white;
+ padding:12px 15px;
+ border-radius:12px;
+ font-weight:800;
+}
+
+.full{width:100%}
+
+.body-grid{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:9px;
+}
+
+.body-grid button{
+ background:var(--card);
+ color:var(--text);
+ border-radius:16px;
+ padding:16px 5px;
+ box-shadow:0 3px 13px #00000009;
+}
+
+.body-grid b{
+ display:block;
+ margin-top:6px;
+ font-size:12px;
+}
+
+.stats-grid{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:9px;
+ margin-top:12px;
+}
+
+.stat{
+ text-align:center;
+ padding:14px 5px;
+ margin:0;
+}
+
+.stat-icon{
+ font-size:22px;
+ display:block;
+}
+
+.stat strong{
+ display:block;
+ font-size:19px;
+ margin:4px 0;
+}
+
+.stat small{color:var(--muted)}
+
+.motivation{
+ display:flex;
+ gap:13px;
+ align-items:center;
+ margin-top:13px;
+}
+
+.motivation-icon{font-size:28px}
+.motivation p{
+ color:var(--muted);
+ font-size:13px;
+ margin-top:4px;
+}
+
+label{
+ display:block;
+ font-size:13px;
+ font-weight:bold;
+ margin:13px 0 6px;
+}
+
+input,select{
+ width:100%;
+ border:1px solid var(--border);
+ border-radius:11px;
+ padding:12px;
+ background:var(--card);
+ color:var(--text);
+ outline:none;
+}
+
+select:focus,input:focus{
+ border-color:var(--green);
+}
+
+.back{
+ background:var(--card);
+ color:var(--text);
+ padding:10px 13px;
+ border-radius:10px;
+ margin-bottom:13px;
+}
+
+.exercise-card{
+ display:flex;
+ align-items:center;
+ gap:13px;
+}
+
+.exercise-emoji{
+ width:50px;
+ height:50px;
+ border-radius:15px;
+ background:#dcfce7;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:26px;
+}
+
+.exercise-main{flex:1}
+.exercise-main h3{font-size:15px}
+.exercise-main p{
+ color:var(--muted);
+ font-size:12px;
+ margin-top:4px;
+}
+
+.circle-btn{
+ width:40px;
+ height:40px;
+ border-radius:50%;
+ background:#dcfce7;
+ color:#15803d;
+}
+
+.workout-header{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ margin-bottom:20px;
+}
+
+.workout-screen{
+ background:var(--card);
+ border-radius:25px;
+ padding:25px 18px;
+ text-align:center;
+}
+
+.big-emoji{
+ font-size:75px;
+ margin:10px 0;
+}
+
+.timer{
+ font-size:58px;
+ font-weight:900;
+ margin:15px 0;
+}
+
+.set-info{
+ font-size:17px;
+ font-weight:bold;
+ margin-bottom:15px;
+}
+
+.workout-actions{
+ display:flex;
+ gap:8px;
+ margin-top:10px;
+}
+
+.workout-actions button{
+ flex:1;
+ background:#e5e7eb;
+ padding:12px;
+ border-radius:11px;
+}
+
+.progress{
+ height:8px;
+ background:#e5e7eb;
+ border-radius:20px;
+ overflow:hidden;
+ margin:12px 0 20px;
+}
+
+.progress div{
+ height:100%;
+ width:0;
+ background:var(--green);
+ transition:.3s;
+}
+
+.water-number{
+ text-align:center;
+ font-size:38px;
+ font-weight:900;
+}
+
+.water-buttons{
+ display:grid;
+ grid-template-columns:1fr 1fr 1fr;
+ gap:7px;
+ margin-top:15px;
+}
+
+.water-buttons button{
+ background:#dcfce7;
+ padding:11px 3px;
+ border-radius:10px;
+ color:#166534;
+}
+
+.xp-bar{
+ height:13px;
+ background:#e5e7eb;
+ border-radius:20px;
+ overflow:hidden;
+ margin:12px 0;
+}
+
+.xp-bar div{
+ height:100%;
+ background:var(--green);
+ width:0;
+}
+
+.badges{
+ display:grid;
+ grid-template-columns:repeat(3,1fr);
+ gap:8px;
+}
+
+.badge{
+ background:#f8fafc;
+ border-radius:14px;
+ padding:13px 5px;
+ text-align:center;
+ font-size:12px;
+}
+
+.badge span{
+ display:block;
+ font-size:27px;
+ margin-bottom:5px;
+}
+
+.calendar{
+ display:grid;
+ grid-template-columns:repeat(7,1fr);
+ gap:5px;
+}
+
+.day{
+ min-height:48px;
+ border-radius:9px;
+ background:#f1f5f9;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ font-size:11px;
+}
+
+.day.done{
+ background:#dcfce7;
+ color:#166534;
+ font-weight:bold;
+}
+
+.day.today{
+ outline:2px solid var(--green);
+}
+
+.challenge{
+ text-align:center;
+ padding:25px;
+ background:linear-gradient(135deg,#111827,#1f2937);
+ color:white;
+ border-radius:20px;
+}
+
+.challenge h2{margin-bottom:8px}
+
+.challenge-number{
+ font-size:48px;
+ font-weight:900;
+ color:#4ade80;
+}
+
+.checklist{
+ display:grid;
+ gap:8px;
+}
+
+.check{
+ background:#f8fafc;
+ padding:13px;
+ border-radius:12px;
+ display:flex;
+ align-items:center;
+ gap:10px;
+}
+
+.check input{width:auto}
+
+.bottom-nav{
+ position:fixed;
+ left:0;
+ right:0;
+ bottom:0;
+ height:72px;
+ background:var(--card);
+ border-top:1px solid var(--border);
+ display:flex;
+ justify-content:space-around;
+ align-items:center;
+ z-index:200;
+}
+
+.bottom-nav button{
+ background:none;
+ color:#64748b;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:3px;
+ font-size:19px;
+}
+
+.bottom-nav small{font-size:9px}
+
+.toast{
+ position:fixed;
+ left:50%;
+ bottom:90px;
+ transform:translateX(-50%) translateY(20px);
+ background:#111827;
+ color:white;
+ padding:12px 18px;
+ border-radius:12px;
+ opacity:0;
+ pointer-events:none;
+ transition:.25s;
+ z-index:500;
+ font-size:13px;
+}
+
+.toast.show{
+ opacity:1;
+ transform:translateX(-50%) translateY(0);
+}
+
+.modal{
+ position:fixed;
+ inset:0;
+ background:#0008;
+ display:none;
+ align-items:flex-end;
+ justify-content:center;
+ z-index:400;
+}
+
+.modal.show{display:flex}
+
+.modal-box{
+ width:100%;
+ max-width:720px;
+ background:var(--card);
+ color:var(--text);
+ border-radius:25px 25px 0 0;
+ padding:22px;
+ max-height:85vh;
+ overflow:auto;
+}
+
+.modal-close{
+ float:right;
+ background:#e5e7eb;
+ width:35px;
+ height:35px;
+ border-radius:50%;
+}
+
+.muted{color:var(--muted)}
+
+body.dark{
+ --bg:#0f172a;
+ --card:#1e293b;
+ --text:#f8fafc;
+ --muted:#94a3b8;
+ --border:#334155;
+}
+
+body.dark .body-grid button,
+body.dark .card,
+body.dark .workout-card,
+body.dark .exercise-card,
+body.dark .stat,
+body.dark .motivation,
+body.dark .water-card,
+body.dark .challenge-card,
+body.dark .coach-card,
+body.dark .workout-screen{
+ box-shadow:none;
+}
+
+body.dark .day,
+body.dark .check,
+body.dark .badge,
+body.dark .workout-actions button{
+ background:#334155;
+ color:white;
+}
+
+@media(max-width:430px){
+ .hero h1{font-size:25px}
+ .body-grid{grid-template-columns:repeat(2,1fr)}
+ .workout-card{flex-wrap:wrap}
+ .workout-card .primary{width:100%}
+}
+</style>
 </head>
 
 <body>
 
 <header class="topbar">
-  <div>
-    <div class="brand">DEMİRKAPİ <span>FIT</span></div>
-    <small>Bugün kendin için çalış 🔥</small>
-  </div>
-  <button onclick="showPage('settings')" class="icon-btn">⚙️</button>
+ <div>
+  <div class="brand">DEMİRKAPI <span>FIT</span></div>
+  <div class="top-sub">Evde fitness • Bugün kendin için çalış</div>
+ </div>
+ <button class="icon-btn" onclick="showPage('settings')">⚙️</button>
 </header>
 
 <main>
@@ -24,116 +589,131 @@
 <!-- ANA SAYFA -->
 <section id="home" class="page active">
 
-  <div class="hero">
-    <div>
-      <p class="muted">HAZIR MISIN?</p>
-      <h1>Bugün de kendin<br>için çalış. 🔥</h1>
-      <p id="streakText">🔥 0 günlük seri</p>
-    </div>
+ <div class="hero">
+  <div class="hero-small">HAZIR MISIN?</div>
+  <h1>Bugün de kendin<br>için çalış. 🔥</h1>
+  <div class="streak" id="streak">🔥 0 günlük seri</div>
+ </div>
+
+ <div class="section-title">
+  <h2>Bugünün Antrenmanı</h2>
+ </div>
+
+ <div class="workout-card">
+  <div class="workout-icon">🏋️</div>
+  <div class="workout-info">
+   <h3>Full Body</h3>
+   <p>25 dk • 8 hareket • ~180 kcal</p>
   </div>
+  <button class="primary" onclick="startToday()">BAŞLA</button>
+ </div>
 
-  <div class="section-title">
-    <h2>Bugünün Antrenmanı</h2>
+ <div class="section-title">
+  <h2>🧠 Akıllı Koç</h2>
+ </div>
+
+ <div class="coach-card">
+  <h3 id="coachTitle">Bugün ne çalışmalıyım?</h3>
+  <p class="muted" id="coachText" style="margin:7px 0 13px">
+   Hedeflerine göre sana günlük öneri hazırlıyorum.
+  </p>
+  <button class="primary full" onclick="smartCoach()">AKILLI PROGRAM OLUŞTUR</button>
+ </div>
+
+ <div class="section-title">
+  <h2>Vücut Bölgesi</h2>
+ </div>
+
+ <div class="body-grid">
+  <button onclick="openPart('Göğüs')">💪<b>Göğüs</b></button>
+  <button onclick="openPart('Sırt')">🪽<b>Sırt</b></button>
+  <button onclick="openPart('Kollar')">💪<b>Kollar</b></button>
+  <button onclick="openPart('Omuz')">🏋️<b>Omuz</b></button>
+  <button onclick="openPart('Bacak')">🦵<b>Bacak</b></button>
+  <button onclick="openPart('Karın')">🔥<b>Karın</b></button>
+ </div>
+
+ <div class="stats-grid">
+  <div class="stat">
+   <span class="stat-icon">💧</span>
+   <strong id="homeWater">0</strong>
+   <small>ml su</small>
   </div>
-
-  <div class="workout-card">
-    <div class="workout-icon">🏋️</div>
-    <div class="workout-info">
-      <h2>Full Body</h2>
-      <p>25 dk • 8 hareket • ~180 kcal</p>
-    </div>
-    <button onclick="startWorkout()">BAŞLA</button>
+  <div class="stat">
+   <span class="stat-icon">⚖️</span>
+   <strong id="homeWeight">-</strong>
+   <small>kg</small>
   </div>
-
-  <div class="section-title">
-    <h2>Vücut Bölgesi</h2>
+  <div class="stat">
+   <span class="stat-icon">⭐</span>
+   <strong id="homeXP">0</strong>
+   <small>XP</small>
   </div>
+ </div>
 
-  <div class="body-grid">
-    <button onclick="openPart('Göğüs')">💪<span>Göğüs</span></button>
-    <button onclick="openPart('Sırt')">🪽<span>Sırt</span></button>
-    <button onclick="openPart('Kollar')">💪<span>Kollar</span></button>
-    <button onclick="openPart('Omuz')">🏋️<span>Omuz</span></button>
-    <button onclick="openPart('Bacak')">🦵<span>Bacak</span></button>
-    <button onclick="openPart('Karın')">🔥<span>Karın</span></button>
+ <div class="motivation">
+  <div class="motivation-icon">🔥</div>
+  <div>
+   <b>Bugünün sözü</b>
+   <p>Bahane değil, tekrar sayısı biriktir.</p>
   </div>
-
-  <div class="stats-grid">
-    <div class="stat">
-      <span>💧</span>
-      <b id="waterHome">0</b>
-      <small>ml su</small>
-    </div>
-
-    <div class="stat">
-      <span>⚖️</span>
-      <b id="weightHome">-</b>
-      <small>kg</small>
-    </div>
-
-    <div class="stat">
-      <span>⭐</span>
-      <b id="xpHome">0</b>
-      <small>XP</small>
-    </div>
-  </div>
-
-  <div class="motivation">
-    <span>🔥</span>
-    <div>
-      <b>Bugünün sözü</b>
-      <p>Bahane değil, tekrar sayısı biriktir.</p>
-    </div>
-  </div>
+ </div>
 
 </section>
 
 
-<!-- PROGRAM -->
+<!-- ANTRENMANLAR -->
 <section id="programs" class="page">
 
-  <h1>Antrenmanlar</h1>
+ <h1 style="margin-bottom:15px">Antrenmanlar</h1>
 
-  <div class="card">
-    <h2>⚡ Anında Antrenman</h2>
+ <div class="card">
+  <h2>⚡ Anında Antrenman</h2>
 
-    <label>Hedef</label>
-    <select id="goal">
-      <option>Kas Geliştirme</option>
-      <option>Yağ Yakma</option>
-      <option>Güç</option>
-      <option>Kondisyon</option>
-    </select>
+  <label>Hedef</label>
+  <select id="goal">
+   <option>Kas Geliştirme</option>
+   <option>Yağ Yakma</option>
+   <option>Güç</option>
+   <option>Kondisyon</option>
+  </select>
 
-    <label>Süre</label>
-    <select id="duration">
-      <option value="10">10 dakika</option>
-      <option value="20">20 dakika</option>
-      <option value="30" selected>30 dakika</option>
-      <option value="45">45 dakika</option>
-    </select>
+  <label>Süre</label>
+  <select id="duration">
+   <option value="10">10 dakika</option>
+   <option value="20">20 dakika</option>
+   <option value="30" selected>30 dakika</option>
+   <option value="45">45 dakika</option>
+  </select>
 
-    <label>Seviye</label>
-    <select id="level">
-      <option>Başlangıç</option>
-      <option>Orta</option>
-      <option>İleri</option>
-    </select>
+  <label>Seviye</label>
+  <select id="level">
+   <option>Başlangıç</option>
+   <option>Orta</option>
+   <option>İleri</option>
+  </select>
 
-    <label>Ekipman</label>
-    <select id="equipment">
-      <option>Ekipmansız</option>
-      <option>Dambıl</option>
-      <option>Direnç Bandı</option>
-      <option>Kettlebell</option>
-      <option>Barfiks</option>
-      <option>Bench</option>
-    </select>
+  <label>Ekipman</label>
+  <select id="equipment">
+   <option>Ekipmansız</option>
+   <option>Dambıl</option>
+   <option>Direnç Bandı</option>
+   <option>Kettlebell</option>
+   <option>Barfiks</option>
+   <option>Bench</option>
+  </select>
 
-    <button class="primary" onclick="createWorkout()">
-      PROGRAM OLUŞTUR
-    </button>
-  </div>
+  <button class="primary full" style="margin-top:18px" onclick="createWorkout()">
+   PROGRAM OLUŞTUR
+  </button>
+ </div>
+
+ <div class="card">
+  <h2>⚡ Hızlı Programlar</h2>
+  <button onclick="quickWorkout(10)">🔥 10 Dakika Hızlı Antrenman</button>
+  <button onclick="quickWorkout(20)">💪 20 Dakika Full Body</button>
+  <button onclick="quickWorkout(30)">🏋️ 30 Dakika Güç</button>
+ </div>
 
 </section>
 
@@ -141,30 +721,497 @@
 <!-- VÜCUT BÖLGESİ -->
 <section id="part" class="page">
 
-  <button class="back" onclick="showPage('home')">← Geri</button>
+ <button class="back" onclick="showPage('home')">← Geri</button>
 
-  <h1 id="partTitle">Göğüs</h1>
+ <h1 id="partTitle">Göğüs</h1>
 
-  <div id="exerciseList"></div>
+ <p class="muted" style="margin:6px 0 15px">
+  Hareket seç ve antrenmana başla.
+ </p>
+
+ <div id="exerciseList"></div>
 
 </section>
 
 
-<!-- ANTRENMAN -->
+<!-- ANTRENMAN EKRANI -->
 <section id="workout" class="page">
 
-  <div class="workout-header">
-    <button class="back" onclick="showPage('home')">←</button>
-    <span id="workoutProgress">1 / 1</span>
+ <div class="workout-header">
+  <button class="back" onclick="showPage('home')">←</button>
+  <b id="workoutProgress">1 / 1</b>
+ </div>
+
+ <div class="progress">
+  <div id="workoutBar"></div>
+ </div>
+
+ <div class="workout-screen">
+
+  <div class="big-emoji" id="workoutEmoji">💪</div>
+
+  <h1 id="workoutName">Şınav</h1>
+
+  <p class="muted" id="workoutDesc" style="margin-top:8px"></p>
+
+  <div class="timer" id="timer">00:30</div>
+
+  <div class="set-info" id="setInfo">Set 1 / 3</div>
+
+  <button class="primary full" style="padding:17px;font-size:17px"
+          onclick="completeSet()">
+   SETİ TAMAMLA ✓
+  </button>
+
+  <div class="workout-actions">
+   <button onclick="pauseTimer()" id="pauseBtn">⏸️ Duraklat</button>
+   <button onclick="skipExercise()">⏭️ Geç</button>
   </div>
 
-  <div class="exercise-big">
-    <div id="exerciseEmoji">💪</div>
-    <h1 id="exerciseName">Şınav</h1>
-    <p id="exerciseDescription"></p>
+ </div>
 
-    <div class="timer" id="timer">00:30</div>
+</section>
 
-    <div class="set-info" id="setInfo">
-      Set 1 / 3
-    </div
+
+<!-- SU -->
+<section id="water" class="page">
+
+ <h1>💧 Su Takibi</h1>
+
+ <div class="water-card">
+
+  <div class="water-number">
+   <span id="waterValue">0</span> ml
+  </div>
+
+  <div class="progress">
+   <div id="waterBar"></div>
+  </div>
+
+  <p class="muted" style="text-align:center">Günlük hedef: 2500 ml</p>
+
+  <div class="water-buttons">
+   <button onclick="addWater(250)">+250</button>
+   <button onclick="addWater(500)">+500</button>
+   <button onclick="resetWater()">Sıfırla</button>
+  </div>
+
+ </div>
+
+</section>
+
+
+<!-- İLERLEME -->
+<section id="stats" class="page">
+
+ <h1>📊 İlerleme</h1>
+
+ <div class="stats-grid" style="grid-template-columns:repeat(2,1fr)">
+  <div class="stat">
+   <span class="stat-icon">🏋️</span>
+   <strong id="totalWorkouts">0</strong>
+   <small>Antrenman</small>
+  </div>
+  <div class="stat">
+   <span class="stat-icon">⏱️</span>
+   <strong id="totalMinutes">0</strong>
+   <small>Dakika</small>
+  </div>
+  <div class="stat">
+   <span class="stat-icon">🔥</span>
+   <strong id="totalCalories">0</strong>
+   <small>Kalori</small>
+  </div>
+  <div class="stat">
+   <span class="stat-icon">⭐</span>
+   <strong id="totalXP">0</strong>
+   <small>XP</small>
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>⭐ Seviye</h2>
+  <h1 id="levelNumber" style="margin-top:8px">Seviye 1</h1>
+  <div class="xp-bar">
+   <div id="xpBar"></div>
+  </div>
+  <p class="muted" id="xpText">0 / 100 XP</p>
+ </div>
+
+ <div class="card">
+  <h2>🏆 Rozetler</h2>
+
+  <div class="badges" style="margin-top:12px">
+
+   <div class="badge">
+    <span>🔥</span>
+    İlk Seri
+   </div>
+
+   <div class="badge">
+    <span>💪</span>
+    İlk Antrenman
+   </div>
+
+   <div class="badge">
+    <span>💧</span>
+    Su Ustası
+   </div>
+
+   <div class="badge">
+    <span>⭐</span>
+    100 XP
+   </div>
+
+   <div class="badge">
+    <span>🏆</span>
+    10 Antrenman
+   </div>
+
+   <div class="badge">
+    <span>🚀</span>
+    30 Gün
+   </div>
+
+  </div>
+ </div>
+
+ <div class="card">
+  <h2>📅 Antrenman Takvimi</h2>
+  <div id="calendar" class="calendar" style="margin-top:12px"></div>
+ </div>
+
+</section>
+
+
+<!-- PROFİL -->
+<section id="profile" class="page">
+
+ <h1>👤 Profil</h1>
+
+ <div class="card">
+
+  <label>Adın</label>
+  <input id="profileName" placeholder="Adın">
+
+  <label>Yaş</label>
+  <input id="profileAge" type="number">
+
+  <label>Boy (cm)</label>
+  <input id="profileHeight" type="number">
+
+  <label>Kilo (kg)</label>
+  <input id="profileWeight" type="number">
+
+  <label>Hedef</label>
+  <select id="profileGoal">
+   <option>Kas geliştirmek</option>
+   <option>Kilo vermek</option>
+   <option>Formda kalmak</option>
+   <option>Güçlenmek</option>
+  </select>
+
+  <button class="primary full" style="margin-top:18px"
+          onclick="saveProfile()">
+   PROFİLİ KAYDET
+  </button>
+
+  <p id="saveMessage" style="margin-top:10px;color:#16a34a"></p>
+
+ </div>
+
+ <div class="card">
+  <h2>⚖️ Vücut Bilgileri</h2>
+  <div id="bmiResult" class="muted" style="margin-top:10px">
+   Boy ve kilo bilgilerini gir.
+  </div>
+ </div>
+
+</section>
+
+
+<!-- CHALLENGE -->
+<section id="challengePage" class="page">
+
+ <h1>🏆 30 Gün Challenge</h1>
+
+ <div class="challenge" style="margin-top:15px">
+
+  <div>DEMİRKAPI FIT</div>
+
+  <div class="challenge-number" id="challengeDay">1</div>
+
+  <h2>Günlük Challenge</h2>
+
+  <p id="challengeText">Bugünkü antrenmanını tamamla.</p>
+
+  <div class="progress" style="background:#374151">
+   <div id="challengeBar"></div>
+  </div>
+
+ </div>
+
+ <div class="card">
+  <h2>✅ Bugünün Görevleri</h2>
+
+  <div class="checklist" style="margin-top:12px">
+
+   <label class="check">
+    <input type="checkbox" id="taskWorkout" onchange="saveTasks()">
+    🏋️ Antrenmanı tamamla
+   </label>
+
+   <label class="check">
+    <input type="checkbox" id="taskWater" onchange="saveTasks()">
+    💧 2500 ml su iç
+   </label>
+
+   <label class="check">
+    <input type="checkbox" id="taskProtein" onchange="saveTasks()">
+    🥗 Protein hedefini tamamla
+   </label>
+
+   <label class="check">
+    <input type="checkbox" id="taskStretch" onchange="saveTasks()">
+    🧘 5 dakika esneme
+   </label>
+
+  </div>
+ </div>
+
+</section>
+
+
+<!-- AYARLAR -->
+<section id="settings" class="page">
+
+ <h1>⚙️ Ayarlar</h1>
+
+ <div class="card" style="margin-top:15px">
+
+  <button onclick="toggleDark()">
+   🌙 Karanlık / Aydınlık Mod
+  </button>
+
+  <button onclick="exportData()">
+   💾 Verileri Yedekle
+  </button>
+
+  <button onclick="importData()">
+   📥 Yedek Geri Yükle
+  </button>
+
+  <button onclick="resetApp()" style="color:#dc2626">
+   🗑️ Tüm Verileri Sil
+  </button>
+
+ </div>
+
+</section>
+
+</main>
+
+
+<!-- ALT MENÜ -->
+<nav class="bottom-nav">
+
+ <button onclick="showPage('home')">
+  🏠
+  <small>Ana Sayfa</small>
+ </button>
+
+ <button onclick="showPage('programs')">
+  🏋️
+  <small>Antrenman</small>
+ </button>
+
+ <button onclick="showPage('water')">
+  💧
+  <small>Su</small>
+ </button>
+
+ <button onclick="showPage('stats')">
+  📊
+  <small>İlerleme</small>
+ </button>
+
+ <button onclick="showPage('profile')">
+  👤
+  <small>Profil</small>
+ </button>
+
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+const KEY="demirkapi_fit_complete_v1";
+
+let state=JSON.parse(localStorage.getItem(KEY))||{
+ profile:{},
+ water:0,
+ workouts:0,
+ minutes:0,
+ calories:0,
+ xp:0,
+ streak:0,
+ lastWorkout:"",
+ dark:false,
+ challengeDay:1,
+ tasks:{},
+ history:[]
+};
+
+const exercises=[
+
+ {name:"Şınav",emoji:"💪",part:"Göğüs",sets:3,reps:12,equipment:"Ekipmansız",desc:"Göğüs, omuz ve arka kol."},
+
+ {name:"Diz Üstü Şınav",emoji:"🧎",part:"Göğüs",sets:3,reps:10,equipment:"Ekipmansız",desc:"Başlangıç göğüs hareketi."},
+
+ {name:"Dumbbell Press",emoji:"🏋️",part:"Göğüs",sets:3,reps:10,equipment:"Dambıl",desc:"Dambıl ile göğüs çalışması."},
+
+ {name:"Squat",emoji:"🦵",part:"Bacak",sets:3,reps:15,equipment:"Ekipmansız",desc:"Bacak ve kalça."},
+
+ {name:"Lunge",emoji:"🏃",part:"Bacak",sets:3,reps:10,equipment:"Ekipmansız",desc:"Bacak ve kalça."},
+
+ {name:"Goblet Squat",emoji:"🏋️",part:"Bacak",sets:3,reps:12,equipment:"Kettlebell",desc:"Kettlebell ile squat."},
+
+ {name:"Mekik",emoji:"🔥",part:"Karın",sets:3,reps:15,equipment:"Ekipmansız",desc:"Karın kasları."},
+
+ {name:"Plank",emoji:"🔥",part:"Karın",sets:3,reps:30,equipment:"Ekipmansız",desc:"Core bölgesi."},
+
+ {name:"Biceps Curl",emoji:"💪",part:"Kollar",sets:3,reps:12,equipment:"Dambıl",desc:"Biceps kasları."},
+
+ {name:"Triceps Extension",emoji:"💪",part:"Kollar",sets:3,reps:12,equipment:"Dambıl",desc:"Arka kol."},
+
+ {name:"Shoulder Press",emoji:"🏋️",part:"Omuz",sets:3,reps:10,equipment:"Dambıl",desc:"Omuz kasları."},
+
+ {name:"Band Row",emoji:"🪽",part:"Sırt",sets:3,reps:12,equipment:"Direnç Bandı",desc:"Sırt kasları."},
+
+ {name:"Barfiks",emoji:"🪽",part:"Sırt",sets:3,reps:6,equipment:"Barfiks",desc:"Sırt ve kol."}
+
+];
+
+let workoutExercises=[];
+let workoutIndex=0;
+let currentSet=1;
+let timer=30;
+let timerInterval=null;
+let running=false;
+let restMode=false;
+
+
+/* KAYDET */
+
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(state));
+}
+
+
+/* SAYFA */
+
+function showPage(id){
+
+ document.querySelectorAll(".page").forEach(x=>{
+  x.classList.remove("active");
+ });
+
+ document.getElementById(id).classList.add("active");
+
+ window.scrollTo(0,0);
+
+ if(id==="stats")renderCalendar();
+
+ update();
+}
+
+
+/* TOAST */
+
+function toast(text){
+
+ const t=document.getElementById("toast");
+
+ t.textContent=text;
+ t.classList.add("show");
+
+ setTimeout(()=>{
+  t.classList.remove("show");
+ },2200);
+}
+
+
+/* BÖLGE */
+
+function openPart(part){
+
+ document.getElementById("partTitle").textContent=part;
+
+ const list=document.getElementById("exerciseList");
+
+ list.innerHTML="";
+
+ exercises
+ .filter(x=>x.part===part)
+ .forEach(ex=>{
+
+  const div=document.createElement("div");
+
+  div.className="exercise-card";
+
+  div.innerHTML=`
+   <div class="exercise-emoji">${ex.emoji}</div>
+
+   <div class="exercise-main">
+    <h3>${ex.name}</h3>
+    <p>${ex.sets} set × ${ex.reps} • ${ex.equipment}</p>
+   </div>
+
+   <button class="circle-btn">▶️</button>
+  `;
+
+  div.querySelector("button").onclick=()=>{
+   startSingle(ex);
+  };
+
+  list.appendChild(div);
+ });
+
+ showPage("part");
+}
+
+
+/* ANTRENMAN */
+
+function startSingle(ex){
+
+ workoutExercises=[ex];
+ workoutIndex=0;
+ currentSet=1;
+
+ openWorkout();
+}
+
+function startToday(){
+
+ workoutExercises=[
+  exercises[0],
+  exercises[3],
+  exercises[6],
+  exercises[7],
+  exercises[8]
+ ];
+
+ workoutIndex=0;
+ currentSet=1;
+
+ openWorkout();
+}
+
+function createWorkout(){
+
+ const equipment=document.getElementById("equipment").value;
+
+ let list=exercises.filter(x=>
+  x
