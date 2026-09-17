@@ -1,1686 +1,523 @@
-/* =====================================================
-   DEMİRKAPI ÇİFTLİĞİ
-   SÜT TAKİP UYGULAMASI
-   ===================================================== */
+let currentWorkout = [];
+let currentType = "";
+let completedExercises = 0;
+let restTimer = null;
 
+const bodyweightExercises = [
+  {
+    name: "Squat",
+    icon: "🦵",
+    sets: "4 set × 15 tekrar",
+    desc: "Bacak ve kalça"
+  },
+  {
+    name: "Şınav",
+    icon: "💪",
+    sets: "4 set × 10 tekrar",
+    desc: "Göğüs ve triceps"
+  },
+  {
+    name: "Lunge",
+    icon: "🦵",
+    sets: "3 set × 12 tekrar",
+    desc: "Bacak ve kalça"
+  },
+  {
+    name: "Plank",
+    icon: "🔥",
+    sets: "3 set × 30 saniye",
+    desc: "Karın ve core"
+  },
+  {
+    name: "Mountain Climber",
+    icon: "🏃",
+    sets: "3 set × 30 saniye",
+    desc: "Kondisyon ve karın"
+  },
+  {
+    name: "Mekik",
+    icon: "💪",
+    sets: "3 set × 15 tekrar",
+    desc: "Karın kasları"
+  }
+];
 
-/* ================= VERİLER ================= */
-
-let animals = JSON.parse(localStorage.getItem("animals")) || [];
-
-let milkRecords = JSON.parse(localStorage.getItem("milkRecords")) || [];
-
-let sales = JSON.parse(localStorage.getItem("sales")) || [];
-
-let settings = JSON.parse(localStorage.getItem("settings")) || {
-  farmName: "Demirkapı Çiftliği",
-  defaultPrice: 0
-};
-
-
-/* ================= BAŞLANGIÇ ================= */
+const equipmentExercises = [
+  {
+    name: "Dambıl Goblet Squat",
+    icon: "🏋️",
+    sets: "4 set × 12 tekrar",
+    desc: "Bacak ve kalça"
+  },
+  {
+    name: "Dambıl Bench Press",
+    icon: "💪",
+    sets: "4 set × 10 tekrar",
+    desc: "Göğüs"
+  },
+  {
+    name: "Dambıl Row",
+    icon: "🏋️",
+    sets: "4 set × 10 tekrar",
+    desc: "Sırt"
+  },
+  {
+    name: "Dambıl Shoulder Press",
+    icon: "💪",
+    sets: "3 set × 12 tekrar",
+    desc: "Omuz"
+  },
+  {
+    name: "Dambıl Curl",
+    icon: "💪",
+    sets: "3 set × 12 tekrar",
+    desc: "Biceps"
+  },
+  {
+    name: "Dambıl Triceps",
+    icon: "🏋️",
+    sets: "3 set × 12 tekrar",
+    desc: "Triceps"
+  }
+];
 
 document.addEventListener("DOMContentLoaded", function () {
-
-  setDefaultDates();
-
+  updateStats();
+  updateToday();
   loadSettings();
-
-  renderAnimals();
-
-  renderMilkRecords();
-
-  renderSales();
-
-  updateDashboard();
-
-  updateReports();
-
-  updateAnimalSelect();
-
-  setupSaleCalculator();
-
 });
 
+function showPage(pageId, button) {
 
-/* ================= MENÜ ================= */
-
-function toggleMenu() {
-
-  const menu = document.getElementById("sideMenu");
-
-  menu.classList.toggle("open");
-
-}
-
-
-function showPage(pageId) {
-
-  document.querySelectorAll(".page").forEach(function (page) {
-
+  document.querySelectorAll(".page").forEach(page => {
     page.classList.remove("active");
-
   });
 
+  const page = document.getElementById(pageId);
 
-  const selectedPage = document.getElementById(pageId);
-
-  if (selectedPage) {
-
-    selectedPage.classList.add("active");
-
+  if (page) {
+    page.classList.add("active");
   }
 
-
-  document.querySelectorAll(".bottom-nav button").forEach(function (button) {
-
-    button.classList.remove("active");
-
+  document.querySelectorAll(".nav-item").forEach(item => {
+    item.classList.remove("active");
   });
 
-
-  const menu = document.getElementById("sideMenu");
-
-  menu.classList.remove("open");
-
+  if (button) {
+    button.classList.add("active");
+  }
 
   window.scrollTo({
     top: 0,
     behavior: "smooth"
   });
-
 }
 
+function openWorkout(type) {
 
-/* ================= TARİH ================= */
+  currentType = type;
 
-function getToday() {
-
-  const date = new Date();
-
-  const year = date.getFullYear();
-
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-
-}
-
-
-function setDefaultDates() {
-
-  const today = getToday();
-
-  const milkDate = document.getElementById("milkDate");
-
-  const saleDate = document.getElementById("saleDate");
-
-  const reportStart = document.getElementById("reportStart");
-
-  const reportEnd = document.getElementById("reportEnd");
-
-
-  if (milkDate) milkDate.value = today;
-
-  if (saleDate) saleDate.value = today;
-
-  if (reportEnd) reportEnd.value = today;
-
-
-  if (reportStart) {
-
-    const date = new Date();
-
-    date.setDate(1);
-
-    reportStart.value = formatDateInput(date);
-
+  if (type === "bodyweight") {
+    currentWorkout = bodyweightExercises.map(x => ({...x}));
+    document.getElementById("workoutType").textContent = "ALETSİZ ANTRENMAN";
+    document.getElementById("workoutTitle").textContent = "Tüm Vücut";
+  } else {
+    currentWorkout = equipmentExercises.map(x => ({...x}));
+    document.getElementById("workoutType").textContent = "ALETLİ ANTRENMAN";
+    document.getElementById("workoutTitle").textContent = "Evde Aletli";
   }
 
-}
+  completedExercises = 0;
 
+  renderExercises();
+  updateProgress();
 
-function formatDateInput(date) {
+  showPage("workout");
 
-  const year = date.getFullYear();
-
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-
-}
-
-
-function formatDate(dateString) {
-
-  if (!dateString) return "-";
-
-  const parts = dateString.split("-");
-
-  if (parts.length !== 3) return dateString;
-
-  return `${parts[2]}.${parts[1]}.${parts[0]}`;
-
-}
-
-
-/* ================= HAYVAN ================= */
-
-function openAnimalForm() {
-
-  document.getElementById("animalForm").classList.remove("hidden");
-
-  document.getElementById("animalTag").focus();
-
-}
-
-
-function closeAnimalForm() {
-
-  document.getElementById("animalForm").classList.add("hidden");
-
-}
-
-
-function addAnimal() {
-
-  const tag = document.getElementById("animalTag").value.trim();
-
-  const name = document.getElementById("animalName").value.trim();
-
-  const breed = document.getElementById("animalBreed").value.trim();
-
-  const birth = document.getElementById("animalBirth").value;
-
-
-  if (!tag) {
-
-    showToast("Küpe numarasını gir.");
-
-    return;
-
-  }
-
-
-  const exists = animals.some(function (animal) {
-
-    return animal.tag.toLowerCase() === tag.toLowerCase();
-
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
   });
+}
 
+function renderExercises() {
 
-  if (exists) {
+  const container = document.getElementById("exerciseList");
 
-    showToast("Bu küpe numarası zaten kayıtlı.");
+  container.innerHTML = "";
 
-    return;
+  currentWorkout.forEach((exercise, index) => {
 
+    const div = document.createElement("div");
+
+    div.className = "exercise";
+
+    div.id = "exercise-" + index;
+
+    div.innerHTML = `
+      <div class="exercise-icon">${exercise.icon}</div>
+
+      <div class="exercise-info">
+        <h3>${exercise.name}</h3>
+        <p>${exercise.sets} • ${exercise.desc}</p>
+      </div>
+
+      <button class="exercise-check"
+        onclick="completeExercise(${index})">
+        ✓
+      </button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+function completeExercise(index) {
+
+  const exercise = document.getElementById("exercise-" + index);
+
+  if (!exercise) return;
+
+  if (exercise.classList.contains("done")) {
+    exercise.classList.remove("done");
+    completedExercises--;
+  } else {
+    exercise.classList.add("done");
+    completedExercises++;
   }
 
+  updateProgress();
+}
 
-  const animal = {
+function updateProgress() {
 
-    id: Date.now(),
+  const total = currentWorkout.length;
 
-    tag: tag,
+  document.getElementById("progressText").textContent =
+    completedExercises + " / " + total;
 
-    name: name || "İsimsiz",
+  const percent = total === 0
+    ? 0
+    : (completedExercises / total) * 100;
 
-    breed: breed || "-",
+  document.getElementById("progressFill").style.width =
+    percent + "%";
+}
 
-    birth: birth || ""
+function finishWorkout() {
 
+  if (completedExercises === 0) {
+    showToast("Önce en az bir hareket tamamla 💪");
+    return;
+  }
+
+  let data = getData();
+
+  data.completedWorkouts++;
+  data.totalExercises += completedExercises;
+  data.totalMinutes += 25;
+
+  const today = new Date().toISOString().split("T")[0];
+
+  if (!data.days.includes(today)) {
+    data.days.push(today);
+  }
+
+  localStorage.setItem("fitnessData", JSON.stringify(data));
+
+  updateStats();
+
+  showToast("Antrenman tamamlandı! 🔥");
+
+  setTimeout(() => {
+    showPage("home");
+  }, 900);
+}
+
+function getData() {
+
+  const saved = localStorage.getItem("fitnessData");
+
+  if (saved) {
+    return JSON.parse(saved);
+  }
+
+  return {
+    completedWorkouts: 0,
+    totalExercises: 0,
+    totalMinutes: 0,
+    days: []
   };
-
-
-  animals.push(animal);
-
-  saveData();
-
-
-  renderAnimals();
-
-  updateAnimalSelect();
-
-  updateDashboard();
-
-
-  document.getElementById("animalTag").value = "";
-
-  document.getElementById("animalName").value = "";
-
-  document.getElementById("animalBreed").value = "";
-
-  document.getElementById("animalBirth").value = "";
-
-
-  closeAnimalForm();
-
-
-  showToast("Hayvan başarıyla eklendi.");
-
 }
 
+function updateStats() {
 
-function deleteAnimal(id) {
+  const data = getData();
 
-  const animal = animals.find(function (item) {
+  const streak = calculateStreak(data.days);
 
-    return item.id === id;
+  document.getElementById("streak").textContent = streak;
+  document.getElementById("completed").textContent = data.completedWorkouts;
+  document.getElementById("minutes").textContent = data.totalMinutes;
+  document.getElementById("workouts").textContent = data.completedWorkouts;
 
-  });
+  document.getElementById("statStreak").textContent = streak;
+  document.getElementById("statCompleted").textContent = data.completedWorkouts;
+  document.getElementById("statMinutes").textContent =
+    data.totalMinutes + " dk";
+  document.getElementById("statExercises").textContent =
+    data.totalExercises;
 
-
-  if (!animal) return;
-
-
-  if (!confirm(`${animal.name} adlı hayvan silinsin mi?`)) {
-
-    return;
-
-  }
-
-
-  animals = animals.filter(function (item) {
-
-    return item.id !== id;
-
-  });
-
-
-  saveData();
-
-  renderAnimals();
-
-  updateAnimalSelect();
-
-  updateDashboard();
-
-
-  showToast("Hayvan silindi.");
-
+  updateWeek(data.days);
 }
 
+function calculateStreak(days) {
 
-function renderAnimals() {
+  if (!days.length) return 0;
 
-  const container = document.getElementById("animalList");
+  const dates = days
+    .map(date => new Date(date))
+    .sort((a, b) => b - a);
 
-  if (!container) return;
+  const today = new Date();
 
+  today.setHours(0,0,0,0);
 
-  if (animals.length === 0) {
+  const latest = dates[0];
 
-    container.innerHTML = `
-      <div class="empty">
-        Henüz hayvan eklenmedi.
-      </div>
-    `;
+  latest.setHours(0,0,0,0);
 
-    return;
+  const difference =
+    Math.floor(
+      (today - latest) / (1000 * 60 * 60 * 24)
+    );
 
+  if (difference > 1) {
+    return 0;
   }
 
+  let streak = 1;
 
-  container.innerHTML = animals.map(function (animal) {
+  for (let i = 0; i < dates.length - 1; i++) {
 
-    return `
+    dates[i].setHours(0,0,0,0);
+    dates[i + 1].setHours(0,0,0,0);
 
-      <div class="animal-card">
+    const diff =
+      Math.floor(
+        (dates[i] - dates[i + 1]) /
+        (1000 * 60 * 60 * 24)
+      );
 
-        <div class="animal-head">
+    if (diff === 1) {
+      streak++;
+    } else if (diff > 1) {
+      break;
+    }
+  }
 
-          <div class="animal-icon">
-            🐄
-          </div>
-
-          <div>
-
-            <h3>${escapeHtml(animal.name)}</h3>
-
-            <div class="animal-tag">
-              Küpe: ${escapeHtml(animal.tag)}
-            </div>
-
-          </div>
-
-        </div>
-
-
-        <div class="animal-info">
-
-          <p>
-            <strong>Irk:</strong>
-            ${escapeHtml(animal.breed)}
-          </p>
-
-          <p>
-            <strong>Doğum:</strong>
-            ${animal.birth ? formatDate(animal.birth) : "-"}
-          </p>
-
-        </div>
-
-
-        <button
-          class="delete-btn"
-          onclick="deleteAnimal(${animal.id})"
-        >
-          🗑 Hayvanı Sil
-        </button>
-
-      </div>
-
-    `;
-
-  }).join("");
-
+  return streak;
 }
 
+function updateWeek(days) {
 
-/* ================= HAYVAN SEÇİMİ ================= */
+  const today = new Date();
 
-function updateAnimalSelect() {
+  let day = today.getDay();
 
-  const select = document.getElementById("milkAnimal");
+  if (day === 0) day = 7;
 
-  if (!select) return;
+  const monday = new Date(today);
 
+  monday.setDate(today.getDate() - day + 1);
+  monday.setHours(0,0,0,0);
 
-  select.innerHTML = `
-    <option value="">
-      Genel Süt Kaydı
-    </option>
-  `;
+  for (let i = 0; i < 7; i++) {
 
+    const date = new Date(monday);
 
-  animals.forEach(function (animal) {
+    date.setDate(monday.getDate() + i);
 
-    const option = document.createElement("option");
+    const dateString =
+      date.toISOString().split("T")[0];
 
-    option.value = animal.id;
+    const circle =
+      document.getElementById("day" + (i + 1));
 
-    option.textContent =
-      `${animal.name} - ${animal.tag}`;
+    if (circle) {
 
-    select.appendChild(option);
+      circle.classList.remove("done");
 
-  });
-
+      if (days.includes(dateString)) {
+        circle.classList.add("done");
+      }
+    }
+  }
 }
 
+function startRest() {
 
-/* ================= SÜT KAYDI ================= */
+  if (restTimer) return;
 
-function addMilkRecord() {
+  let seconds = 60;
 
-  const date =
-    document.getElementById("milkDate").value;
+  const button =
+    document.querySelector(".rest-box button");
 
-  const session =
-    document.getElementById("milkSession").value;
+  button.textContent = seconds + " sn";
 
-  const animalId =
-    document.getElementById("milkAnimal").value;
+  restTimer = setInterval(() => {
 
-  const amount =
-    parseFloat(document.getElementById("milkAmount").value);
+    seconds--;
 
-  const fat =
-    parseFloat(document.getElementById("milkFat").value) || 0;
+    button.textContent = seconds + " sn";
 
-  const protein =
-    parseFloat(document.getElementById("milkProtein").value) || 0;
+    if (seconds <= 0) {
 
-  const note =
-    document.getElementById("milkNote").value.trim();
+      clearInterval(restTimer);
+      restTimer = null;
 
+      button.textContent = "Hazır 💪";
 
-  if (!date) {
+      showToast("Dinlenme bitti! Başlayabilirsin 🔥");
+    }
 
-    showToast("Tarih seç.");
-
-    return;
-
-  }
-
-
-  if (!amount || amount <= 0) {
-
-    showToast("Geçerli bir süt miktarı gir.");
-
-    return;
-
-  }
-
-
-  const animal = animals.find(function (item) {
-
-    return String(item.id) === String(animalId);
-
-  });
-
-
-  const record = {
-
-    id: Date.now(),
-
-    date: date,
-
-    session: session,
-
-    animalId: animalId || "",
-
-    animalName: animal ? animal.name : "Genel",
-
-    amount: amount,
-
-    fat: fat,
-
-    protein: protein,
-
-    note: note
-
-  };
-
-
-  milkRecords.push(record);
-
-  saveData();
-
-
-  renderMilkRecords();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  document.getElementById("milkAmount").value = "";
-
-  document.getElementById("milkFat").value = "";
-
-  document.getElementById("milkProtein").value = "";
-
-  document.getElementById("milkNote").value = "";
-
-
-  showToast("Süt kaydı başarıyla eklendi.");
-
+  }, 1000);
 }
 
+function updateToday() {
 
-function deleteMilkRecord(id) {
+  const names = [
+    "Pazar",
+    "Pazartesi",
+    "Salı",
+    "Çarşamba",
+    "Perşembe",
+    "Cuma",
+    "Cumartesi"
+  ];
 
-  if (!confirm("Bu süt kaydı silinsin mi?")) {
+  const today = new Date();
 
-    return;
+  document.getElementById("todayName").textContent =
+    names[today.getDay()];
 
+  const day = today.getDay();
+
+  if (day === 2 || day === 5) {
+
+    document.getElementById("todayWorkout").textContent =
+      "Tüm Vücut";
+
+    document.getElementById("todayDescription").textContent =
+      "Evde ekipmansız antrenman";
+
+  } else {
+
+    document.getElementById("todayWorkout").textContent =
+      "Fitness Programı";
+
+    document.getElementById("todayDescription").textContent =
+      "Bugünkü hareketlerini tamamla";
   }
-
-
-  milkRecords = milkRecords.filter(function (record) {
-
-    return record.id !== id;
-
-  });
-
-
-  saveData();
-
-  renderMilkRecords();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  showToast("Süt kaydı silindi.");
-
 }
 
-
-function renderMilkRecords() {
-
-  const container =
-    document.getElementById("milkList");
-
-  if (!container) return;
-
-
-  if (milkRecords.length === 0) {
-
-    container.innerHTML = `
-      <div class="empty">
-        Henüz süt kaydı bulunmuyor.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const records = [...milkRecords].sort(function (a, b) {
-
-    return new Date(b.date) - new Date(a.date);
-
-  });
-
-
-  container.innerHTML = `
-
-    <table class="data-table">
-
-      <thead>
-
-        <tr>
-
-          <th>Tarih</th>
-
-          <th>Sağım</th>
-
-          <th>Hayvan</th>
-
-          <th>Süt</th>
-
-          <th>Yağ</th>
-
-          <th>Protein</th>
-
-          <th></th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody>
-
-        ${records.map(function (record) {
-
-          return `
-
-            <tr>
-
-              <td>
-                ${formatDate(record.date)}
-              </td>
-
-              <td>
-                ${record.session}
-              </td>
-
-              <td>
-                ${escapeHtml(record.animalName)}
-              </td>
-
-              <td>
-                <strong>
-                  ${formatNumber(record.amount)} L
-                </strong>
-              </td>
-
-              <td>
-                ${record.fat ? record.fat + "%" : "-"}
-              </td>
-
-              <td>
-                ${record.protein ? record.protein + "%" : "-"}
-              </td>
-
-              <td>
-
-                <button
-                  class="delete-btn"
-                  onclick="deleteMilkRecord(${record.id})"
-                >
-                  Sil
-                </button>
-
-              </td>
-
-            </tr>
-
-          `;
-
-        }).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* ================= SÜT TEMİZLE ================= */
-
-function clearMilkRecords() {
-
-  if (milkRecords.length === 0) {
-
-    showToast("Silinecek kayıt yok.");
-
-    return;
-
-  }
-
-
-  if (!confirm("Tüm süt kayıtları silinsin mi?")) {
-
-    return;
-
-  }
-
-
-  milkRecords = [];
-
-  saveData();
-
-  renderMilkRecords();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  showToast("Süt kayıtları temizlendi.");
-
-}
-
-
-/* ================= SATIŞ ================= */
-
-function setupSaleCalculator() {
-
-  const amount =
-    document.getElementById("saleAmount");
-
-  const price =
-    document.getElementById("salePrice");
-
-
-  if (!amount || !price) return;
-
-
-  amount.addEventListener("input", calculateSaleTotal);
-
-  price.addEventListener("input", calculateSaleTotal);
-
-
-  if (settings.defaultPrice) {
-
-    price.value = settings.defaultPrice;
-
-  }
-
-
-  calculateSaleTotal();
-
-}
-
-
-function calculateSaleTotal() {
-
-  const amount =
-    parseFloat(document.getElementById("saleAmount").value) || 0;
-
-  const price =
-    parseFloat(document.getElementById("salePrice").value) || 0;
-
-
-  const total = amount * price;
-
-
-  const output =
-    document.getElementById("saleTotal");
-
-
-  if (output) {
-
-    output.textContent =
-      formatMoney(total);
-
-  }
-
-}
-
-
-function addSale() {
-
-  const date =
-    document.getElementById("saleDate").value;
-
-  const customer =
-    document.getElementById("saleCustomer").value.trim();
-
-  const amount =
-    parseFloat(document.getElementById("saleAmount").value);
-
-  const price =
-    parseFloat(document.getElementById("salePrice").value);
-
-  const note =
-    document.getElementById("saleNote").value.trim();
-
-
-  if (!date) {
-
-    showToast("Tarih seç.");
-
-    return;
-
-  }
-
-
-  if (!customer) {
-
-    showToast("Alıcı adını gir.");
-
-    return;
-
-  }
-
-
-  if (!amount || amount <= 0) {
-
-    showToast("Süt miktarını gir.");
-
-    return;
-
-  }
-
-
-  if (!price || price <= 0) {
-
-    showToast("Litre fiyatını gir.");
-
-    return;
-
-  }
-
-
-  const sale = {
-
-    id: Date.now(),
-
-    date: date,
-
-    customer: customer,
-
-    amount: amount,
-
-    price: price,
-
-    total: amount * price,
-
-    note: note
-
-  };
-
-
-  sales.push(sale);
-
-  saveData();
-
-
-  renderSales();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  document.getElementById("saleCustomer").value = "";
-
-  document.getElementById("saleAmount").value = "";
-
-  document.getElementById("saleNote").value = "";
-
-
-  calculateSaleTotal();
-
-
-  showToast("Süt satışı kaydedildi.");
-
-}
-
-
-function deleteSale(id) {
-
-  if (!confirm("Bu satış silinsin mi?")) {
-
-    return;
-
-  }
-
-
-  sales = sales.filter(function (sale) {
-
-    return sale.id !== id;
-
-  });
-
-
-  saveData();
-
-  renderSales();
-
-  updateDashboard();
-
-  updateReports();
-
-
-  showToast("Satış silindi.");
-
-}
-
-
-function renderSales() {
-
-  const container =
-    document.getElementById("salesList");
-
-  if (!container) return;
-
-
-  if (sales.length === 0) {
-
-    container.innerHTML = `
-      <div class="empty">
-        Henüz satış kaydı bulunmuyor.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const sorted = [...sales].sort(function (a, b) {
-
-    return new Date(b.date) - new Date(a.date);
-
-  });
-
-
-  container.innerHTML = `
-
-    <table class="data-table">
-
-      <thead>
-
-        <tr>
-
-          <th>Tarih</th>
-
-          <th>Alıcı</th>
-
-          <th>Miktar</th>
-
-          <th>Litre Fiyatı</th>
-
-          <th>Toplam</th>
-
-          <th></th>
-
-        </tr>
-
-      </thead>
-
-
-      <tbody>
-
-        ${sorted.map(function (sale) {
-
-          return `
-
-            <tr>
-
-              <td>
-                ${formatDate(sale.date)}
-              </td>
-
-              <td>
-                ${escapeHtml(sale.customer)}
-              </td>
-
-              <td>
-                ${formatNumber(sale.amount)} L
-              </td>
-
-              <td>
-                ${formatMoney(sale.price)}
-              </td>
-
-              <td>
-                <strong>
-                  ${formatMoney(sale.total)}
-                </strong>
-              </td>
-
-              <td>
-
-                <button
-                  class="delete-btn"
-                  onclick="deleteSale(${sale.id})"
-                >
-                  Sil
-                </button>
-
-              </td>
-
-            </tr>
-
-          `;
-
-        }).join("")}
-
-      </tbody>
-
-    </table>
-
-  `;
-
-}
-
-
-/* ================= ANA SAYFA ================= */
-
-function updateDashboard() {
-
-  const today = getToday();
-
-  const now = new Date();
-
-  const currentMonth =
-    now.getFullYear() + "-" +
-    String(now.getMonth() + 1).padStart(2, "0");
-
-
-  const todayRecords =
-    milkRecords.filter(function (record) {
-
-      return record.date === today;
-
+function setDifficulty(level) {
+
+  document.querySelectorAll(".difficulty")
+    .forEach(button => {
+      button.classList.remove("active-difficulty");
     });
 
+  event.target.classList.add("active-difficulty");
 
-  const morning =
-    todayRecords
-      .filter(function (record) {
+  localStorage.setItem("difficulty", level);
 
-        return record.session === "Sabah";
-
-      })
-      .reduce(function (sum, record) {
-
-        return sum + Number(record.amount);
-
-      }, 0);
-
-
-  const evening =
-    todayRecords
-      .filter(function (record) {
-
-        return record.session === "Akşam";
-
-      })
-      .reduce(function (sum, record) {
-
-        return sum + Number(record.amount);
-
-      }, 0);
-
-
-  const todayTotal = morning + evening;
-
-
-  const monthMilk =
-    milkRecords
-      .filter(function (record) {
-
-        return record.date.startsWith(currentMonth);
-
-      })
-      .reduce(function (sum, record) {
-
-        return sum + Number(record.amount);
-
-      }, 0);
-
-
-  const monthIncome =
-    sales
-      .filter(function (sale) {
-
-        return sale.date.startsWith(currentMonth);
-
-      })
-      .reduce(function (sum, sale) {
-
-        return sum + Number(sale.total);
-
-      }, 0);
-
-
-  setText("todayMilk", formatNumber(todayTotal) + " L");
-
-  setText("morningMilk", formatNumber(morning) + " L");
-
-  setText("eveningMilk", formatNumber(evening) + " L");
-
-  setText("animalCount", animals.length);
-
-  setText("monthMilk", formatNumber(monthMilk) + " L");
-
-  setText("monthIncome", formatMoney(monthIncome));
-
-
-  renderRecentMilk();
-
+  showToast(level + " seviyesi seçildi");
 }
 
+function toggleTheme() {
 
-function renderRecentMilk() {
+  document.body.classList.toggle("dark");
 
-  const container =
-    document.getElementById("recentMilk");
+  const dark =
+    document.body.classList.contains("dark");
 
-  if (!container) return;
+  localStorage.setItem("darkMode", dark);
 
-
-  if (milkRecords.length === 0) {
-
-    container.innerHTML = `
-      <div class="empty">
-        Henüz süt kaydı bulunmuyor.
-      </div>
-    `;
-
-    return;
-
-  }
-
-
-  const records =
-    [...milkRecords]
-      .sort(function (a, b) {
-
-        return b.id - a.id;
-
-      })
-      .slice(0, 5);
-
-
-  container.innerHTML =
-    records.map(function (record) {
-
-      return `
-
-        <div class="record">
-
-          <div class="record-left">
-
-            <div class="record-icon">
-              🥛
-            </div>
-
-            <div>
-
-              <div class="record-title">
-                ${escapeHtml(record.animalName)}
-                - ${record.session}
-              </div>
-
-              <div class="record-date">
-                ${formatDate(record.date)}
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div class="record-amount">
-            ${formatNumber(record.amount)} L
-          </div>
-
-        </div>
-
-      `;
-
-    }).join("");
-
+  document.querySelector(".theme-btn").textContent =
+    dark ? "☀️" : "🌙";
 }
-
-
-/* ================= RAPORLAR ================= */
-
-function updateReports() {
-
-  const totalMilk =
-    milkRecords.reduce(function (sum, record) {
-
-      return sum + Number(record.amount);
-
-    }, 0);
-
-
-  const totalSales =
-    sales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.total);
-
-    }, 0);
-
-
-  const soldMilk =
-    sales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.amount);
-
-    }, 0);
-
-
-  const dates = new Set(
-    milkRecords.map(function (record) {
-
-      return record.date;
-
-    })
-  );
-
-
-  const average =
-    dates.size > 0
-      ? totalMilk / dates.size
-      : 0;
-
-
-  setText(
-    "reportTotalMilk",
-    formatNumber(totalMilk) + " L"
-  );
-
-
-  setText(
-    "reportAverageMilk",
-    formatNumber(average) + " L"
-  );
-
-
-  setText(
-    "reportTotalSales",
-    formatMoney(totalSales)
-  );
-
-
-  setText(
-    "reportSoldMilk",
-    formatNumber(soldMilk) + " L"
-  );
-
-}
-
-
-function generateReport() {
-
-  const start =
-    document.getElementById("reportStart").value;
-
-  const end =
-    document.getElementById("reportEnd").value;
-
-
-  if (!start || !end) {
-
-    showToast("Başlangıç ve bitiş tarihini seç.");
-
-    return;
-
-  }
-
-
-  const filteredMilk =
-    milkRecords.filter(function (record) {
-
-      return record.date >= start &&
-             record.date <= end;
-
-    });
-
-
-  const filteredSales =
-    sales.filter(function (sale) {
-
-      return sale.date >= start &&
-             sale.date <= end;
-
-    });
-
-
-  const totalMilk =
-    filteredMilk.reduce(function (sum, record) {
-
-      return sum + Number(record.amount);
-
-    }, 0);
-
-
-  const soldMilk =
-    filteredSales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.amount);
-
-    }, 0);
-
-
-  const income =
-    filteredSales.reduce(function (sum, sale) {
-
-      return sum + Number(sale.total);
-
-    }, 0);
-
-
-  const dates = new Set(
-    filteredMilk.map(function (record) {
-
-      return record.date;
-
-    })
-  );
-
-
-  const average =
-    dates.size > 0
-      ? totalMilk / dates.size
-      : 0;
-
-
-  const result =
-    document.getElementById("reportResult");
-
-
-  result.innerHTML = `
-
-    <h3>📊 Rapor Sonucu</h3>
-
-    <p>
-      <strong>Tarih:</strong>
-      ${formatDate(start)}
-      -
-      ${formatDate(end)}
-    </p>
-
-    <br>
-
-    <p>
-      🥛 Toplam üretilen süt:
-      <strong>${formatNumber(totalMilk)} L</strong>
-    </p>
-
-    <p>
-      📅 Günlük ortalama:
-      <strong>${formatNumber(average)} L</strong>
-    </p>
-
-    <p>
-      🚚 Satılan süt:
-      <strong>${formatNumber(soldMilk)} L</strong>
-    </p>
-
-    <p>
-      💰 Satış geliri:
-      <strong>${formatMoney(income)}</strong>
-    </p>
-
-  `;
-
-
-  showToast("Rapor oluşturuldu.");
-
-}
-
-
-/* ================= AYARLAR ================= */
 
 function loadSettings() {
 
-  const farmName =
-    document.getElementById("farmName");
+  const saved =
+    localStorage.getItem("fitnessSettings");
 
-  const defaultPrice =
-    document.getElementById("defaultPrice");
+  if (saved) {
 
+    const data = JSON.parse(saved);
 
-  if (farmName) {
+    document.getElementById("userName").value =
+      data.name || "";
 
-    farmName.value =
-      settings.farmName || "Demirkapı Çiftliği";
-
+    document.getElementById("goal").value =
+      data.goal || "Genel fitness";
   }
 
+  const dark =
+    localStorage.getItem("darkMode") === "true";
 
-  if (defaultPrice) {
+  if (dark) {
 
-    defaultPrice.value =
-      settings.defaultPrice || "";
+    document.body.classList.add("dark");
 
+    document.querySelector(".theme-btn").textContent =
+      "☀️";
   }
-
 }
-
 
 function saveSettings() {
 
-  const farmName =
-    document.getElementById("farmName").value.trim();
-
-
-  const defaultPrice =
-    parseFloat(
-      document.getElementById("defaultPrice").value
-    ) || 0;
-
-
-  settings = {
-
-    farmName:
-      farmName || "Demirkapı Çiftliği",
-
-    defaultPrice:
-      defaultPrice
-
+  const data = {
+    name: document.getElementById("userName").value,
+    goal: document.getElementById("goal").value
   };
 
+  localStorage.setItem(
+    "fitnessSettings",
+    JSON.stringify(data)
+  );
 
-  saveData();
-
-
-  const priceInput =
-    document.getElementById("salePrice");
-
-
-  if (priceInput && settings.defaultPrice) {
-
-    priceInput.value =
-      settings.defaultPrice;
-
-    calculateSaleTotal();
-
-  }
-
-
-  showToast("Ayarlar kaydedildi.");
-
+  showToast("Ayarlar kaydedildi ✅");
 }
 
+function resetData() {
 
-/* ================= YEDEKLEME ================= */
-
-function exportData() {
-
-  const data = {
-
-    version: 1,
-
-    exportedAt: new Date().toISOString(),
-
-    animals: animals,
-
-    milkRecords: milkRecords,
-
-    sales: sales,
-
-    settings: settings
-
-  };
-
-
-  const blob =
-    new Blob(
-      [JSON.stringify(data, null, 2)],
-      { type: "application/json" }
+  const answer =
+    confirm(
+      "Tüm antrenman geçmişi ve istatistikler silinsin mi?"
     );
 
+  if (!answer) return;
 
-  const url =
-    URL.createObjectURL(blob);
+  localStorage.removeItem("fitnessData");
 
+  updateStats();
 
-  const link =
-    document.createElement("a");
-
-
-  link.href = url;
-
-  link.download =
-    "demirkapi-sut-yedek-" +
-    getToday() +
-    ".json";
-
-
-  document.body.appendChild(link);
-
-  link.click();
-
-  link.remove();
-
-
-  URL.revokeObjectURL(url);
-
-
-  showToast("Yedek dosyası hazırlandı.");
-
+  showToast("Veriler sıfırlandı");
 }
-
-
-function importData(event) {
-
-  const file =
-    event.target.files[0];
-
-
-  if (!file) return;
-
-
-  const reader =
-    new FileReader();
-
-
-  reader.onload = function (e) {
-
-    try {
-
-      const data =
-        JSON.parse(e.target.result);
-
-
-      if (!data || typeof data !== "object") {
-
-        throw new Error();
-
-      }
-
-
-      animals =
-        Array.isArray(data.animals)
-          ? data.animals
-          : [];
-
-
-      milkRecords =
-        Array.isArray(data.milkRecords)
-          ? data.milkRecords
-          : [];
-
-
-      sales =
-        Array.isArray(data.sales)
-          ? data.sales
-          : [];
-
-
-      settings =
-        data.settings || {
-          farmName: "Demirkapı Çiftliği",
-          defaultPrice: 0
-        };
-
-
-      saveData();
-
-
-      loadSettings();
-
-      renderAnimals();
-
-      renderMilkRecords();
-
-      renderSales();
-
-      updateAnimalSelect();
-
-      updateDashboard();
-
-      updateReports();
-
-
-      showToast("Yedek başarıyla geri yüklendi.");
-
-    } catch (error) {
-
-      showToast("Yedek dosyası geçersiz.");
-
-    }
-
-  };
-
-
-  reader.readAsText(file);
-
-}
-
-
-/* ================= LOCAL STORAGE ================= */
-
-function saveData() {
-
-  localStorage.setItem(
-    "animals",
-    JSON.stringify(animals)
-  );
-
-
-  localStorage.setItem(
-    "milkRecords",
-    JSON.stringify(milkRecords)
-  );
-
-
-  localStorage.setItem(
-    "sales",
-    JSON.stringify(sales)
-  );
-
-
-  localStorage.setItem(
-    "settings",
-    JSON.stringify(settings)
-  );
-
-}
-
-
-/* ================= YARDIMCI ================= */
-
-function setText(id, value) {
-
-  const element =
-    document.getElementById(id);
-
-
-  if (element) {
-
-    element.textContent = value;
-
-  }
-
-}
-
-
-function formatNumber(number) {
-
-  return Number(number || 0).toLocaleString(
-    "tr-TR",
-    {
-      maximumFractionDigits: 2
-    }
-  );
-
-}
-
-
-function formatMoney(number) {
-
-  return Number(number || 0).toLocaleString(
-    "tr-TR",
-    {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }
-  ) + " ₺";
-
-}
-
-
-function escapeHtml(value) {
-
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-
-}
-
-
-/* ================= BİLDİRİM ================= */
-
-let toastTimer;
-
 
 function showToast(message) {
 
   const toast =
     document.getElementById("toast");
 
-
-  if (!toast) return;
-
-
   toast.textContent = message;
 
   toast.classList.add("show");
 
-
-  clearTimeout(toastTimer);
-
-
-  toastTimer = setTimeout(function () {
-
+  setTimeout(() => {
     toast.classList.remove("show");
-
-  }, 2500);
-
-      }
+  }, 2200);
+}
