@@ -1,1413 +1,482 @@
-let currentWorkout = [];
-let currentType = "bodyweight";
-let completedExercises = 0;
-
-let workoutTimer = null;
-let workoutSeconds = 0;
-let restTimer = null;
-let restSeconds = 60;
-
-let selectedLevel = "Başlangıç";
-let selectedDays = 4;
-
 const bodyweightExercises = [
-  { name: "Squat", icon: "🦵", sets: "4 set × 15 tekrar", desc: "Bacak ve kalça" },
-  { name: "Şınav", icon: "💪", sets: "4 set × 10 tekrar", desc: "Göğüs ve triceps" },
-  { name: "Lunge", icon: "🦵", sets: "3 set × 12 tekrar", desc: "Bacak ve kalça" },
-  { name: "Plank", icon: "🔥", sets: "3 set × 30 saniye", desc: "Karın ve core" },
-  { name: "Mountain Climber", icon: "🏃", sets: "3 set × 30 saniye", desc: "Kondisyon" },
-  { name: "Mekik", icon: "💪", sets: "3 set × 15 tekrar", desc: "Karın" }
+  {name:"Squat",icon:"🦵",sets:4,reps:"15 tekrar",muscle:"Bacak • Kalça"},
+  {name:"Şınav",icon:"💪",sets:4,reps:"10 tekrar",muscle:"Göğüs • Kol"},
+  {name:"Lunge",icon:"🦵",sets:3,reps:"12 tekrar",muscle:"Bacak"},
+  {name:"Plank",icon:"🔥",sets:3,reps:"30 saniye",muscle:"Karın"},
+  {name:"Mountain Climber",icon:"🏃",sets:3,reps:"20 tekrar",muscle:"Karın • Kardiyo"},
+  {name:"Mekik",icon:"🔥",sets:3,reps:"15 tekrar",muscle:"Karın"}
 ];
 
 const equipmentExercises = [
-  { name: "Dambıl Goblet Squat", icon: "🏋️", sets: "4 set × 12 tekrar", desc: "Bacak ve kalça" },
-  { name: "Dambıl Bench Press", icon: "💪", sets: "4 set × 10 tekrar", desc: "Göğüs" },
-  { name: "Dambıl Row", icon: "🏋️", sets: "4 set × 10 tekrar", desc: "Sırt" },
-  { name: "Dambıl Shoulder Press", icon: "💪", sets: "3 set × 12 tekrar", desc: "Omuz" },
-  { name: "Dambıl Curl", icon: "💪", sets: "3 set × 12 tekrar", desc: "Biceps" },
-  { name: "Dambıl Triceps", icon: "🏋️", sets: "3 set × 12 tekrar", desc: "Triceps" }
+  {name:"Dambıl Goblet Squat",icon:"🏋️",sets:4,reps:"12 tekrar",muscle:"Bacak"},
+  {name:"Dambıl Bench Press",icon:"🏋️",sets:4,reps:"10 tekrar",muscle:"Göğüs"},
+  {name:"Dambıl Row",icon:"💪",sets:4,reps:"12 tekrar",muscle:"Sırt"},
+  {name:"Dambıl Shoulder Press",icon:"🏋️",sets:3,reps:"12 tekrar",muscle:"Omuz"},
+  {name:"Dambıl Curl",icon:"💪",sets:3,reps:"12 tekrar",muscle:"Biceps"},
+  {name:"Dambıl Triceps",icon:"💪",sets:3,reps:"12 tekrar",muscle:"Triceps"}
 ];
 
-const weekNames = [
-  "Pazartesi",
-  "Salı",
-  "Çarşamba",
-  "Perşembe",
-  "Cuma",
-  "Cumartesi",
-  "Pazar"
-];
+let program = localStorage.getItem("demirkapi_program") || "bodyweight";
+let completed = [];
+let timerSeconds = 0;
+let timerInterval = null;
+let restSeconds = 60;
+let restInterval = null;
 
-const motivationTexts = [
-  "Bahane yok. Bugün kendin için bir şey yap. 🔥",
-  "Düzenli olmak, mükemmel olmaktan daha önemlidir.",
-  "Bugünkü antrenmanın gelecekteki seni oluşturur. 💪",
-  "Kendinle yarış. Dünkü senden daha iyi ol.",
-  "Bir antrenman daha. Bir adım daha. 🏆"
-];
+let stats = JSON.parse(localStorage.getItem("demirkapi_stats") || "{}");
 
+stats.streak = stats.streak || 0;
+stats.workouts = stats.workouts || 0;
+stats.exercises = stats.exercises || 0;
+stats.minutes = stats.minutes || 0;
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadEverything();
-});
+let profile = JSON.parse(localStorage.getItem("demirkapi_profile") || "{}");
+let weightHistory = JSON.parse(localStorage.getItem("demirkapi_weights") || "[]");
+let water = Number(localStorage.getItem("demirkapi_water") || 0);
 
-
-function loadEverything() {
-
-  loadTheme();
-  loadProfile();
-  updateStats();
-  updateHome();
-  renderWeekPlan();
-  updateWeight();
-  updateWater();
-  randomMotivation();
-
-  const savedProgram =
-    localStorage.getItem("fitnessProgram");
-
-  if (savedProgram) {
-    currentType = savedProgram;
-  }
+function saveStats(){
+  localStorage.setItem("demirkapi_stats",JSON.stringify(stats));
 }
 
+function showPage(page){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
 
-function showPage(pageId, button) {
+  const target=document.getElementById(page);
 
-  document.querySelectorAll(".page").forEach(page => {
-    page.classList.remove("active");
+  if(target) target.classList.add("active");
+
+  document.querySelectorAll(".nav-item").forEach(n=>{
+    n.classList.toggle("active",n.dataset.page===page);
   });
 
-  const page = document.getElementById(pageId);
+  window.scrollTo({top:0,behavior:"smooth"});
 
-  if (!page) return;
+  if(page==="home") updateHome();
+  if(page==="programs") renderWeeklyPlan();
+  if(page==="workout") renderWorkout();
+  if(page==="weight") renderWeight();
+  if(page==="water") updateWater();
+  if(page==="stats") updateStats();
+  if(page==="profile") loadProfile();
+}
 
-  page.classList.add("active");
+function updateHome(){
+  document.getElementById("homeStreak").textContent=stats.streak;
+  document.getElementById("homeWater").textContent=water+" ml";
 
-  document.querySelectorAll(".nav-item").forEach(item => {
-    item.classList.remove("active");
-  });
+  const current=profile.weight || weightHistory[weightHistory.length-1]?.weight;
 
-  if (button) {
-    button.classList.add("active");
-  } else {
+  document.getElementById("homeWeight").textContent=
+    current ? current+" kg" : "-- kg";
 
-    const navMap = {
-      home: 0,
-      programs: 1,
-      stats: 2,
-      profile: 3
-    };
+  let progress=0;
 
-    if (navMap[pageId] !== undefined) {
+  if(profile.targetWeight && current){
+    const start=Number(profile.startWeight || current);
+    const target=Number(profile.targetWeight);
 
-      const items =
-        document.querySelectorAll(".nav-item");
-
-      items[navMap[pageId]].classList.add("active");
+    if(start!==target){
+      progress=Math.min(100,
+        Math.max(0,
+          Math.round(Math.abs(start-current)/Math.abs(start-target)*100)
+        )
+      );
     }
   }
 
-  if (pageId === "stats") {
-    updateStats();
-  }
+  document.getElementById("homeProgress").textContent="%"+progress;
 
-  if (pageId === "weight") {
-    updateWeight();
-  }
+  const motivation=[
+    "Bahane değil, tekrar.",
+    "Bugün dünden daha güçlüsün.",
+    "Küçük adımlar büyük değişimler oluşturur.",
+    "Disiplin motivasyondan güçlüdür.",
+    "Antrenmanı tamamla, hedefe yaklaş."
+  ];
 
-  if (pageId === "water") {
-    updateWater();
-  }
-
-  if (pageId === "programs") {
-    renderWeekPlan();
-  }
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
+  document.getElementById("motivationText").textContent=
+    motivation[new Date().getDate()%motivation.length];
 }
 
+function setProgram(type){
+  program=type;
+  localStorage.setItem("demirkapi_program",program);
 
-function startTodayWorkout() {
-
-  openWorkout(currentType);
-
-}
-
-
-function openWorkout(type) {
-
-  currentType = type;
-
-  localStorage.setItem(
-    "fitnessProgram",
-    type
+  document.getElementById("bodyweightBtn").classList.toggle(
+    "selected",type==="bodyweight"
   );
 
-  if (type === "bodyweight") {
-
-    currentWorkout =
-      bodyweightExercises.map(x => ({...x}));
-
-    document.getElementById("workoutType").textContent =
-      "ALETSİZ ANTRENMAN";
-
-    document.getElementById("workoutTitle").textContent =
-      "Tüm Vücut";
-
-  } else {
-
-    currentWorkout =
-      equipmentExercises.map(x => ({...x}));
-
-    document.getElementById("workoutType").textContent =
-      "ALETLİ ANTRENMAN";
-
-    document.getElementById("workoutTitle").textContent =
-      "Evde Aletli";
-  }
-
-  completedExercises = 0;
-
-  stopWorkoutTimer();
-
-  workoutSeconds = 0;
-
-  updateWorkoutTimer();
-
-  renderExercises();
-
-  updateProgress();
-
-  showPage("workout");
-}
-
-
-function selectProgram(type, button) {
-
-  currentType = type;
-
-  localStorage.setItem(
-    "fitnessProgram",
-    type
+  document.getElementById("equipmentBtn").classList.toggle(
+    "selected",type==="equipment"
   );
 
-  document.querySelectorAll(".choice")
-    .forEach(x => x.classList.remove("active"));
-
-  button.classList.add("active");
-
-  const text =
-    type === "bodyweight"
-      ? "Aletsiz program seçildi 🏠"
-      : "Aletli program seçildi 🏋️";
-
-  showToast(text);
-
-  updateHome();
-  renderWeekPlan();
+  renderWorkout();
 }
 
+function getExercises(){
+  return program==="equipment"
+    ? equipmentExercises
+    : bodyweightExercises;
+}
 
-function renderExercises() {
+function renderWorkout(){
+  const list=document.getElementById("exerciseList");
+  if(!list) return;
 
-  const container =
-    document.getElementById("exerciseList");
+  const exercises=getExercises();
 
-  container.innerHTML = "";
+  if(completed.length!==exercises.length){
+    completed=Array(exercises.length).fill(false);
+  }
 
-  currentWorkout.forEach((exercise, index) => {
+  list.innerHTML="";
 
-    const item =
-      document.createElement("div");
+  exercises.forEach((ex,index)=>{
+    const div=document.createElement("div");
 
-    item.className = "exercise";
+    div.className="exercise"+(completed[index]?" done":"");
 
-    item.id =
-      "exercise-" + index;
-
-    item.innerHTML = `
-      <div class="exercise-icon">${exercise.icon}</div>
+    div.innerHTML=`
+      <div class="exercise-icon">${ex.icon}</div>
 
       <div class="exercise-info">
-        <b>${exercise.name}</b>
-        <small>${exercise.sets} • ${exercise.desc}</small>
+        <b>${ex.name}</b>
+        <small>${ex.sets} set • ${ex.reps} • ${ex.muscle}</small>
       </div>
 
-      <button
-        class="exercise-check"
-        onclick="completeExercise(${index})">
-        ✓
+      <button class="exercise-check"
+        onclick="toggleExercise(${index})">
+        ${completed[index]?"✓":"○"}
       </button>
     `;
 
-    container.appendChild(item);
+    list.appendChild(div);
   });
 
-  document.getElementById("exerciseCounter").textContent =
-    "0 / " + currentWorkout.length;
+  updateWorkoutProgress();
 }
 
+function toggleExercise(index){
+  completed[index]=!completed[index];
 
-function completeExercise(index) {
-
-  const exercise =
-    document.getElementById("exercise-" + index);
-
-  if (!exercise) return;
-
-  if (exercise.classList.contains("done")) {
-
-    exercise.classList.remove("done");
-
-    completedExercises--;
-
-  } else {
-
-    exercise.classList.add("done");
-
-    completedExercises++;
-
-    showToast("Hareket tamamlandı 💪");
+  if(completed[index]){
+    stats.exercises++;
+    saveStats();
   }
 
-  updateProgress();
+  renderWorkout();
 }
 
+function updateWorkoutProgress(){
+  const total=getExercises().length;
+  const done=completed.filter(Boolean).length;
 
-function updateProgress() {
+  document.getElementById("workoutProgressText").textContent=
+    `${done} / ${total}`;
 
-  const total =
-    currentWorkout.length;
-
-  document.getElementById("progressText").textContent =
-    completedExercises + " / " + total;
-
-  document.getElementById("exerciseCounter").textContent =
-    completedExercises + " / " + total;
-
-  const percent =
-    total === 0
-      ? 0
-      : (completedExercises / total) * 100;
-
-  document.getElementById("progressFill").style.width =
-    percent + "%";
+  document.getElementById("workoutProgress").style.width=
+    ((done/total)*100)+"%";
 }
 
+function startTimer(){
+  if(timerInterval) return;
 
-function startWorkoutTimer() {
+  timerInterval=setInterval(()=>{
+    timerSeconds++;
 
-  if (workoutTimer) return;
+    const min=String(Math.floor(timerSeconds/60)).padStart(2,"0");
+    const sec=String(timerSeconds%60).padStart(2,"0");
 
-  workoutTimer =
-    setInterval(() => {
-
-      workoutSeconds++;
-
-      updateWorkoutTimer();
-
-    }, 1000);
+    document.getElementById("timer").textContent=`${min}:${sec}`;
+  },1000);
 }
 
-
-function pauseWorkoutTimer() {
-
-  stopWorkoutTimer();
-
+function pauseTimer(){
+  clearInterval(timerInterval);
+  timerInterval=null;
 }
 
-
-function stopWorkoutTimer() {
-
-  if (workoutTimer) {
-
-    clearInterval(workoutTimer);
-
-    workoutTimer = null;
-  }
+function resetTimer(){
+  pauseTimer();
+  timerSeconds=0;
+  document.getElementById("timer").textContent="00:00";
 }
 
+function startRest(){
+  clearInterval(restInterval);
+  restSeconds=60;
+  document.getElementById("restTimer").textContent=restSeconds;
 
-function updateWorkoutTimer() {
+  restInterval=setInterval(()=>{
+    restSeconds--;
 
-  const minutes =
-    Math.floor(workoutSeconds / 60);
+    document.getElementById("restTimer").textContent=
+      Math.max(restSeconds,0);
 
-  const seconds =
-    workoutSeconds % 60;
+    if(restSeconds<=0){
+      clearInterval(restInterval);
 
-  document.getElementById("workoutTimer").textContent =
-    String(minutes).padStart(2, "0") +
-    ":" +
-    String(seconds).padStart(2, "0");
+      if(navigator.vibrate) navigator.vibrate([300,150,300]);
+    }
+  },1000);
 }
 
+function finishWorkout(){
+  const done=completed.filter(Boolean).length;
 
-function startRest() {
-
-  if (restTimer) return;
-
-  restSeconds = 60;
-
-  updateRestDisplay();
-
-  restTimer =
-    setInterval(() => {
-
-      restSeconds--;
-
-      updateRestDisplay();
-
-      if (restSeconds <= 0) {
-
-        clearInterval(restTimer);
-
-        restTimer = null;
-
-        restSeconds = 60;
-
-        updateRestDisplay();
-
-        showToast("Dinlenme bitti! Başlayabilirsin 🔥");
-      }
-
-    }, 1000);
-}
-
-
-function updateRestDisplay() {
-
-  document.getElementById("restTime").textContent =
-    restSeconds;
-}
-
-
-function finishWorkout() {
-
-  if (completedExercises === 0) {
-
-    showToast("Önce en az bir hareket tamamla 💪");
-
+  if(done===0){
+    alert("Önce en az bir hareket tamamla 💪");
     return;
   }
 
-  stopWorkoutTimer();
+  pauseTimer();
 
-  const data =
-    getFitnessData();
+  stats.workouts++;
+  stats.streak++;
 
-  data.completedWorkouts++;
+  stats.minutes+=Math.max(1,Math.round(timerSeconds/60));
 
-  data.totalExercises +=
-    completedExercises;
+  saveStats();
 
-  data.totalMinutes +=
-    Math.max(
-      1,
-      Math.round(workoutSeconds / 60)
-    );
+  alert("Antrenman tamamlandı! 🔥\nBugün kendin için bir adım attın.");
 
-  const today =
-    getTodayString();
+  completed=[];
+  resetTimer();
 
-  if (!data.days.includes(today)) {
-    data.days.push(today);
+  showPage("home");
+}
+
+function renderWeeklyPlan(){
+  const box=document.getElementById("weeklyPlan");
+  if(!box) return;
+
+  const days=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
+  const today=new Date().getDay();
+  const index=today===0?6:today-1;
+
+  box.innerHTML=days.map((day,i)=>`
+    <div class="day ${i===index?"today":""}">
+      <b>${day}</b>
+      <small>${i===index?"BUGÜN":"Antrenman"}</small>
+    </div>
+  `).join("");
+
+  document.getElementById("bodyweightBtn")
+    .classList.toggle("selected",program==="bodyweight");
+
+  document.getElementById("equipmentBtn")
+    .classList.toggle("selected",program==="equipment");
+}
+
+function openBodyPart(part){
+  alert(
+    `${part} programı hazırlanıyor 💪\n\n`+
+    "Bu bölge için özel hareket listesi ve program sistemi ekleyeceğiz."
+  );
+}
+
+function saveWeight(){
+  const input=document.getElementById("weightInput");
+  const value=Number(input.value);
+
+  if(!value || value<=0){
+    alert("Geçerli bir kilo gir.");
+    return;
+  }
+
+  const item={
+    weight:value,
+    date:new Date().toLocaleDateString("tr-TR")
+  };
+
+  weightHistory.push(item);
+
+  localStorage.setItem(
+    "demirkapi_weights",
+    JSON.stringify(weightHistory)
+  );
+
+  profile.weight=value;
+
+  if(!profile.startWeight){
+    profile.startWeight=value;
   }
 
   localStorage.setItem(
-    "fitnessData",
-    JSON.stringify(data)
-  );
-
-  updateStats();
-
-  showToast("Antrenman tamamlandı! 🏆");
-
-  setTimeout(() => {
-    showPage("home");
-  }, 1000);
-}
-
-
-function getFitnessData() {
-
-  const saved =
-    localStorage.getItem("fitnessData");
-
-  if (saved) {
-
-    try {
-      return JSON.parse(saved);
-    } catch (e) {}
-  }
-
-  return {
-    completedWorkouts: 0,
-    totalExercises: 0,
-    totalMinutes: 0,
-    days: []
-  };
-}
-
-
-function updateStats() {
-
-  const data =
-    getFitnessData();
-
-  const streak =
-    calculateStreak(data.days);
-
-  setText("streak", streak);
-  setText("completed", data.completedWorkouts);
-  setText("minutes", data.totalMinutes);
-  setText("workouts", data.totalExercises);
-
-  setText("statStreak", streak);
-  setText("statCompleted", data.completedWorkouts);
-  setText("statExercises", data.totalExercises);
-  setText("statMinutes", data.totalMinutes);
-  setText("statWater", getTodayWater());
-
-  updateWeekDots(data.days);
-}
-
-
-function calculateStreak(days) {
-
-  if (!days || days.length === 0) {
-    return 0;
-  }
-
-  const uniqueDays =
-    [...new Set(days)].sort().reverse();
-
-  let streak = 0;
-
-  let check =
-    new Date();
-
-  check.setHours(0,0,0,0);
-
-  const today =
-    getTodayString();
-
-  if (!uniqueDays.includes(today)) {
-
-    check.setDate(
-      check.getDate() - 1
-    );
-
-    if (!uniqueDays.includes(
-      dateToString(check)
-    )) {
-      return 0;
-    }
-  }
-
-  for (let i = 0; i < uniqueDays.length; i++) {
-
-    const expected =
-      dateToString(check);
-
-    if (uniqueDays.includes(expected)) {
-
-      streak++;
-
-      check.setDate(
-        check.getDate() - 1
-      );
-
-    } else {
-
-      break;
-    }
-  }
-
-  return streak;
-}
-
-
-function renderWeekPlan() {
-
-  const container =
-    document.getElementById("weekPlan");
-
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  const today =
-    new Date();
-
-  let day =
-    today.getDay();
-
-  if (day === 0) day = 7;
-
-  const monday =
-    new Date(today);
-
-  monday.setDate(
-    today.getDate() - day + 1
-  );
-
-  monday.setHours(0,0,0,0);
-
-  const trainingDays =
-    createTrainingDays(selectedDays);
-
-  for (let i = 0; i < 7; i++) {
-
-    const date =
-      new Date(monday);
-
-    date.setDate(
-      monday.getDate() + i
-    );
-
-    const isToday =
-      dateToString(date) ===
-      getTodayString();
-
-    const isTraining =
-      trainingDays[i];
-
-    const div =
-      document.createElement("div");
-
-    div.className =
-      "week-day" +
-      (isToday ? " today" : "");
-
-    div.innerHTML = `
-      <div class="week-date">
-        <b>${date.getDate()}</b>
-        <small>${weekNames[i].substring(0,3)}</small>
-      </div>
-
-      <div class="week-info">
-        <b>${isTraining ? getWorkoutName(i) : "Dinlenme Günü"}</b>
-        <small>${isTraining ? "Antrenman günü" : "Vücudunu dinlendir"}</small>
-      </div>
-
-      <div class="week-status">
-        ${isTraining ? "💪" : "😴"}
-      </div>
-    `;
-
-    container.appendChild(div);
-  }
-}
-
-
-function createTrainingDays(days) {
-
-  const result =
-    [false,false,false,false,false,false,false];
-
-  const patterns = {
-    3: [0,2,4],
-    4: [0,1,3,5],
-    5: [0,1,2,4,5],
-    6: [0,1,2,3,4,5]
-  };
-
-  const pattern =
-    patterns[days] || patterns[4];
-
-  pattern.forEach(i => {
-    result[i] = true;
-  });
-
-  return result;
-}
-
-
-function getWorkoutName(day) {
-
-  const names = [
-    "Göğüs + Triceps",
-    "Bacak + Karın",
-    "Dinlenme",
-    "Sırt + Biceps",
-    "Omuz + Karın",
-    "Tüm Vücut",
-    "Dinlenme"
-  ];
-
-  if (!createTrainingDays(selectedDays)[day]) {
-    return "Dinlenme Günü";
-  }
-
-  return names[day];
-}
-
-
-function updateWeekDots(days) {
-
-  const today =
-    new Date();
-
-  let day =
-    today.getDay();
-
-  if (day === 0) day = 7;
-
-  const monday =
-    new Date(today);
-
-  monday.setDate(
-    today.getDate() - day + 1
-  );
-
-  monday.setHours(0,0,0,0);
-
-  for (let i = 0; i < 7; i++) {
-
-    const date =
-      new Date(monday);
-
-    date.setDate(
-      monday.getDate() + i
-    );
-
-    const circle =
-      document.getElementById(
-        "day" + (i + 1)
-      );
-
-    if (circle) {
-
-      circle.classList.remove("done");
-
-      if (
-        days.includes(
-          dateToString(date)
-        )
-      ) {
-        circle.classList.add("done");
-      }
-    }
-  }
-}
-
-
-function saveProfile() {
-
-  const profile = {
-
-    name:
-      document.getElementById("userName").value.trim(),
-
-    age:
-      document.getElementById("userAge").value,
-
-    gender:
-      document.getElementById("userGender").value,
-
-    height:
-      document.getElementById("userHeight").value,
-
-    weight:
-      document.getElementById("userWeight").value,
-
-    goal:
-      document.getElementById("goal").value,
-
-    level:
-      selectedLevel,
-
-    days:
-      selectedDays
-  };
-
-  localStorage.setItem(
-    "fitnessProfile",
+    "demirkapi_profile",
     JSON.stringify(profile)
   );
 
-  if (profile.weight) {
-
-    const history =
-      getWeightHistory();
-
-    if (history.length === 0) {
-
-      history.push({
-        date: getTodayString(),
-        weight: Number(profile.weight)
-      });
-
-      localStorage.setItem(
-        "weightHistory",
-        JSON.stringify(history)
-      );
-    }
-  }
-
+  input.value="";
+  renderWeight();
   updateHome();
-  updateWeight();
-  renderWeekPlan();
-  calculateBMI();
-
-  showToast("Profil kaydedildi! 💪");
-
 }
 
+function renderWeight(){
+  const current=
+    profile.weight ||
+    weightHistory[weightHistory.length-1]?.weight;
 
-function loadProfile() {
+  document.getElementById("startWeight").textContent=
+    profile.startWeight ? profile.startWeight+" kg" : "--";
 
-  const saved =
-    localStorage.getItem("fitnessProfile");
+  document.getElementById("currentWeight").textContent=
+    current ? current+" kg" : "--";
 
-  if (!saved) return;
+  document.getElementById("targetWeight").textContent=
+    profile.targetWeight ? profile.targetWeight+" kg" : "--";
 
-  try {
+  const box=document.getElementById("weightHistory");
 
-    const p =
-      JSON.parse(saved);
-
-    setValue("userName", p.name);
-    setValue("userAge", p.age);
-    setValue("userGender", p.gender);
-    setValue("userHeight", p.height);
-    setValue("userWeight", p.weight);
-    setValue("goal", p.goal);
-
-    selectedLevel =
-      p.level || "Başlangıç";
-
-    selectedDays =
-      p.days || 4;
-
-    document.querySelectorAll(".level-choice")
-      .forEach(btn => {
-
-        btn.classList.remove("active");
-
-        if (
-          btn.textContent.includes(
-            selectedLevel
-          )
-        ) {
-          btn.classList.add("active");
-        }
-      });
-
-    document.querySelectorAll(".days-choice button")
-      .forEach(btn => {
-
-        btn.classList.remove("selected");
-
-        if (
-          Number(btn.textContent) === selectedDays
-        ) {
-          btn.classList.add("selected");
-        }
-      });
-
-    calculateBMI();
-
-  } catch (e) {}
+  box.innerHTML=weightHistory.slice().reverse().map(x=>`
+    <div class="history-item">
+      <div>
+        <b>${x.weight} kg</b>
+      </div>
+      <small>${x.date}</small>
+    </div>
+  `).join("");
 }
 
-
-function chooseLevel(level, button) {
-
-  selectedLevel = level;
-
-  document.querySelectorAll(".level-choice")
-    .forEach(x => x.classList.remove("active"));
-
-  button.classList.add("active");
+function addWater(amount){
+  water=Math.min(2500,water+amount);
+  localStorage.setItem("demirkapi_water",water);
+  updateWater();
+  updateHome();
 }
 
-
-function chooseDays(days, button) {
-
-  selectedDays = days;
-
-  document.querySelectorAll(".days-choice button")
-    .forEach(x => x.classList.remove("selected"));
-
-  button.classList.add("selected");
+function undoWater(){
+  water=Math.max(0,water-250);
+  localStorage.setItem("demirkapi_water",water);
+  updateWater();
+  updateHome();
 }
 
+function updateWater(){
+  const percent=Math.min(100,Math.round(water/2500*100));
 
-function calculateBMI() {
+  document.getElementById("waterAmount").textContent=water;
+  document.getElementById("waterProgress").style.width=percent+"%";
+  document.getElementById("waterPercent").textContent=
+    "%"+percent+" tamamlandı";
+}
 
-  const height =
-    Number(
-      document.getElementById("userHeight").value
-    );
+function updateStats(){
+  document.getElementById("statStreak").textContent=stats.streak;
+  document.getElementById("statWorkouts").textContent=stats.workouts;
+  document.getElementById("statExercises").textContent=stats.exercises;
+  document.getElementById("statMinutes").textContent=stats.minutes;
 
-  const weight =
-    Number(
-      document.getElementById("userWeight").value
-    );
+  const chart=document.getElementById("weekChart");
 
-  const card =
-    document.getElementById("bmiCard");
+  const values=[0,0,0,0,0,0,stats.workouts>0?1:0];
+  const days=["Pzt","Sal","Çar","Per","Cum","Cmt","Paz"];
 
-  if (!height || !weight) {
+  chart.innerHTML=days.map((day,i)=>`
+    <div class="chart-column">
+      <div class="chart-bar" style="height:${values[i]?70:10}%"></div>
+      <small>${day}</small>
+    </div>
+  `).join("");
+}
 
-    card.classList.add("hidden");
+function saveProfile(){
+  profile.name=document.getElementById("profileName").value;
+  profile.age=document.getElementById("profileAge").value;
+  profile.height=document.getElementById("profileHeight").value;
+  profile.weight=document.getElementById("profileWeight").value;
+  profile.goal=document.getElementById("profileGoal").value;
+  profile.level=document.getElementById("profileLevel").value;
 
-    return;
+  if(!profile.startWeight && profile.weight){
+    profile.startWeight=profile.weight;
   }
-
-  const bmi =
-    weight /
-    Math.pow(height / 100, 2);
-
-  document.getElementById("bmiValue").textContent =
-    bmi.toFixed(1);
-
-  let text =
-    "Değer hesaplandı.";
-
-  if (bmi < 18.5) {
-    text = "Düşük aralık.";
-  } else if (bmi < 25) {
-    text = "Normal aralık.";
-  } else if (bmi < 30) {
-    text = "Yüksek aralık.";
-  } else {
-    text = "Daha yüksek aralık.";
-  }
-
-  document.getElementById("bmiText").textContent =
-    text;
-
-  card.classList.remove("hidden");
-}
-
-
-function addWeight() {
-
-  const input =
-    document.getElementById("weightInput");
-
-  const weight =
-    Number(input.value);
-
-  if (!weight || weight <= 0) {
-
-    showToast("Geçerli bir kilo gir.");
-
-    return;
-  }
-
-  const history =
-    getWeightHistory();
-
-  history.push({
-    date: getTodayString(),
-    weight: weight
-  });
 
   localStorage.setItem(
-    "weightHistory",
-    JSON.stringify(history)
-  );
-
-  const profile =
-    getProfile();
-
-  profile.weight =
-    weight;
-
-  localStorage.setItem(
-    "fitnessProfile",
+    "demirkapi_profile",
     JSON.stringify(profile)
   );
 
-  input.value = "";
-
-  updateWeight();
+  updateBMI();
   updateHome();
 
-  showToast("Kilon kaydedildi ⚖️");
+  alert("Profil kaydedildi ✅");
 }
 
-
-function getWeightHistory() {
-
-  const saved =
-    localStorage.getItem("weightHistory");
-
-  if (!saved) return [];
-
-  try {
-    return JSON.parse(saved);
-  } catch (e) {
-    return [];
-  }
-}
-
-
-function updateWeight() {
-
-  const history =
-    getWeightHistory();
-
-  const profile =
-    getProfile();
-
-  const start =
-    history.length
-      ? history[0].weight
-      : profile.weight || "-";
-
-  const current =
-    history.length
-      ? history[history.length - 1].weight
-      : profile.weight || "-";
-
-  setText(
-    "startWeight",
-    start
-  );
-
-  setText(
-    "currentWeight",
-    current
-  );
-
-  setText(
-    "targetWeight",
-    profile.goal === "Kilo verme"
-      ? "Hedef"
-      : "-"
-  );
-
-  const container =
-    document.getElementById("weightHistory");
-
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  history
-    .slice()
-    .reverse()
-    .slice(0, 10)
-    .forEach(item => {
-
-      const row =
-        document.createElement("div");
-
-      row.className =
-        "weight-history-row";
-
-      row.innerHTML = `
-        <small>${formatDate(item.date)}</small>
-        <strong>${item.weight} kg</strong>
-      `;
-
-      container.appendChild(row);
-    });
-
-  if (history.length === 0) {
-
-    container.innerHTML =
-      `<p style="color:var(--muted);font-size:11px">
-        Henüz kilo kaydı yok.
-      </p>`;
-  }
-}
-
-
-function addWater(amount) {
-
-  const today =
-    getTodayString();
-
-  const data =
-    getWaterData();
-
-  if (data.date !== today) {
-
-    data.date = today;
-    data.amount = 0;
-  }
-
-  data.amount += amount;
-
-  localStorage.setItem(
-    "waterData",
-    JSON.stringify(data)
-  );
-
-  updateWater();
-
-  showToast("Su eklendi 💧");
-}
-
-
-function removeWater() {
-
-  const data =
-    getWaterData();
-
-  data.amount =
-    Math.max(
-      0,
-      data.amount - 250
-    );
-
-  localStorage.setItem(
-    "waterData",
-    JSON.stringify(data)
-  );
-
-  updateWater();
-}
-
-
-function getWaterData() {
-
-  const saved =
-    localStorage.getItem("waterData");
-
-  const today =
-    getTodayString();
-
-  if (!saved) {
-    return {
-      date: today,
-      amount: 0
-    };
-  }
-
-  try {
-
-    const data =
-      JSON.parse(saved);
-
-    if (data.date !== today) {
-
-      return {
-        date: today,
-        amount: 0
-      };
-    }
-
-    return data;
-
-  } catch (e) {
-
-    return {
-      date: today,
-      amount: 0
-    };
-  }
-}
-
-
-function getTodayWater() {
-
-  return getWaterData().amount;
-}
-
-
-function updateWater() {
-
-  const amount =
-    getTodayWater();
-
-  const target =
-    calculateWaterTarget();
-
-  const percent =
-    Math.min(
-      100,
-      Math.round(
-        (amount / target) * 100
-      )
-    );
-
-  setText(
-    "waterAmount",
-    amount
-  );
-
-  setText(
-    "waterTarget",
-    target
-  );
-
-  setText(
-    "waterPercent",
-    percent + "%"
-  );
-
-  document.getElementById(
-    "waterFill"
-  ).style.width =
-    percent + "%";
-}
-
-
-function calculateWaterTarget() {
-
-  const profile =
-    getProfile();
-
-  const weight =
-    Number(profile.weight);
-
-  if (!weight) return 2500;
-
-  return Math.round(
-    weight * 35
-  );
-}
-
-
-function updateHome() {
-
-  const profile =
-    getProfile();
-
-  const name =
+function loadProfile(){
+  document.getElementById("profileName").value=profile.name||"";
+  document.getElementById("profileAge").value=profile.age||"";
+  document.getElementById("profileHeight").value=profile.height||"";
+  document.getElementById("profileWeight").value=profile.weight||"";
+  document.getElementById("profileGoal").value=profile.goal||"kas";
+  document.getElementById("profileLevel").value=profile.level||"beginner";
+
+  document.getElementById("profileNameDisplay").textContent=
     profile.name || "Sporcu";
 
-  setText(
-    "homeName",
-    name
-  );
-
-  setText(
-    "homeLevel",
-    (
-      profile.level ||
-      selectedLevel
-    ).toUpperCase()
-  );
-
-  const isEquipment =
-    currentType === "equipment";
-
-  setText(
-    "homeWorkout",
-    isEquipment
-      ? "Evde Aletli"
-      : "Tüm Vücut"
-  );
-
-  setText(
-    "homeWorkoutDesc",
-    isEquipment
-      ? "Dambıl ve ekipmanlarla"
-      : "Evde ekipmansız antrenman"
-  );
-
-  setText(
-    "homeExerciseCount",
-    isEquipment
-      ? equipmentExercises.length
-      : bodyweightExercises.length
-  );
-
-  setText(
-    "homeDate",
-    new Intl.DateTimeFormat(
-      "tr-TR",
-      {
-        weekday: "long",
-        day: "numeric",
-        month: "long"
-      }
-    ).format(new Date()).toUpperCase()
-  );
-
-  setText(
-    "planTitle",
-    profile.goal ||
-    "Genel Fitness"
-  );
-
-  setText(
-    "planDescription",
-    (
-      profile.level ||
-      selectedLevel
-    ) +
-    " seviyesine uygun program"
-  );
+  updateBMI();
 }
 
+function updateBMI(){
+  const h=Number(profile.height);
+  const w=Number(profile.weight);
+  const card=document.getElementById("bmiCard");
 
-function randomMotivation() {
+  if(!h || !w){
+    card.innerHTML="<b>BMI</b><p>Boy ve kilo bilgilerini girerek hesaplayabilirsin.</p>";
+    return;
+  }
 
-  const index =
-    Math.floor(
-      Math.random() *
-      motivationTexts.length
-    );
+  const bmi=w/Math.pow(h/100,2);
 
-  setText(
-    "motivationText",
-    motivationTexts[index]
-  );
+  let text="Genel değer";
+
+  if(bmi<18.5) text="Düşük aralık";
+  else if(bmi<25) text="Normal aralık";
+  else if(bmi<30) text="Yüksek aralık";
+  else text="Daha yüksek aralık";
+
+  card.innerHTML=`
+    <small>BMI</small>
+    <h2>${bmi.toFixed(1)}</h2>
+    <p>${text}</p>
+  `;
 }
 
-
-function toggleTheme() {
-
+function toggleTheme(){
   document.body.classList.toggle("dark");
 
-  const dark =
-    document.body.classList.contains("dark");
-
   localStorage.setItem(
-    "darkMode",
-    dark
-  );
-
-  setText(
-    "themeBtn",
-    dark ? "☀️" : "🌙"
+    "demirkapi_theme",
+    document.body.classList.contains("dark")
+      ?"dark":"light"
   );
 }
 
+function resetApp(){
+  const ok=confirm(
+    "Tüm Demirkapı Fit verileri silinsin mi?"
+  );
 
-function loadTheme() {
+  if(!ok) return;
 
-  const dark =
-    localStorage.getItem("darkMode") === "true";
-
-  if (dark) {
-
-    document.body.classList.add("dark");
-
-    setText(
-      "themeBtn",
-      "☀️"
-    );
-  }
-}
-
-
-function resetAllData() {
-
-  const answer =
-    confirm(
-      "Tüm fitness verileri, kilo geçmişi ve su kayıtları silinsin mi?"
-    );
-
-  if (!answer) return;
-
-  localStorage.removeItem("fitnessData");
-  localStorage.removeItem("fitnessProfile");
-  localStorage.removeItem("weightHistory");
-  localStorage.removeItem("waterData");
-  localStorage.removeItem("fitnessProgram");
-
+  localStorage.clear();
   location.reload();
 }
 
-
-function getProfile() {
-
-  const saved =
-    localStorage.getItem("fitnessProfile");
-
-  if (!saved) {
-    return {};
-  }
-
-  try {
-    return JSON.parse(saved);
-  } catch (e) {
-    return {};
+function loadTheme(){
+  if(localStorage.getItem("demirkapi_theme")==="dark"){
+    document.body.classList.add("dark");
   }
 }
 
-
-function getTodayString() {
-
-  const date =
-    new Date();
-
-  return dateToString(date);
-}
-
-
-function dateToString(date) {
-
-  return (
-    date.getFullYear() +
-    "-" +
-    String(
-      date.getMonth() + 1
-    ).padStart(2, "0") +
-    "-" +
-    String(
-      date.getDate()
-    ).padStart(2, "0")
-  );
-}
-
-
-function formatDate(dateString) {
-
-  const parts =
-    dateString.split("-");
-
-  if (parts.length !== 3) {
-    return dateString;
-  }
-
-  return (
-    parts[2] +
-    "." +
-    parts[1] +
-    "." +
-    parts[0]
-  );
-}
-
-
-function setText(id, value) {
-
-  const element =
-    document.getElementById(id);
-
-  if (element) {
-    element.textContent = value;
-  }
-}
-
-
-function setValue(id, value) {
-
-  const element =
-    document.getElementById(id);
-
-  if (element && value !== undefined) {
-    element.value = value;
-  }
-}
-
-
-function showToast(message) {
-
-  const toast =
-    document.getElementById("toast");
-
-  toast.textContent =
-    message;
-
-  toast.classList.add("show");
-
-  setTimeout(() => {
-    toast.classList.remove("show");
-  }, 2200);
-}
+document.addEventListener("DOMContentLoaded",()=>{
+  loadTheme();
+  loadProfile();
+  renderWorkout();
+  renderWeeklyPlan();
+  renderWeight();
+  updateWater();
+  updateStats();
+  updateHome();
+});
