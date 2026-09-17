@@ -1,799 +1,818 @@
 /* DEMİRKAPI FIT
-   Tamamen tarayıcı üzerinde çalışır.
+   Tamamen tarayıcı içinde çalışır.
    Veriler localStorage ile telefonda saklanır.
 */
 
-const bodyData = {
+const STORAGE_KEY = "demirkapiFit_v1";
 
-"Göğüs":{
-emoji:"🏋️",
-moves:[
-["Şınav","💪",4,"10-15",60,"Göğüs • Triceps","Yüzüstü pozisyonda ellerini omuz genişliğinde aç. Göğsünü kontrollü şekilde aşağı indir ve tekrar yukarı it."],
-["Diz Üstü Şınav","💪",3,"12",45,"Göğüs • Triceps","Dizlerini yere koy. Vücudunu düz tutarak göğsünü aşağı indir ve tekrar yukarı çık."],
-["Geniş Şınav","💪",3,"10",60,"Göğüs","Ellerini omuz genişliğinden daha açık tutarak kontrollü şekilde şınav yap."],
-["Dar Şınav","💪",3,"10",60,"Göğüs • Triceps","Ellerini birbirine yakın tut. Dirseklerini vücuduna yakın tutarak hareketi yap."]
-]
-},
-
-"Sırt":{
-emoji:"🪽",
-moves:[
-["Dambıl Row","🏋️",4,"12",60,"Sırt • Biceps","Bir elinle destek al. Diğer elindeki dambılı gövdene doğru çek ve kontrollü şekilde indir."],
-["Superman","🦸",3,"12",45,"Sırt • Bel","Yüzüstü uzan. Kollarını ve bacaklarını aynı anda hafifçe yukarı kaldır."],
-["Ters Snow Angel","🪽",3,"12",45,"Sırt • Omuz","Yüzüstü uzanarak kollarını kontrollü şekilde yanlardan yukarı ve aşağı hareket ettir."]
-]
-},
-
-"Kol":{
-emoji:"💪",
-moves:[
-["Dambıl Curl","💪",4,"12",60,"Biceps","Dirseklerini sabit tut. Dambılları kontrollü şekilde omuzlarına doğru kaldır ve indir."],
-["Hammer Curl","💪",3,"12",45,"Biceps","Avuç içlerin birbirine bakacak şekilde dambılları yukarı kaldır ve indir."],
-["Triceps Extension","💪",3,"12",45,"Triceps","Dambılı başının arkasından kontrollü şekilde yukarı kaldır."],
-["Bench Dip","💪",3,"10",60,"Triceps","Sağlam bir yüzeyden destek alarak dirseklerini bük ve gövdeni kontrollü şekilde indir."]
-]
-},
-
-"Omuz":{
-emoji:"🏋️",
-moves:[
-["Dambıl Shoulder Press","🏋️",4,"10",60,"Omuz","Dambılları omuz hizasından başının üzerine doğru kontrollü şekilde kaldır."],
-["Lateral Raise","🏋️",3,"12",45,"Yan Omuz","Dambılları iki yana omuz hizasına kadar kaldır ve kontrollü şekilde indir."],
-["Front Raise","🏋️",3,"12",45,"Ön Omuz","Dambılları önünden omuz hizasına kadar kontrollü şekilde kaldır."]
-]
-},
-
-"Bacak":{
-emoji:"🦵",
-moves:[
-["Squat","🦵",4,"15",60,"Bacak • Kalça","Ayaklarını omuz genişliğinde aç. Kalçanı geriye göndererek çömel ve tekrar ayağa kalk."],
-["Lunge","🦵",3,"12",60,"Bacak • Kalça","Bir ayağını öne al. Dizlerini kontrollü şekilde büküp başlangıç pozisyonuna dön."],
-["Glute Bridge","🦵",3,"15",45,"Kalça","Sırtüstü yat. Dizlerini bük ve kalçanı yukarı kaldırıp kontrollü şekilde indir."],
-["Calf Raise","🦵",3,"20",30,"Baldır","Ayakta dur. Topuklarını yerden kaldır ve kontrollü şekilde tekrar indir."]
-]
-},
-
-"Karın":{
-emoji:"🔥",
-moves:[
-["Mekik","🔥",3,"15",45,"Karın","Sırtüstü yat. Karın kaslarını kullanarak gövdeni kontrollü şekilde kaldır ve indir."],
-["Plank","🔥",3,"30 sn",45,"Karın","Dirseklerini omuzlarının altında tut. Vücudunu düz bir çizgide sabit tut."],
-["Mountain Climber","🏃",3,"20",45,"Karın • Kardiyo","Şınav pozisyonunda dizlerini sırayla göğsüne doğru çek."],
-["Bicycle Crunch","🔥",3,"16",45,"Karın","Sırtüstü yat. Karşı dirsek ve dizi kontrollü şekilde birbirine yaklaştır."]
-]
-}
-
+let state = {
+  profile: {},
+  measurements: {},
+  water: 0,
+  workouts: 0,
+  minutes: 0,
+  calories: 0,
+  xp: 0,
+  streak: 0,
+  lastWorkout: "",
+  dark: false
 };
 
-const equipment=[
-["Dambıl Goblet Squat","🏋️",4,"12",60,"Bacak"],
-["Dambıl Bench Press","🏋️",4,"10",60,"Göğüs"],
-["Dambıl Row","💪",4,"12",60,"Sırt"],
-["Dambıl Shoulder Press","🏋️",3,"12",60,"Omuz"],
-["Dambıl Curl","💪",3,"12",45,"Biceps"],
-["Dambıl Triceps","💪",3,"12",45,"Triceps"]
-];
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+  if(saved) state = {...state,...saved};
+} catch(e){}
 
-const bodyweight=[
-["Squat","🦵",4,"15",60,"Bacak"],
-["Şınav","💪",4,"10",60,"Göğüs"],
-["Lunge","🦵",3,"12",60,"Bacak"],
-["Plank","🔥",3,"30 sn",45,"Karın"],
-["Mountain Climber","🏃",3,"20",45,"Karın"],
-["Mekik","🔥",3,"15",45,"Karın"]
-];
+let buildOptions = {
+  time: "10",
+  level: "Başlangıç",
+  equipment: "Ekipmansız"
+};
 
-
-let state=JSON.parse(localStorage.getItem("demirkapiFit")||"{}");
-
-state.program=state.program||"bodyweight";
-state.water=state.water||0;
-state.workouts=state.workouts||0;
-state.exercises=state.exercises||0;
-state.minutes=state.minutes||0;
-state.streak=state.streak||0;
-state.profile=state.profile||{};
+let currentPart = "Göğüs";
+let currentExercise = null;
+let workoutExercises = [];
+let workoutIndex = 0;
+let timerSeconds = 30;
+let timerInterval = null;
+let timerRunning = false;
 
 
-let selectedBody="";
-let selectedMove=null;
-let activeWorkout=[];
-let completed=[];
-let seconds=0;
-let timerInterval=null;
+/* ---------------- VERİ ---------------- */
 
-
-function save(){
-
-localStorage.setItem(
-"demirkapiFit",
-JSON.stringify(state)
-);
-
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 
-function $(id){
+/* ---------------- SAYFA ---------------- */
 
-return document.getElementById(id);
+function showPage(page){
 
+  document.querySelectorAll(".page").forEach(p=>{
+    p.classList.remove("active");
+  });
+
+  const target = document.getElementById(page);
+
+  if(!target){
+    console.log("Sayfa bulunamadı:",page);
+    return;
+  }
+
+  target.classList.add("active");
+
+  document.querySelectorAll(".nav-item").forEach(item=>{
+    item.classList.remove("active");
+
+    if(item.dataset.page === page){
+      item.classList.add("active");
+    }
+  });
+
+  window.scrollTo({
+    top:0,
+    behavior:"smooth"
+  });
+
+  if(page === "home") updateHome();
+  if(page === "stats") updateStats();
+  if(page === "profile") loadProfile();
+  if(page === "water") updateWater();
 }
 
 
-function showPage(id){
+/* ---------------- EGZERSİZLER ---------------- */
 
-document.querySelectorAll(".page").forEach(page=>{
-page.classList.remove("active");
-});
+const exercises = {
 
-const page=$(id);
+  "Göğüs":[
+    ["Şınav","💪","Göğüs ve triceps","3","12","45","Vücudunu düz tut. Dirseklerini kontrollü şekilde bükerek aşağı in ve yukarı çık."],
+    ["Diz Üstü Şınav","🧎","Başlangıç seviyesi","3","10","40","Dizlerini yere koy. Gövdeni düz tutarak kontrollü şınav çek."],
+    ["Geniş Şınav","🔥","Göğüs dış kısmı","3","10","45","Ellerini omuz genişliğinden daha açık yerleştir ve kontrollü hareket et."],
+    ["Dar Şınav","💪","Göğüs ve triceps","3","8","45","Ellerini birbirine daha yakın tutarak şınav hareketini yap."]
+  ],
 
-if(page){
-page.classList.add("active");
-}
+  "Sırt":[
+    ["Superman","🦸","Bel ve sırt","3","12","40","Yüzüstü uzan. Kollarını ve bacaklarını aynı anda hafifçe kaldır."],
+    ["Bird Dog","🐕","Core ve sırt","3","10","40","Dört ayak pozisyonunda karşı kol ve bacağını aynı anda uzat."],
+    ["Yüzüstü Y T","🏋️","Üst sırt","3","12","40","Yüzüstü yat ve kollarını Y şeklinde kontrollü olarak kaldır."],
+    ["Reverse Snow Angel","❄️","Sırt","3","10","45","Yüzüstü pozisyonda kollarını kontrollü şekilde yanlardan yukarı doğru hareket ettir."]
+  ],
 
-document.querySelectorAll(".nav").forEach(nav=>{
-nav.classList.remove("active");
-});
+  "Kollar":[
+    ["Diamond Şınav","💎","Triceps","3","8","45","Ellerini göğsünün altında birbirine yaklaştırarak şınav yap."],
+    ["Sandalye Triceps Dip","🪑","Triceps","3","10","45","Sağlam bir sandalyenin kenarından destek alarak kontrollü şekilde aşağı in."],
+    ["Biceps Curl","🏋️","Biceps","3","12","40","Dambıl varsa kullan. Dirseklerini sabit tutarak ağırlığı yukarı kaldır."],
+    ["Hammer Curl","💪","Biceps","3","12","40","Dambılları avuçların birbirine bakacak şekilde tut ve kontrollü kaldır."]
+  ],
 
-document.querySelectorAll(".nav").forEach(nav=>{
-if(nav.dataset.page===id){
-nav.classList.add("active");
-}
-});
+  "Omuz":[
+    ["Pike Push Up","🏔️","Omuz","3","8","45","Kalçanı yukarı kaldır ve başını zemine doğru kontrollü şekilde yaklaştır."],
+    ["Lateral Raise","🏋️","Yan omuz","3","12","40","Dambılları iki yana doğru omuz hizasına kadar kaldır."],
+    ["Front Raise","💪","Ön omuz","3","12","40","Ağırlığı kontrollü şekilde önden omuz hizasına kadar kaldır."],
+    ["Shoulder Tap","👋","Omuz ve core","3","16","35","Şınav pozisyonunda karşı omzuna elinle dokun."]
+  ],
 
-window.scrollTo(0,0);
+  "Bacak":[
+    ["Squat","🦵","Tüm bacak","3","15","45","Ayaklarını omuz genişliğinde aç. Kalçanı geriye göndererek kontrollü çömel."],
+    ["Lunge","🏃","Bacak ve kalça","3","10","45","Bir ayağını öne at ve arka dizini kontrollü şekilde aşağı indir."],
+    ["Glute Bridge","🍑","Kalça","3","15","40","Sırtüstü yat. Kalçanı yukarı kaldır ve üst noktada sık."],
+    ["Calf Raise","🦶","Baldır","3","20","30","Ayakta dur. Topuklarını yukarı kaldır ve yavaşça indir."]
+  ],
 
-updateHome();
+  "Karın":[
+    ["Crunch","🔥","Üst karın","3","15","35","Sırtüstü yat. Karın kaslarını sıkarak omuzlarını kontrollü şekilde kaldır."],
+    ["Leg Raise","🦵","Alt karın","3","10","40","Bacaklarını düz tut ve belini zorlamadan kontrollü kaldırıp indir."],
+    ["Plank","🧱","Tüm core","3","30 sn","30","Dirseklerini yere koy. Vücudunu düz tut ve karın kaslarını sık."],
+    ["Mountain Climber","🏃","Karın ve kondisyon","3","20","35","Şınav pozisyonunda dizlerini sırayla göğsüne doğru çek."]
+  ],
 
-}
+  "Tüm Vücut":[
+    ["Şınav","💪","Göğüs ve kol","3","12","40","Vücudunu düz tutarak kontrollü şınav çek."],
+    ["Squat","🦵","Bacak","3","15","40","Kalçanı geriye göndererek kontrollü çömel."],
+    ["Mountain Climber","🏃","Core","3","20","35","Dizlerini sırayla göğsüne doğru çek."],
+    ["Glute Bridge","🍑","Kalça","3","15","35","Kalçanı yukarı kaldır ve üst noktada sık."],
+    ["Shoulder Tap","👋","Omuz","3","16","35","Şınav pozisyonunda karşı omzuna dokun."],
+    ["Crunch","🔥","Karın","3","15","35","Karın kaslarını sıkarak kontrollü crunch yap."],
+    ["Lunge","🏃","Bacak","3","10","40","Öne adım atıp kontrollü şekilde aşağı in."],
+    ["Plank","🧱","Core","3","30 sn","30","Vücudunu düz tutarak plank pozisyonunu koru."]
+  ]
+};
 
+
+/* ---------------- BÖLGE SEÇME ---------------- */
 
 function openBodyPart(part){
 
-selectedBody=part;
+  currentPart = part;
 
-$("bodyTitle").textContent=part;
-$("bodyBannerTitle").textContent=part;
-$("bodyEmoji").textContent=bodyData[part].emoji;
+  document.getElementById("bodyPartTitle").textContent = part;
 
-const box=$("bodyExercises");
+  const descriptions = {
+    "Göğüs":"Göğüs kaslarını güçlendirmeye yönelik hareketler.",
+    "Sırt":"Sırt ve gövde bölgesini çalıştıran hareketler.",
+    "Kollar":"Biceps ve triceps odaklı hareketler.",
+    "Omuz":"Omuz kaslarını güçlendirmeye yönelik hareketler.",
+    "Bacak":"Bacak ve kalça odaklı hareketler.",
+    "Karın":"Karın ve core bölgesi hareketleri.",
+    "Tüm Vücut":"Tüm vücudu çalıştıran hareketler."
+  };
 
-box.innerHTML="";
+  document.getElementById("bodyPartDescription").textContent =
+    descriptions[part] || "Bölgeye özel hareketler.";
 
-bodyData[part].moves.forEach((move,index)=>{
+  renderExercises(part);
 
-const button=document.createElement("button");
-
-button.type="button";
-button.className="bodyExercise";
-
-button.innerHTML=`
-<div class="exerciseIcon">${move[1]}</div>
-
-<div class="exerciseInfo">
-<b>${move[0]}</b>
-<small>${move[2]} set • ${move[3]} tekrar • ${move[4]} sn dinlenme</small>
-</div>
-
-<div class="openArrow">›</div>
-`;
-
-button.addEventListener("click",function(){
-
-openMove(part,index);
-
-});
-
-box.appendChild(button);
-
-});
-
-showPage("bodyPage");
-
+  showPage("bodypart");
 }
 
 
-function openMove(part,index){
+function renderExercises(part){
 
-selectedBody=part;
-selectedMove=index;
+  const list = document.getElementById("exerciseList");
 
-const move=bodyData[part].moves[index];
+  list.innerHTML = "";
 
-$("detailIcon").textContent=move[1];
-$("detailMuscle").textContent=move[5];
-$("detailName").textContent=move[0];
-$("detailSets").textContent=move[2];
-$("detailReps").textContent=move[3];
-$("detailRest").textContent=move[4];
-$("detailDescription").textContent=move[6];
+  const data = exercises[part] || exercises["Tüm Vücut"];
 
-showPage("detailPage");
+  data.forEach((item,index)=>{
 
+    const button = document.createElement("button");
+    button.className = "exercise-item";
+
+    button.innerHTML = `
+      <div class="exercise-item-icon">${item[1]}</div>
+
+      <div>
+        <h3>${item[0]}</h3>
+        <p>${item[2]} • ${item[3]} set • ${item[4]} tekrar</p>
+      </div>
+
+      <strong>→</strong>
+    `;
+
+    button.addEventListener("click",()=>{
+      openExercise(part,index);
+    });
+
+    list.appendChild(button);
+  });
 }
 
 
-function startSelectedMove(){
+/* ---------------- HAREKET DETAY ---------------- */
 
-const move=bodyData[selectedBody].moves[selectedMove];
+function openExercise(part,index){
 
-activeWorkout=[[
-move[0],
-move[1],
-move[2],
-move[3],
-move[4],
-move[5]
-]];
+  currentPart = part;
 
-completed=[false];
+  const data = exercises[part] || exercises["Tüm Vücut"];
+  const item = data[index];
 
-$("workoutTitle").textContent=move[0];
+  currentExercise = {
+    part:part,
+    index:index,
+    data:item
+  };
 
-seconds=0;
-resetTimerDisplay();
+  document.getElementById("detailIcon").textContent = item[1];
+  document.getElementById("detailPart").textContent = part.toUpperCase();
+  document.getElementById("detailName").textContent = item[0];
+  document.getElementById("detailDescription").textContent = item[2];
+  document.getElementById("detailSets").textContent = item[3];
+  document.getElementById("detailReps").textContent = item[4];
+  document.getElementById("detailRest").textContent = item[5];
+  document.getElementById("detailHow").textContent = item[6];
 
-renderWorkout();
-
-showPage("workoutPage");
-
+  showPage("exerciseDetail");
 }
 
 
-function startFullWorkout(){
+function startSelectedExercise(){
 
-activeWorkout=state.program==="equipment"
-?equipment
-:bodyweight;
+  if(!currentExercise) return;
 
-completed=new Array(activeWorkout.length).fill(false);
+  workoutExercises = [
+    currentExercise.data
+  ];
 
-$("workoutTitle").textContent=
-state.program==="equipment"
-?"Ekipmanlı Full Body"
-:"Ekipmansız Full Body";
+  workoutIndex = 0;
 
-seconds=0;
-resetTimerDisplay();
-
-renderWorkout();
-
-showPage("workoutPage");
-
+  startWorkoutScreen();
 }
 
 
-function renderWorkout(){
+/* ---------------- ANTRENMAN ---------------- */
 
-const box=$("workoutExercises");
+function startTodayWorkout(){
 
-box.innerHTML="";
+  workoutExercises = exercises["Tüm Vücut"];
+  workoutIndex = 0;
 
-activeWorkout.forEach((move,index)=>{
-
-const div=document.createElement("div");
-
-div.className=
-"workoutExercise "+
-(completed[index]?"done":"");
-
-div.innerHTML=`
-<div class="exerciseIcon">${move[1]}</div>
-
-<div class="workoutInfo">
-<b>${move[0]}</b>
-<small>${move[2]} set • ${move[3]} tekrar • ${move[5]}</small>
-</div>
-
-<button class="check" type="button">
-${completed[index]?"✓":"○"}
-</button>
-`;
-
-div.querySelector(".check").addEventListener("click",function(){
-
-completed[index]=!completed[index];
-
-if(completed[index]){
-state.exercises++;
-save();
-}
-
-renderWorkout();
-updateProgress();
-
-});
-
-box.appendChild(div);
-
-});
-
-updateProgress();
-
+  startWorkoutScreen();
 }
 
 
-function updateProgress(){
+function createWorkout(){
 
-const total=activeWorkout.length;
-const done=completed.filter(Boolean).length;
+  const goal = document.getElementById("buildGoal").value;
 
-$("progressText").textContent=
-done+" / "+total;
+  const time = Number(buildOptions.time);
 
-$("progressBar").style.width=
-(total?done/total*100:0)+"%";
+  let base = exercises["Tüm Vücut"].slice();
 
+  if(goal === "Yağ yakma"){
+    base = [
+      exercises["Tüm Vücut"][2],
+      exercises["Tüm Vücut"][1],
+      exercises["Tüm Vücut"][5],
+      exercises["Tüm Vücut"][6],
+      exercises["Tüm Vücut"][7]
+    ];
+  }
+
+  if(goal === "Kas geliştirme"){
+    base = [
+      exercises["Tüm Vücut"][0],
+      exercises["Tüm Vücut"][1],
+      exercises["Tüm Vücut"][3],
+      exercises["Tüm Vücut"][4],
+      exercises["Tüm Vücut"][5]
+    ];
+  }
+
+  if(time <= 10){
+    base = base.slice(0,3);
+  }else if(time <= 20){
+    base = base.slice(0,5);
+  }
+
+  workoutExercises = base;
+  workoutIndex = 0;
+
+  showToast(`${goal} için program hazırlandı 🔥`);
+
+  setTimeout(()=>{
+    startWorkoutScreen();
+  },500);
 }
 
 
-function startTimer(){
+function startWorkoutScreen(){
 
-if(timerInterval)return;
+  if(!workoutExercises.length){
+    workoutExercises = exercises["Tüm Vücut"];
+  }
 
-timerInterval=setInterval(()=>{
+  clearInterval(timerInterval);
 
-seconds++;
+  workoutIndex = Math.max(0,Math.min(workoutIndex,workoutExercises.length-1));
 
-resetTimerDisplay();
+  loadWorkoutExercise();
 
-},1000);
+  showPage("workout");
+}
 
+
+function loadWorkoutExercise(){
+
+  const item = workoutExercises[workoutIndex];
+
+  if(!item) return;
+
+  timerSeconds = 30;
+  timerRunning = false;
+
+  clearInterval(timerInterval);
+
+  document.getElementById("timer").textContent = formatTime(timerSeconds);
+  document.getElementById("timerBtn").textContent = "▶ Başlat";
+
+  document.getElementById("activeIcon").textContent = item[1];
+  document.getElementById("activeExercise").textContent = item[0];
+  document.getElementById("activeInstruction").textContent = item[6];
+
+  document.getElementById("workoutCounter").textContent =
+    `${workoutIndex+1} / ${workoutExercises.length}`;
+
+  const percent =
+    ((workoutIndex+1) / workoutExercises.length) * 100;
+
+  document.getElementById("progressBar").style.width = percent + "%";
+
+  const next =
+    workoutExercises[workoutIndex+1];
+
+  document.getElementById("nextExercise").textContent =
+    next ? next[0] : "Son hareket 🎉";
+}
+
+
+function toggleTimer(){
+
+  if(timerRunning){
+    pauseTimer();
+    return;
+  }
+
+  timerRunning = true;
+
+  document.getElementById("timerBtn").textContent = "⏸ Duraklat";
+
+  timerInterval = setInterval(()=>{
+
+    timerSeconds--;
+
+    document.getElementById("timer").textContent =
+      formatTime(timerSeconds);
+
+    if(timerSeconds <= 0){
+      clearInterval(timerInterval);
+      timerRunning = false;
+
+      document.getElementById("timerBtn").textContent = "▶ Tekrar";
+
+      showToast("Süre bitti! 🔥");
+
+      if(navigator.vibrate){
+        navigator.vibrate([200,100,200]);
+      }
+    }
+
+  },1000);
 }
 
 
 function pauseTimer(){
 
-clearInterval(timerInterval);
+  clearInterval(timerInterval);
 
-timerInterval=null;
+  timerRunning = false;
 
+  document.getElementById("timerBtn").textContent = "▶ Devam";
 }
 
 
-function resetTimer(){
+function skipExercise(){
 
-pauseTimer();
+  clearInterval(timerInterval);
 
-seconds=0;
+  workoutIndex++;
 
-resetTimerDisplay();
+  if(workoutIndex >= workoutExercises.length){
+    finishWorkout();
+    return;
+  }
 
-}
-
-
-function resetTimerDisplay(){
-
-const m=String(Math.floor(seconds/60)).padStart(2,"0");
-const s=String(seconds%60).padStart(2,"0");
-
-$("timer").textContent=m+":"+s;
-
+  loadWorkoutExercise();
 }
 
 
 function finishWorkout(){
 
-const done=completed.filter(Boolean).length;
+  clearInterval(timerInterval);
 
-if(done===0){
+  timerRunning = false;
 
-alert("Önce en az bir hareket tamamla 💪");
-return;
+  state.workouts += 1;
+  state.minutes += Math.max(1,workoutExercises.length * 3);
+  state.calories += Math.max(20,workoutExercises.length * 20);
+  state.xp += 50;
 
-}
+  updateStreak();
 
-pauseTimer();
+  saveState();
 
-state.workouts++;
-state.streak++;
-state.minutes+=Math.max(1,Math.round(seconds/60));
+  showToast("Antrenman tamamlandı! +50 XP 🏆");
 
-save();
-
-alert("Antrenman tamamlandı! 🔥");
-
-startHome();
-
-}
-
-
-function addWater(amount){
-
-state.water=Math.min(
-2500,
-Number(state.water)+amount
-);
-
-save();
-
-updateWater();
-updateHome();
-
+  setTimeout(()=>{
+    showPage("stats");
+    updateStats();
+  },700);
 }
 
 
-function undoWater(){
+function formatTime(seconds){
 
-state.water=Math.max(
-0,
-Number(state.water)-250
-);
+  const min = Math.floor(seconds/60)
+    .toString()
+    .padStart(2,"0");
 
-save();
+  const sec = (seconds%60)
+    .toString()
+    .padStart(2,"0");
 
-updateWater();
-updateHome();
-
+  return `${min}:${sec}`;
 }
 
 
-function updateWater(){
+/* ---------------- PROGRAM SEÇİMLERİ ---------------- */
 
-const amount=Number(state.water)||0;
+function chooseBuild(button,type,value){
 
-const percent=Math.min(
-100,
-Math.round(amount/2500*100)
-);
+  buildOptions[type] = value;
 
-$("waterAmount").textContent=amount;
+  const parent = button.parentElement;
 
-$("waterBar").style.width=percent+"%";
+  parent.querySelectorAll(".choice").forEach(b=>{
+    b.classList.remove("active");
+  });
 
-$("waterPercent").textContent=
-"%"+percent+" tamamlandı";
-
+  button.classList.add("active");
 }
 
+
+/* ---------------- PROFİL ---------------- */
 
 function saveProfile(){
 
-const name=$("profileName").value.trim();
-const age=$("profileAge").value;
-const height=$("profileHeight").value;
-const weight=$("profileWeight").value;
-const goal=$("profileGoal").value;
-const level=$("profileLevel").value;
+  state.profile = {
+    name: document.getElementById("profileName").value.trim(),
+    age: document.getElementById("profileAge").value,
+    height: document.getElementById("profileHeight").value,
+    weight: document.getElementById("profileWeight").value,
+    goal: document.getElementById("profileGoal").value,
+    level: document.getElementById("profileLevel").value
+  };
 
-if(!name){
+  saveState();
 
-$("saveMessage").textContent=
-"Lütfen adını yaz.";
+  updateHome();
 
-return;
+  document.getElementById("profilePreview").textContent =
+    state.profile.name || "Demirkapı Fit";
 
-}
+  document.getElementById("saveMessage").textContent =
+    "✓ Profil başarıyla kaydedildi.";
 
-state.profile={
-name,
-age,
-height,
-weight,
-goal,
-level
-};
+  showToast("Profil kaydedildi 💾");
 
-save();
-
-$("saveMessage").textContent=
-"✓ Profil başarıyla kaydedildi";
-
-updateHome();
-
-setTimeout(()=>{
-
-$("saveMessage").textContent="";
-
-},3000);
-
+  setTimeout(()=>{
+    document.getElementById("saveMessage").textContent="";
+  },2500);
 }
 
 
 function loadProfile(){
 
-const p=state.profile||{};
+  const p = state.profile || {};
 
-$("profileName").value=p.name||"";
-$("profileAge").value=p.age||"";
-$("profileHeight").value=p.height||"";
-$("profileWeight").value=p.weight||"";
-$("profileGoal").value=p.goal||"kas";
-$("profileLevel").value=p.level||"beginner";
+  document.getElementById("profileName").value = p.name || "";
+  document.getElementById("profileAge").value = p.age || "";
+  document.getElementById("profileHeight").value = p.height || "";
+  document.getElementById("profileWeight").value = p.weight || "";
+  document.getElementById("profileGoal").value =
+    p.goal || "Kas geliştirme";
+  document.getElementById("profileLevel").value =
+    p.level || "Başlangıç";
 
+  document.getElementById("profilePreview").textContent =
+    p.name || "Demirkapı Fit";
+
+  const m = state.measurements || {};
+
+  document.getElementById("waist").value = m.waist || "";
+  document.getElementById("chest").value = m.chest || "";
+  document.getElementById("arm").value = m.arm || "";
+  document.getElementById("leg").value = m.leg || "";
 }
 
+
+function saveMeasurements(){
+
+  state.measurements = {
+    waist:document.getElementById("waist").value,
+    chest:document.getElementById("chest").value,
+    arm:document.getElementById("arm").value,
+    leg:document.getElementById("leg").value
+  };
+
+  saveState();
+
+  showToast("Ölçüler kaydedildi 📏");
+}
+
+
+/* ---------------- SU ---------------- */
+
+function addWater(){
+
+  if(state.water < 8){
+    state.water++;
+  }
+
+  saveState();
+  updateWater();
+  updateHome();
+}
+
+
+function removeWater(){
+
+  if(state.water > 0){
+    state.water--;
+  }
+
+  saveState();
+  updateWater();
+  updateHome();
+}
+
+
+function updateWater(){
+
+  document.getElementById("waterCount").textContent = state.water;
+
+  const home = document.getElementById("waterHome");
+
+  if(home){
+    home.textContent = `${state.water} / 8`;
+  }
+}
+
+
+/* ---------------- ANA SAYFA ---------------- */
 
 function updateHome(){
 
-$("streakHome").textContent=state.streak;
-$("homeWater").textContent=(state.water||0)+" ml";
-$("homeWeight").textContent=
-state.profile.weight
-?state.profile.weight+" kg"
-:"-- kg";
+  updateWater();
 
-$("homeWorkoutCount").textContent=state.workouts;
+  document.getElementById("streakNumber").textContent =
+    state.streak || 0;
 
-$("statStreak").textContent=state.streak;
-$("statWorkouts").textContent=state.workouts;
-$("statExercises").textContent=state.exercises;
-$("statMinutes").textContent=state.minutes;
+  document.getElementById("xpHome").textContent =
+    `${state.xp || 0} XP`;
 
+  document.getElementById("weightHome").textContent =
+    state.profile && state.profile.weight
+      ? `${state.profile.weight} kg`
+      : "-- kg";
+
+  const name =
+    state.profile && state.profile.name
+      ? state.profile.name
+      : "";
+
+  document.getElementById("homeGreeting").textContent =
+    name
+      ? `${name}, bugün de kendin için çalış. 💪`
+      : "Güçlenmeye devam et.";
 }
 
 
-function selectProgram(type){
+/* ---------------- İSTATİSTİK ---------------- */
 
-state.program=type;
+function updateStats(){
 
-save();
+  document.getElementById("totalWorkouts").textContent =
+    state.workouts || 0;
 
-$("homeProgram").classList.toggle(
-"selected",
-type==="bodyweight"
-);
+  document.getElementById("totalMinutes").textContent =
+    state.minutes || 0;
 
-$("equipmentProgram").classList.toggle(
-"selected",
-type==="equipment"
-);
+  document.getElementById("totalCalories").textContent =
+    state.calories || 0;
 
+  document.getElementById("statsStreak").textContent =
+    state.streak || 0;
+
+  document.getElementById("xpText").textContent =
+    state.xp || 0;
+
+  let level = "Başlangıç";
+
+  if(state.xp >= 500) level = "Usta";
+  else if(state.xp >= 250) level = "İleri";
+  else if(state.xp >= 100) level = "Orta";
+
+  document.getElementById("levelText").textContent = level;
+
+  const progress = Math.min(100,(state.xp % 100));
+
+  document.getElementById("xpBar").style.width =
+    progress + "%";
+
+  renderBadges();
 }
 
 
-function renderWeekly(){
+function renderBadges(){
 
-const box=$("weekly");
+  const badges = [
+    ["🔥","İlk Antrenman",state.workouts >= 1],
+    ["💪","5 Antrenman",state.workouts >= 5],
+    ["🏆","10 Antrenman",state.workouts >= 10],
+    ["🔥","3 Gün Seri",state.streak >= 3],
+    ["💧","Su Hedefi",state.water >= 8],
+    ["⭐","100 XP",state.xp >= 100]
+  ];
 
-const days=[
-"Pzt","Sal","Çar","Per",
-"Cum","Cmt","Paz"
-];
+  const grid = document.getElementById("badgeGrid");
 
-const today=new Date().getDay();
-const todayIndex=today===0?6:today-1;
-
-box.innerHTML=`
-<div class="dayGrid">
-${days.map((day,i)=>`
-<div class="day ${i===todayIndex?"today":""}">
-<b>${day}</b>
-<small>${i===todayIndex?"BUGÜN":"Plan"}</small>
-</div>
-`).join("")}
-</div>
-`;
-
+  grid.innerHTML = badges.map(b=>`
+    <div class="badge ${b[2] ? "unlocked":""}">
+      <span>${b[0]}</span>
+      <small>${b[1]}</small>
+    </div>
+  `).join("");
 }
 
 
-function toggleTheme(){
+/* ---------------- SERİ ---------------- */
 
-document.body.classList.toggle("dark");
+function updateStreak(){
 
-localStorage.setItem(
-"demirkapiTheme",
-document.body.classList.contains("dark")
-?"dark"
-:"light"
-);
+  const today = new Date().toISOString().slice(0,10);
 
+  if(state.lastWorkout === today){
+    return;
+  }
+
+  if(!state.lastWorkout){
+    state.streak = 1;
+  }else{
+
+    const old = new Date(state.lastWorkout);
+    const now = new Date(today);
+
+    const difference =
+      Math.floor((now-old)/(1000*60*60*24));
+
+    if(difference === 1){
+      state.streak++;
+    }else if(difference > 1){
+      state.streak = 1;
+    }
+  }
+
+  state.lastWorkout = today;
 }
 
 
-function resetApp(){
+/* ---------------- KARANLIK MOD ---------------- */
 
-const answer=confirm(
-"Tüm Demirkapı Fit verileri silinsin mi?"
-);
+function toggleDarkMode(){
 
-if(!answer)return;
+  state.dark = !state.dark;
 
-localStorage.removeItem("demirkapiFit");
+  document.body.classList.toggle("dark",state.dark);
 
-location.reload();
+  saveState();
 
+  showToast(
+    state.dark
+      ? "Karanlık mod açıldı 🌙"
+      : "Karanlık mod kapatıldı ☀️"
+  );
 }
 
 
-function startHome(){
+/* ---------------- YEDEKLEME ---------------- */
 
-showPage("home");
+function exportData(){
 
+  const data = JSON.stringify(state,null,2);
+
+  const blob = new Blob(
+    [data],
+    {type:"application/json"}
+  );
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "demirkapi-fit-yedek.json";
+
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+
+  URL.revokeObjectURL(url);
+
+  showToast("Yedek dosyası hazırlandı 💾");
 }
 
 
-function connectEvents(){
+function importData(event){
 
-/* ANA SAYFA */
+  const file = event.target.files[0];
 
-$("startHomeWorkout").addEventListener(
-"click",
-startFullWorkout
-);
+  if(!file) return;
 
+  const reader = new FileReader();
 
-/* BÖLGE BUTONLARI */
+  reader.onload = function(){
 
-document.querySelectorAll(".bodyBtn").forEach(button=>{
+    try{
 
-button.addEventListener("click",function(){
+      const imported = JSON.parse(reader.result);
 
-const part=this.dataset.body;
+      state = {...state,...imported};
 
-openBodyPart(part);
+      saveState();
 
-});
+      document.body.classList.toggle("dark",state.dark);
 
-});
+      loadProfile();
+      updateHome();
 
+      showToast("Veriler geri yüklendi ✓");
 
-/* GERİ */
+    }catch(e){
 
-$("bodyBack").addEventListener(
-"click",
-startHome
-);
+      showToast("Dosya geçersiz ❌");
+    }
+  };
 
-$("detailBack").addEventListener(
-"click",
-()=>showPage("bodyPage")
-);
-
-$("workoutBack").addEventListener(
-"click",
-startHome
-);
-
-
-/* HAREKET */
-
-$("startDetailWorkout").addEventListener(
-"click",
-startSelectedMove
-);
-
-
-/* PROGRAM */
-
-$("homeProgram").addEventListener(
-"click",
-()=>selectProgram("bodyweight")
-);
-
-$("equipmentProgram").addEventListener(
-"click",
-()=>selectProgram("equipment")
-);
-
-$("startProgramWorkout").addEventListener(
-"click",
-startFullWorkout
-);
-
-
-/* ANTRENMAN */
-
-$("timerStart").addEventListener(
-"click",
-startTimer
-);
-
-$("timerPause").addEventListener(
-"click",
-pauseTimer
-);
-
-$("timerReset").addEventListener(
-"click",
-resetTimer
-);
-
-$("finishWorkout").addEventListener(
-"click",
-finishWorkout
-);
-
-
-/* SU */
-
-$("water250").addEventListener(
-"click",
-()=>addWater(250)
-);
-
-$("water500").addEventListener(
-"click",
-()=>addWater(500)
-);
-
-$("waterUndo").addEventListener(
-"click",
-undoWater
-);
-
-
-/* PROFİL */
-
-$("saveProfile").addEventListener(
-"click",
-saveProfile
-);
-
-
-/* AYARLAR */
-
-$("settingsBtn").addEventListener(
-"click",
-()=>showPage("settingsPage")
-);
-
-$("themeBtn").addEventListener(
-"click",
-toggleTheme
-);
-
-$("profileSettingsBtn").addEventListener(
-"click",
-()=>showPage("profilePage")
-);
-
-$("resetBtn").addEventListener(
-"click",
-resetApp
-);
-
-
-/* ALT MENÜ */
-
-document.querySelectorAll(".nav").forEach(nav=>{
-
-nav.addEventListener("click",function(){
-
-if(this.id==="navWorkout"){
-
-startFullWorkout();
-return;
-
+  reader.readAsText(file);
 }
 
-const page=this.dataset.page;
 
-if(page){
-showPage(page);
+function resetData(){
+
+  const ok = confirm(
+    "Tüm Demirkapı Fit verileri silinsin mi?"
+  );
+
+  if(!ok) return;
+
+  localStorage.removeItem(STORAGE_KEY);
+
+  location.reload();
 }
 
-});
 
-});
+/* ---------------- BİLDİRİM ---------------- */
 
+function showToast(message){
+
+  const toast = document.getElementById("toast");
+
+  toast.textContent = message;
+
+  toast.classList.add("show");
+
+  setTimeout(()=>{
+    toast.classList.remove("show");
+  },2200);
 }
 
+
+/* ---------------- BAŞLANGIÇ ---------------- */
 
 function init(){
 
-if(localStorage.getItem("demirkapiTheme")==="dark"){
-document.body.classList.add("dark");
+  document.body.classList.toggle("dark",state.dark);
+
+  updateHome();
+  updateWater();
+  updateStats();
+  loadProfile();
+
+  showPage("home");
 }
 
-loadProfile();
-
-selectProgram(state.program);
-
-updateWater();
-
-updateHome();
-
-renderWeekly();
-
-connectEvents();
-
-}
-
-
-document.addEventListener(
-"DOMContentLoaded",
-init
-);
+init();
