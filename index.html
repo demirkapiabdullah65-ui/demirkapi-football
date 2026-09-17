@@ -2,534 +2,161 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<meta name="theme-color" content="#111827">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101514">
 <title>Demirkapı Fit</title>
 
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-
-:root{
-  --green:#16a34a;
-  --green2:#22c55e;
-  --dark:#111827;
-  --bg:#f4f6f8;
-  --card:#fff;
-  --text:#111827;
-  --muted:#64748b;
-  --border:#e5e7eb;
-}
-
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  padding-bottom:85px;
-}
-
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f7f6;color:#17201e}
+body.dark{background:#101514;color:#f5f7f6}
 button,input,select{font:inherit}
 button{cursor:pointer;border:0}
-
 .topbar{
-  position:sticky;
-  top:0;
-  z-index:100;
-  background:#111827;
-  color:#fff;
-  padding:15px 17px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+ position:sticky;top:0;z-index:1000;height:64px;
+ background:#101514;color:white;display:flex;align-items:center;
+ justify-content:space-between;padding:0 18px;
 }
-
-.brand{
-  font-size:21px;
-  font-weight:900;
+.logo{font-weight:900;letter-spacing:1px;font-size:20px}
+.logo span{color:#6ee7a8}
+.iconbtn{
+ width:42px;height:42px;border-radius:13px;background:#202a27;color:white;
+ font-size:20px
 }
-
-.brand span{color:#22c55e}
-
-.top-sub{
-  color:#94a3b8;
-  font-size:11px;
-  margin-top:3px;
-}
-
-.icon-btn{
-  width:42px;
-  height:42px;
-  border-radius:13px;
-  background:#1f2937;
-  color:#fff;
-}
-
-main{
-  max-width:720px;
-  margin:auto;
-  padding:16px;
-}
-
+.container{max-width:720px;margin:auto;padding:18px 16px 100px}
 .page{display:none}
 .page.active{display:block}
-
 .hero{
-  background:#111827;
-  color:#fff;
-  border-radius:23px;
-  padding:25px 21px;
-  margin-bottom:20px;
+ background:linear-gradient(135deg,#17211f,#263630);
+ color:white;border-radius:25px;padding:24px;margin-bottom:16px;
+ box-shadow:0 10px 30px #0002
 }
-
-.hero-small{
-  color:#94a3b8;
-  font-size:12px;
-  font-weight:bold;
-}
-
-.hero h1{
-  font-size:28px;
-  line-height:1.15;
-  margin:8px 0 13px;
-}
-
+.hero h1{margin:0 0 8px;font-size:28px}
+.hero p{margin:0;color:#cdd7d3}
 .streak{
-  display:inline-flex;
-  background:#1f2937;
-  padding:8px 12px;
-  border-radius:20px;
-  font-size:13px;
+ margin-top:18px;background:#ffffff14;padding:12px 15px;
+ border-radius:15px;display:flex;justify-content:space-between
 }
-
-.section-title{
-  margin:20px 0 11px;
+.card{
+ background:white;border-radius:20px;padding:18px;margin-bottom:15px;
+ box-shadow:0 5px 20px #0000000b
 }
-
-.section-title h2{
-  font-size:18px;
-}
-
-.card,
-.workout-card,
-.exercise-card,
-.stat,
-.motivation,
-.water-card,
-.coach-card{
-  background:var(--card);
-  border-radius:19px;
-  padding:17px;
-  box-shadow:0 4px 18px #0000000b;
-  margin-bottom:12px;
-}
-
-.workout-card{
-  display:flex;
-  align-items:center;
-  gap:13px;
-}
-
-.workout-icon{
-  width:58px;
-  height:58px;
-  border-radius:17px;
-  background:#dcfce7;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:29px;
-}
-
-.workout-info{flex:1}
-
-.workout-info h3{
-  font-size:18px;
-}
-
-.workout-info p{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:5px;
-}
-
+.dark .card{background:#18201e;box-shadow:none}
+.card h2,.card h3{margin-top:0}
 .primary{
-  background:var(--green);
-  color:white;
-  padding:12px 15px;
-  border-radius:12px;
-  font-weight:800;
+ background:#20c875;color:#07130e;padding:14px 18px;border-radius:14px;
+ font-weight:800;width:100%;margin-top:10px
 }
-
-.full{width:100%}
-
-.body-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:9px;
+.secondary{
+ background:#e9efec;color:#16201d;padding:12px 15px;border-radius:13px;
+ font-weight:700
 }
-
-.body-grid button{
-  background:var(--card);
-  color:var(--text);
-  border-radius:16px;
-  padding:17px 5px;
-  min-height:88px;
-  box-shadow:0 3px 13px #0000000a;
-  -webkit-tap-highlight-color:transparent;
-  touch-action:manipulation;
+.dark .secondary{background:#26332f;color:white}
+.grid{
+ display:grid;grid-template-columns:repeat(2,1fr);gap:12px
 }
-
-.body-grid button:active{
-  transform:scale(.96);
-  background:#dcfce7;
+.part{
+ min-height:100px;border-radius:18px;padding:16px;
+ background:#eaf5ef;text-align:left;font-weight:900;
+ border:1px solid #d8e9df
 }
-
-.body-grid .body-icon{
-  display:block;
-  font-size:27px;
-}
-
-.body-grid b{
-  display:block;
-  margin-top:6px;
-  font-size:12px;
-}
-
-.stats-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:9px;
-  margin-top:12px;
-}
-
+.dark .part{background:#202b28;border-color:#30403a;color:white}
+.part small{display:block;font-weight:500;opacity:.7;margin-top:6px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .stat{
-  text-align:center;
-  padding:14px 5px;
-  margin:0;
+ background:#eaf5ef;border-radius:16px;padding:14px;text-align:center
 }
-
-.stat-icon{
-  font-size:22px;
-  display:block;
+.dark .stat{background:#202b28}
+.stat b{display:block;font-size:22px;margin-bottom:5px}
+.bottom{
+ position:fixed;bottom:0;left:0;right:0;height:72px;z-index:999;
+ background:white;border-top:1px solid #ddd;
+ display:grid;grid-template-columns:repeat(5,1fr);
+ max-width:720px;margin:auto
 }
-
-.stat strong{
-  display:block;
-  font-size:19px;
-  margin:4px 0;
+.dark .bottom{background:#141b19;border-color:#29332f}
+.navbtn{
+ background:transparent;color:#68736f;font-size:12px;font-weight:700
 }
-
-.stat small{color:var(--muted)}
-
-.motivation{
-  display:flex;
-  gap:13px;
-  align-items:center;
-  margin-top:13px;
+.navbtn.active{color:#16b869}
+.sectiontitle{
+ display:flex;align-items:center;justify-content:space-between;
+ margin:8px 0 12px
 }
-
-.motivation-icon{font-size:28px}
-
-.motivation p{
-  color:var(--muted);
-  font-size:13px;
-  margin-top:4px;
-}
-
-label{
-  display:block;
-  font-size:13px;
-  font-weight:bold;
-  margin:13px 0 6px;
-}
-
+.row{display:flex;gap:10px;align-items:center}
+.row>*{flex:1}
 input,select{
-  width:100%;
-  border:1px solid var(--border);
-  border-radius:11px;
-  padding:12px;
-  background:var(--card);
-  color:var(--text);
-  outline:none;
+ width:100%;padding:13px;border-radius:13px;
+ border:1px solid #d6dfdb;background:white;color:#17201e;
+ outline:none
 }
-
-.back{
-  background:var(--card);
-  color:var(--text);
-  padding:10px 13px;
-  border-radius:10px;
-  margin-bottom:13px;
+.dark input,.dark select{
+ background:#202b28;color:white;border-color:#35443f
 }
-
-.exercise-card{
-  display:flex;
-  align-items:center;
-  gap:13px;
+.exercise{
+ display:flex;gap:13px;align-items:center;padding:14px;
+ border-radius:17px;background:#f2f6f4;margin-bottom:10px
 }
-
-.exercise-emoji{
-  width:52px;
-  height:52px;
-  border-radius:15px;
-  background:#dcfce7;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:26px;
+.dark .exercise{background:#202b28}
+.exerciseIcon{
+ width:52px;height:52px;border-radius:15px;background:#dff5e9;
+ display:grid;place-items:center;font-size:25px;flex:none
 }
-
-.exercise-main{flex:1}
-
-.exercise-main h3{
-  font-size:15px;
+.dark .exerciseIcon{background:#294038}
+.exerciseInfo{flex:1}
+.exerciseInfo b{display:block;margin-bottom:5px}
+.exerciseInfo small{opacity:.65}
+.exerciseActions{display:flex;gap:6px}
+.circle{
+ width:40px;height:40px;border-radius:12px;background:#20c875;
+ font-size:18px
 }
-
-.exercise-main p{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:4px;
-}
-
-.circle-btn{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  background:#dcfce7;
-  color:#15803d;
-}
-
-.workout-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:15px;
-}
-
-.workout-screen{
-  background:var(--card);
-  border-radius:25px;
-  padding:25px 18px;
-  text-align:center;
-}
-
-.big-emoji{
-  font-size:75px;
-  margin:10px 0;
-}
-
-.timer{
-  font-size:58px;
-  font-weight:900;
-  margin:15px 0;
-}
-
-.set-info{
-  font-size:17px;
-  font-weight:bold;
-  margin-bottom:15px;
-}
-
-.workout-actions{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
-}
-
-.workout-actions button{
-  flex:1;
-  background:#e5e7eb;
-  padding:12px;
-  border-radius:11px;
-}
-
-.progress,
-.xp-bar{
-  height:10px;
-  background:#e5e7eb;
-  border-radius:20px;
-  overflow:hidden;
-  margin:12px 0 20px;
-}
-
-.progress div,
-.xp-bar div{
-  height:100%;
-  width:0;
-  background:var(--green);
-  transition:.3s;
-}
-
-.water-number{
-  text-align:center;
-  font-size:38px;
-  font-weight:900;
-}
-
-.water-buttons{
-  display:grid;
-  grid-template-columns:1fr 1fr 1fr;
-  gap:7px;
-  margin-top:15px;
-}
-
-.water-buttons button{
-  background:#dcfce7;
-  padding:11px 3px;
-  border-radius:10px;
-  color:#166534;
-}
-
-.badges{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
-}
-
+.star{background:#e9efec}
+.dark .star{background:#33403c;color:white}
 .badge{
-  background:#f8fafc;
-  border-radius:14px;
-  padding:13px 5px;
-  text-align:center;
-  font-size:11px;
+ display:inline-block;background:#dff5e9;padding:7px 10px;
+ border-radius:999px;font-size:12px;font-weight:800;margin:3px
 }
-
-.badge span{
-  display:block;
-  font-size:27px;
-  margin-bottom:5px;
+.dark .badge{background:#294038}
+.progress{
+ height:10px;background:#dce6e1;border-radius:99px;overflow:hidden
 }
-
-.calendar{
-  display:grid;
-  grid-template-columns:repeat(7,1fr);
-  gap:5px;
+.progress span{display:block;height:100%;background:#20c875;width:0}
+.timer{
+ font-size:65px;font-weight:900;text-align:center;padding:25px 0
 }
-
-.day{
-  min-height:48px;
-  border-radius:9px;
-  background:#f1f5f9;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  font-size:11px;
+.workoutExercise{
+ text-align:center;font-size:26px;font-weight:900
 }
-
-.day.done{
-  background:#dcfce7;
-  color:#166534;
-  font-weight:bold;
-}
-
-.day.today{
-  outline:2px solid var(--green);
-}
-
-.challenge{
-  text-align:center;
-  padding:25px;
-  background:linear-gradient(135deg,#111827,#1f2937);
-  color:white;
-  border-radius:20px;
-}
-
-.challenge-number{
-  font-size:48px;
-  font-weight:900;
-  color:#4ade80;
-  margin:8px 0;
-}
-
-.checklist{
-  display:grid;
-  gap:8px;
-}
-
-.check{
-  background:#f8fafc;
-  padding:13px;
-  border-radius:12px;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-.check input{
-  width:auto;
-}
-
-.bottom-nav{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:0;
-  height:72px;
-  background:var(--card);
-  border-top:1px solid var(--border);
-  display:flex;
-  justify-content:space-around;
-  align-items:center;
-  z-index:500;
-}
-
-.bottom-nav button{
-  background:none;
-  color:#64748b;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:3px;
-  font-size:19px;
-  padding:5px 10px;
-  touch-action:manipulation;
-}
-
-.bottom-nav small{
-  font-size:9px;
-}
-
 .toast{
-  position:fixed;
-  left:50%;
-  bottom:90px;
-  transform:translateX(-50%);
-  background:#111827;
-  color:#fff;
-  padding:12px 18px;
-  border-radius:12px;
-  opacity:0;
-  pointer-events:none;
-  transition:.25s;
-  z-index:1000;
-  white-space:nowrap;
-  font-size:13px;
+ position:fixed;left:50%;bottom:88px;transform:translateX(-50%);
+ background:#17201e;color:white;padding:12px 18px;border-radius:13px;
+ z-index:3000;display:none
 }
-
-.toast.show{
-  opacity:1;
+.modal{
+ position:fixed;inset:0;background:#0008;z-index:2000;
+ display:none;align-items:flex-end
 }
-
-body.dark{
-  --bg:#0f172a;
-  --card:#1e293b;
-  --text:#f8fafc;
-  --muted:#94a3b8;
-  --border:#334155;
+.modal.show{display:flex}
+.modalBox{
+ width:100%;max-width:720px;margin:auto;background:white;
+ border-radius:25px 25px 0 0;padding:20px;max-height:85vh;overflow:auto
 }
-
-body.dark .day,
-body.dark .check,
-body.dark .badge,
-body.dark .workout-actions button{
-  background:#334155;
-  color:white;
+.dark .modalBox{background:#18201e;color:white}
+.close{float:right;background:#e8eeeb;border-radius:10px;padding:8px}
+.dark .close{background:#2b3834;color:white}
+.check{
+ display:flex;align-items:center;gap:10px;padding:12px 0
 }
-
-@media(max-width:430px){
-  .hero h1{font-size:25px}
-  .body-grid{grid-template-columns:repeat(2,1fr)}
-  .workout-card{flex-wrap:wrap}
-  .workout-card .primary{width:100%}
+.check input{width:20px;height:20px}
+.mini{
+ font-size:12px;opacity:.65
+}
+@media(max-width:480px){
+ .container{padding-left:12px;padding-right:12px}
+ .hero h1{font-size:25px}
+ .grid{gap:9px}
+ .stats{gap:7px}
 }
 </style>
 </head>
@@ -537,2350 +164,1255 @@ body.dark .workout-actions button{
 <body>
 
 <header class="topbar">
-  <div>
-    <div class="brand">DEMİRKAPI <span>FIT</span></div>
-    <div class="top-sub">Evde fitness • Bugün kendin için çalış</div>
-  </div>
-
-  <button class="icon-btn" id="settingsBtn">⚙️</button>
+  <div class="logo">DEMİRKAPİ <span>FIT</span></div>
+  <button class="iconbtn" id="settingsBtn">⚙️</button>
 </header>
 
-
-<main>
+<main class="container">
 
 <!-- ANA SAYFA -->
-
 <section id="home" class="page active">
 
   <div class="hero">
-    <div class="hero-small">HAZIR MISIN?</div>
-
-    <h1>
-      Bugün de kendin<br>
-      için çalış. 🔥
-    </h1>
-
-    <div class="streak" id="streakText">
-      🔥 0 günlük seri
+    <h1>HAZIR MISIN?</h1>
+    <p>Bugün de kendin için çalış. 🔥</p>
+    <div class="streak">
+      <span>🔥 Antrenman serisi</span>
+      <b id="streakHome">0 gün</b>
     </div>
   </div>
 
-
-  <div class="section-title">
-    <h2>Bugünün Antrenmanı</h2>
+  <div class="card">
+    <div class="sectiontitle">
+      <div>
+        <h2>Bugünün Antrenmanı</h2>
+        <div class="mini">Full Body • 25 dk • 8 hareket</div>
+      </div>
+      <span class="badge">🔥 ÖNERİ</span>
+    </div>
+    <p>Bugünkü programını başlat ve hedefini tamamla.</p>
+    <button class="primary" id="todayBtn">ANTRENMANA BAŞLA</button>
   </div>
 
-  <div class="workout-card">
-
-    <div class="workout-icon">🏋️</div>
-
-    <div class="workout-info">
-      <h3>Full Body</h3>
-      <p>25 dk • 8 hareket • ~180 kcal</p>
+  <div class="card">
+    <div class="sectiontitle">
+      <h2>Vücut Bölgesi</h2>
+      <span class="mini">HAREKETLER</span>
     </div>
 
-    <button class="primary" id="todayWorkoutBtn">
-      BAŞLA
-    </button>
-
-  </div>
-
-
-  <div class="section-title">
-    <h2>🧠 Akıllı Koç</h2>
-  </div>
-
-  <div class="coach-card">
-
-    <h3 id="coachTitle">
-      Bugün ne çalışmalıyım?
-    </h3>
-
-    <p class="muted" id="coachText" style="margin:7px 0 13px">
-      Hedefine göre sana program hazırlayayım.
-    </p>
-
-    <button class="primary full" id="coachBtn">
-      AKILLI PROGRAM OLUŞTUR
-    </button>
-
-  </div>
-
-
-  <div class="section-title">
-    <h2>Vücut Bölgesi</h2>
-  </div>
-
-
-  <div class="body-grid">
-
-    <button data-part="Göğüs">
-      <span class="body-icon">💪</span>
-      <b>Göğüs</b>
-    </button>
-
-    <button data-part="Sırt">
-      <span class="body-icon">🪽</span>
-      <b>Sırt</b>
-    </button>
-
-    <button data-part="Kollar">
-      <span class="body-icon">💪</span>
-      <b>Kollar</b>
-    </button>
-
-    <button data-part="Omuz">
-      <span class="body-icon">🏋️</span>
-      <b>Omuz</b>
-    </button>
-
-    <button data-part="Bacak">
-      <span class="body-icon">🦵</span>
-      <b>Bacak</b>
-    </button>
-
-    <button data-part="Karın">
-      <span class="body-icon">🔥</span>
-      <b>Karın</b>
-    </button>
-
-  </div>
-
-
-  <div class="stats-grid">
-
-    <div class="stat">
-      <span class="stat-icon">💧</span>
-      <strong id="homeWater">0</strong>
-      <small>ml su</small>
+    <div class="grid">
+      <button class="part" data-part="Göğüs">💪 Göğüs<small>Göğüs hareketleri</small></button>
+      <button class="part" data-part="Sırt">🦅 Sırt<small>Sırt hareketleri</small></button>
+      <button class="part" data-part="Biceps">💪 Biceps<small>Ön kol</small></button>
+      <button class="part" data-part="Triceps">🔥 Triceps<small>Arka kol</small></button>
+      <button class="part" data-part="Omuz">🏋️ Omuz<small>Omuz hareketleri</small></button>
+      <button class="part" data-part="Bacak">🦵 Bacak<small>Bacak hareketleri</small></button>
+      <button class="part" data-part="Karın">🔥 Karın<small>Core hareketleri</small></button>
+      <button class="part" data-part="Full Body">⚡ Full Body<small>Tüm vücut</small></button>
     </div>
-
-    <div class="stat">
-      <span class="stat-icon">⚖️</span>
-      <strong id="homeWeight">-</strong>
-      <small>kg</small>
-    </div>
-
-    <div class="stat">
-      <span class="stat-icon">⭐</span>
-      <strong id="homeXP">0</strong>
-      <small>XP</small>
-    </div>
-
   </div>
 
-
-  <div class="motivation">
-
-    <div class="motivation-icon">🔥</div>
-
-    <div>
-      <b>Bugünün sözü</b>
-      <p>Bahane değil, tekrar sayısı biriktir.</p>
+  <div class="card">
+    <h2>Hızlı İstatistik</h2>
+    <div class="stats">
+      <div class="stat"><b id="waterHome">0</b><span>💧 Su</span></div>
+      <div class="stat"><b id="weightHome">--</b><span>⚖️ Kilo</span></div>
+      <div class="stat"><b id="xpHome">0</b><span>⭐ XP</span></div>
     </div>
+  </div>
 
+  <div class="card">
+    <h2>🧠 Smart Coach</h2>
+    <p id="coachText">Bugün için sana uygun antrenmanı hazırlayayım.</p>
+    <button class="primary" id="coachBtn">BUGÜN NE ÇALIŞMALIYIM?</button>
   </div>
 
 </section>
 
-
-<!-- ANTRENMANLAR -->
-
+<!-- PROGRAMLAR -->
 <section id="programs" class="page">
-
-  <h1 style="margin-bottom:15px">
-    Antrenmanlar
-  </h1>
-
+  <div class="sectiontitle">
+    <h1>Programlar</h1>
+  </div>
 
   <div class="card">
-
-    <h2>⚡ Anında Antrenman</h2>
+    <h3>Anında Antrenman</h3>
 
     <label>Hedef</label>
-
-    <select id="goal">
+    <select id="goalSelect">
       <option>Kas Geliştirme</option>
-      <option>Yağ Yakma</option>
+      <option>Kilo Verme</option>
       <option>Güç</option>
       <option>Kondisyon</option>
     </select>
 
+    <br><br>
 
     <label>Süre</label>
-
-    <select id="duration">
+    <select id="timeSelect">
+      <option value="5">5 dakika</option>
       <option value="10">10 dakika</option>
+      <option value="15">15 dakika</option>
       <option value="20">20 dakika</option>
-      <option value="30" selected>30 dakika</option>
-      <option value="45">45 dakika</option>
+      <option value="30">30 dakika</option>
     </select>
 
+    <br><br>
 
     <label>Seviye</label>
-
-    <select id="level">
+    <select id="levelSelect">
       <option>Başlangıç</option>
       <option>Orta</option>
       <option>İleri</option>
     </select>
 
+    <br><br>
 
     <label>Ekipman</label>
-
-    <select id="equipment">
+    <select id="equipmentSelect">
       <option>Ekipmansız</option>
       <option>Dambıl</option>
       <option>Direnç Bandı</option>
       <option>Kettlebell</option>
-      <option>Barfiks</option>
-      <option>Bench</option>
+      <option>Barfiks Barı</option>
+      <option>Sehpa</option>
     </select>
 
-
-    <button class="primary full" id="createWorkoutBtn"
-      style="margin-top:18px">
-      PROGRAM OLUŞTUR
-    </button>
-
+    <button class="primary" id="createProgramBtn">PROGRAM OLUŞTUR</button>
   </div>
-
 
   <div class="card">
-
-    <h2>⚡ Hızlı Programlar</h2>
-
-    <button class="full" data-quick="10"
-      style="padding:13px;background:#f1f5f9;border-radius:11px;margin-top:10px">
-      🔥 10 Dakika
-    </button>
-
-    <button class="full" data-quick="20"
-      style="padding:13px;background:#f1f5f9;border-radius:11px;margin-top:8px">
-      💪 20 Dakika
-    </button>
-
-    <button class="full" data-quick="30"
-      style="padding:13px;background:#f1f5f9;border-radius:11px;margin-top:8px">
-      🏋️ 30 Dakika
-    </button>
-
+    <h3>⚡ Hızlı Antrenman</h3>
+    <div class="grid">
+      <button class="secondary quick" data-min="5">5 DK 🔥</button>
+      <button class="secondary quick" data-min="10">10 DK 🔥</button>
+      <button class="secondary quick" data-min="15">15 DK 🔥</button>
+      <button class="secondary quick" data-min="20">20 DK 🔥</button>
+    </div>
   </div>
 
+  <div class="card">
+    <h3>⭐ Favori Hareketler</h3>
+    <div id="favoritesList">
+      <p class="mini">Henüz favori hareket eklemedin.</p>
+    </div>
+  </div>
 </section>
 
+<!-- VÜCUT BÖLGESİ -->
+<section id="bodypart" class="page">
+  <div class="sectiontitle">
+    <button class="secondary" id="backBody">← Geri</button>
+    <h2 id="bodyTitle">Göğüs</h2>
+  </div>
 
-<!-- BÖLGE -->
+  <div class="card">
+    <input id="exerciseSearch" placeholder="🔎 Hareket ara...">
+    <br><br>
 
-<section id="part" class="page">
-
-  <button class="back" id="backHomeBtn">
-    ← Geri
-  </button>
-
-  <h1 id="partTitle">Göğüs</h1>
-
-  <p class="muted" style="margin:6px 0 15px">
-    Bir hareket seç.
-  </p>
+    <select id="equipmentFilter">
+      <option value="Tümü">Tüm ekipmanlar</option>
+      <option>Ekipmansız</option>
+      <option>Dambıl</option>
+      <option>Direnç Bandı</option>
+      <option>Kettlebell</option>
+      <option>Barfiks Barı</option>
+      <option>Sehpa</option>
+    </select>
+  </div>
 
   <div id="exerciseList"></div>
-
 </section>
 
-
-<!-- ANTRENMAN EKRANI -->
-
+<!-- ANTRENMAN -->
 <section id="workout" class="page">
+  <div class="card">
+    <div class="sectiontitle">
+      <span id="workoutCount">1 / 1</span>
+      <span id="workoutGoal" class="badge">ANTRENMAN</span>
+    </div>
 
-  <div class="workout-header">
+    <div class="progress"><span id="workoutProgress"></span></div>
 
-    <button class="back" id="workoutBackBtn">
-      ←
-    </button>
+    <div class="workoutExercise" id="workoutExercise">Hazırlanıyor...</div>
 
-    <b id="workoutProgress">
-      1 / 1
-    </b>
+    <div class="mini" style="text-align:center;margin-top:8px" id="workoutMeta">
+      3 set • 12 tekrar
+    </div>
 
+    <div class="timer" id="timer">30</div>
+
+    <div class="grid">
+      <button class="secondary" id="pauseBtn">⏸ Duraklat</button>
+      <button class="secondary" id="skipBtn">⏭ Atla</button>
+    </div>
+
+    <button class="primary" id="completeSetBtn">SETİ TAMAMLA ✓</button>
   </div>
-
-
-  <div class="progress">
-    <div id="workoutBar"></div>
-  </div>
-
-
-  <div class="workout-screen">
-
-    <div class="big-emoji" id="workoutEmoji">
-      💪
-    </div>
-
-    <h1 id="workoutName">
-      Şınav
-    </h1>
-
-    <p class="muted" id="workoutDesc"
-      style="margin-top:8px">
-    </p>
-
-    <div class="timer" id="timer">
-      00:30
-    </div>
-
-    <div class="set-info" id="setInfo">
-      Set 1 / 3
-    </div>
-
-    <button class="primary full"
-      id="completeSetBtn"
-      style="padding:17px;font-size:17px">
-      SETİ TAMAMLA ✓
-    </button>
-
-    <div class="workout-actions">
-
-      <button id="pauseBtn">
-        ⏸️ Duraklat
-      </button>
-
-      <button id="skipBtn">
-        ⏭️ Geç
-      </button>
-
-    </div>
-
-  </div>
-
 </section>
-
 
 <!-- SU -->
-
 <section id="water" class="page">
-
-  <h1>💧 Su Takibi</h1>
-
-  <div class="water-card">
-
-    <div class="water-number">
-      <span id="waterValue">0</span> ml
-    </div>
+  <div class="card">
+    <h1>💧 Su Takibi</h1>
+    <p>Günlük hedef: <b>8 bardak</b></p>
 
     <div class="progress">
-      <div id="waterBar"></div>
+      <span id="waterProgress"></span>
     </div>
 
-    <p class="muted" style="text-align:center">
-      Günlük hedef: 2500 ml
-    </p>
+    <h1 style="text-align:center" id="waterCount">0 / 8</h1>
 
-    <div class="water-buttons">
-
-      <button data-water="250">
-        +250
-      </button>
-
-      <button data-water="500">
-        +500
-      </button>
-
-      <button id="resetWaterBtn">
-        Sıfırla
-      </button>
-
+    <div class="grid">
+      <button class="primary" id="addWater">+ 1 Bardak</button>
+      <button class="secondary" id="removeWater">− 1 Bardak</button>
     </div>
-
   </div>
-
 </section>
-
 
 <!-- İSTATİSTİK -->
-
 <section id="stats" class="page">
+  <div class="card">
+    <h1>📊 İlerleme</h1>
 
-  <h1>📊 İlerleme</h1>
-
-  <div class="stats-grid"
-    style="grid-template-columns:repeat(2,1fr)">
-
-    <div class="stat">
-      <span class="stat-icon">🏋️</span>
-      <strong id="totalWorkouts">0</strong>
-      <small>Antrenman</small>
+    <div class="stats">
+      <div class="stat"><b id="statWorkout">0</b>Antrenman</div>
+      <div class="stat"><b id="statMinutes">0</b>Dakika</div>
+      <div class="stat"><b id="statCalories">0</b>Kalori</div>
     </div>
-
-    <div class="stat">
-      <span class="stat-icon">⏱️</span>
-      <strong id="totalMinutes">0</strong>
-      <small>Dakika</small>
-    </div>
-
-    <div class="stat">
-      <span class="stat-icon">🔥</span>
-      <strong id="totalCalories">0</strong>
-      <small>Kalori</small>
-    </div>
-
-    <div class="stat">
-      <span class="stat-icon">⭐</span>
-      <strong id="totalXP">0</strong>
-      <small>XP</small>
-    </div>
-
   </div>
-
 
   <div class="card">
-
-    <h2>⭐ Seviye</h2>
-
-    <h1 id="levelNumber" style="margin-top:8px">
-      Seviye 1
-    </h1>
-
-    <div class="xp-bar">
-      <div id="xpBar"></div>
-    </div>
-
-    <p class="muted" id="xpText">
-      0 / 100 XP
-    </p>
-
+    <h3>⭐ XP Seviyesi</h3>
+    <p><b id="levelText">Seviye 1</b></p>
+    <div class="progress"><span id="xpProgress"></span></div>
+    <p class="mini" id="xpText">0 / 100 XP</p>
   </div>
-
 
   <div class="card">
-
-    <h2>🏆 Rozetler</h2>
-
-    <div class="badges" style="margin-top:12px">
-
-      <div class="badge">
-        <span>🔥</span>
-        İlk Seri
-      </div>
-
-      <div class="badge">
-        <span>💪</span>
-        İlk Antrenman
-      </div>
-
-      <div class="badge">
-        <span>💧</span>
-        Su Ustası
-      </div>
-
-      <div class="badge">
-        <span>⭐</span>
-        100 XP
-      </div>
-
-      <div class="badge">
-        <span>🏆</span>
-        10 Antrenman
-      </div>
-
-      <div class="badge">
-        <span>🚀</span>
-        30 Gün
-      </div>
-
-    </div>
-
+    <h3>🏆 Rozetler</h3>
+    <div id="badges"></div>
   </div>
-
 
   <div class="card">
-
-    <h2>📅 Son 30 Gün</h2>
-
-    <div id="calendar"
-      class="calendar"
-      style="margin-top:12px">
-    </div>
-
+    <h3>📅 Son 30 Gün</h3>
+    <div id="calendar" class="grid"></div>
   </div>
-
 </section>
-
 
 <!-- PROFİL -->
-
 <section id="profile" class="page">
-
-  <h1>👤 Profil</h1>
-
   <div class="card">
+    <h1>👤 Profil</h1>
 
-    <label>Adın</label>
+    <label>Ad</label>
     <input id="profileName" placeholder="Adın">
 
+    <br><br>
     <label>Yaş</label>
-    <input id="profileAge" type="number">
+    <input id="profileAge" type="number" placeholder="Yaş">
 
+    <br><br>
     <label>Boy (cm)</label>
-    <input id="profileHeight" type="number">
+    <input id="profileHeight" type="number" placeholder="180">
 
+    <br><br>
     <label>Kilo (kg)</label>
-    <input id="profileWeight" type="number">
+    <input id="profileWeight" type="number" step="0.1" placeholder="80">
 
+    <br><br>
     <label>Hedef</label>
-
     <select id="profileGoal">
-      <option>Kas geliştirmek</option>
-      <option>Kilo vermek</option>
-      <option>Formda kalmak</option>
-      <option>Güçlenmek</option>
+      <option>Kas Geliştirme</option>
+      <option>Kilo Verme</option>
+      <option>Güç</option>
+      <option>Kondisyon</option>
     </select>
 
-    <button class="primary full"
-      id="saveProfileBtn"
-      style="margin-top:18px">
-      PROFİLİ KAYDET
-    </button>
+    <br><br>
+    <label>Seviye</label>
+    <select id="profileLevel">
+      <option>Başlangıç</option>
+      <option>Orta</option>
+      <option>İleri</option>
+    </select>
 
-    <p id="saveMessage"
-      style="margin-top:10px;color:#16a34a">
-    </p>
-
+    <button class="primary" id="saveProfile">PROFİLİ KAYDET</button>
+    <p id="profileMessage" class="mini"></p>
   </div>
-
 
   <div class="card">
-
-    <h2>⚖️ Vücut Bilgileri</h2>
-
-    <div id="bmiResult"
-      class="muted"
-      style="margin-top:10px">
-      Boy ve kilo bilgilerini gir.
-    </div>
-
+    <h3>⚖️ Vücut Analizi</h3>
+    <p id="bmiResult">Boy ve kilo bilgilerini gir.</p>
   </div>
-
 </section>
-
-
-<!-- CHALLENGE -->
-
-<section id="challengePage" class="page">
-
-  <h1>🏆 30 Gün Challenge</h1>
-
-  <div class="challenge"
-    style="margin-top:15px">
-
-    <div>DEMİRKAPI FIT</div>
-
-    <div class="challenge-number"
-      id="challengeDay">
-      1
-    </div>
-
-    <h2>Günlük Challenge</h2>
-
-    <p id="challengeText">
-      Bugünkü antrenmanını tamamla.
-    </p>
-
-    <div class="progress"
-      style="background:#374151">
-      <div id="challengeBar"></div>
-    </div>
-
-  </div>
-
-
-  <div class="card">
-
-    <h2>✅ Bugünün Görevleri</h2>
-
-    <div class="checklist"
-      style="margin-top:12px">
-
-      <label class="check">
-        <input type="checkbox" id="taskWorkout">
-        🏋️ Antrenman
-      </label>
-
-      <label class="check">
-        <input type="checkbox" id="taskWater">
-        💧 2500 ml su
-      </label>
-
-      <label class="check">
-        <input type="checkbox" id="taskProtein">
-        🥗 Protein hedefi
-      </label>
-
-      <label class="check">
-        <input type="checkbox" id="taskStretch">
-        🧘 Esneme
-      </label>
-
-    </div>
-
-  </div>
-
-</section>
-
 
 <!-- AYARLAR -->
-
 <section id="settings" class="page">
+  <div class="card">
+    <h1>⚙️ Ayarlar</h1>
 
-  <h1>⚙️ Ayarlar</h1>
+    <div class="check">
+      <input type="checkbox" id="darkMode">
+      <label for="darkMode">🌙 Karanlık mod</label>
+    </div>
 
-  <div class="card" style="margin-top:15px">
+    <button class="secondary" id="exportBtn">💾 Verilerimi Yedekle</button>
+    <br><br>
+    <button class="secondary" id="importBtn">📥 Yedek Geri Yükle</button>
+    <input type="file" id="importFile" accept=".json" hidden>
 
-    <button class="full" id="darkBtn"
-      style="padding:14px;background:#f1f5f9;border-radius:12px;margin-bottom:9px">
-      🌙 Karanlık / Aydınlık
-    </button>
+    <br><br>
+    <button class="secondary" id="resetBtn">🗑 Verileri Sıfırla</button>
+  </div>
+</section>
 
-    <button class="full" id="exportBtn"
-      style="padding:14px;background:#f1f5f9;border-radius:12px;margin-bottom:9px">
-      💾 Verileri Yedekle
-    </button>
-
-    <button class="full" id="importBtn"
-      style="padding:14px;background:#f1f5f9;border-radius:12px;margin-bottom:9px">
-      📥 Yedek Geri Yükle
-    </button>
-
-    <button class="full" id="resetBtn"
-      style="padding:14px;background:#fee2e2;color:#dc2626;border-radius:12px">
-      🗑️ Verileri Sil
-    </button>
-
+<!-- 30 GÜN -->
+<section id="challenge" class="page">
+  <div class="card">
+    <h1>🔥 30 Günlük Challenge</h1>
+    <p>Her gün hedefini tamamla.</p>
+    <div class="progress"><span id="challengeProgress"></span></div>
+    <p id="challengeText">0 / 30 gün</p>
   </div>
 
+  <div class="card">
+    <div id="challengeList"></div>
+  </div>
 </section>
 
 </main>
 
-
-<!-- ALT MENÜ -->
-
-<nav class="bottom-nav">
-
-  <button data-page="home">
-    🏠
-    <small>Ana Sayfa</small>
-  </button>
-
-  <button data-page="programs">
-    🏋️
-    <small>Antrenman</small>
-  </button>
-
-  <button data-page="water">
-    💧
-    <small>Su</small>
-  </button>
-
-  <button data-page="stats">
-    📊
-    <small>İlerleme</small>
-  </button>
-
-  <button data-page="profile">
-    👤
-    <small>Profil</small>
-  </button>
-
+<nav class="bottom">
+  <button class="navbtn active" data-page="home">🏠<br>Ana Sayfa</button>
+  <button class="navbtn" data-page="programs">🏋️<br>Program</button>
+  <button class="navbtn" data-page="water">💧<br>Su</button>
+  <button class="navbtn" data-page="stats">📊<br>İlerleme</button>
+  <button class="navbtn" data-page="profile">👤<br>Profil</button>
 </nav>
-
 
 <div class="toast" id="toast"></div>
 
+<div class="modal" id="exerciseModal">
+  <div class="modalBox">
+    <button class="close" id="closeModal">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
 
 <script>
-
-/* =========================
+/* =========================================================
    DEMİRKAPI FIT
-   TEK DOSYA SİSTEMİ
-========================= */
+   ========================================================= */
 
-const STORAGE_KEY="demirkapi_fit_v3";
+const KEY="demirkapi_fit_final";
 
-
-let state=JSON.parse(
-  localStorage.getItem(STORAGE_KEY)
-)||{
+let state={
   profile:{},
   water:0,
+  xp:0,
   workouts:0,
   minutes:0,
   calories:0,
-  xp:0,
   streak:0,
   lastWorkout:"",
-  dark:false,
-  challengeDay:1,
-  history:[],
-  tasks:{}
+  favorites:[],
+  workoutDays:[],
+  challenge:[],
+  dark:false
 };
 
+try{
+  const saved=JSON.parse(localStorage.getItem(KEY));
+  if(saved) state={...state,...saved};
+}catch(e){}
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(state));
+}
+
+function $(id){
+  return document.getElementById(id);
+}
+
+function toast(text){
+  const t=$("toast");
+  t.textContent=text;
+  t.style.display="block";
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>t.style.display="none",2200);
+}
+
+/* =========================================================
+   HAREKET KÜTÜPHANESİ
+   ========================================================= */
 
 const exercises=[
 
- {
-  name:"Şınav",
-  emoji:"💪",
-  part:"Göğüs",
-  sets:3,
-  reps:12,
-  equipment:"Ekipmansız",
-  desc:"Göğüs, omuz ve arka kol"
- },
+/* GÖĞÜS */
+["Göğüs","Şınav","Ekipmansız","12","Göğüs, Triceps","Temel şınav hareketi.","Vücudunu düz tut, göğsünü yere yaklaştır ve kontrollü yüksel."],
+["Göğüs","Geniş Tutuş Şınav","Ekipmansız","12","Göğüs","Eller omuzdan daha geniş.","Dirsekleri kontrollü şekilde bükerek göğsünü yere yaklaştır."],
+["Göğüs","Dar Tutuş Şınav","Ekipmansız","10","Göğüs, Triceps","Dar el pozisyonu.","Dirsekleri gövdeye yakın tut."],
+["Göğüs","Elmas Şınav","Ekipmansız","8","Triceps, Göğüs","Eller elmas şeklinde.","Belini düşürmeden kontrollü tekrar yap."],
+["Göğüs","Diz Üstü Şınav","Ekipmansız","15","Göğüs","Başlangıç seviyesi.","Dizlerden destek alarak düz çizgiyi koru."],
+["Göğüs","Incline Şınav","Sehpa","12","Üst Göğüs","Eller yükseltilmiş yüzeyde.","Göğsünü yüzeye doğru indir."],
+["Göğüs","Decline Şınav","Sehpa","10","Üst Göğüs, Omuz","Ayaklar yükseltilmiş.","Core bölgesini sıkı tut."],
+["Göğüs","Dambıl Bench Press","Dambıl","10","Göğüs, Triceps","Dambıllarla press.","Dambılları göğüs hizasında kontrollü indir."],
+["Göğüs","Dambıl Incline Press","Dambıl","10","Üst Göğüs","Eğimli press.","Omuzlarını geriye al."],
+["Göğüs","Dambıl Fly","Dambıl","12","Göğüs","Dambılları yana aç.","Dirsekleri hafif kırık tut."],
+["Göğüs","Band Chest Press","Direnç Bandı","15","Göğüs","Band ile göğüs press.","Bandı arkadan sabitle."],
 
- {
-  name:"Diz Üstü Şınav",
-  emoji:"🧎",
-  part:"Göğüs",
-  sets:3,
-  reps:10,
-  equipment:"Ekipmansız",
-  desc:"Başlangıç seviyesi göğüs"
- },
+/* SIRT */
+["Sırt","Superman","Ekipmansız","15","Bel, Sırt","Yerde sırt aktivasyonu.","Kollar ve bacakları kontrollü kaldır."],
+["Sırt","Bird Dog","Ekipmansız","12","Sırt, Core","Denge hareketi.","Karşı kol ve bacağı uzat."],
+["Sırt","Bent Over Row","Dambıl","12","Sırt, Biceps","Öne eğilerek row.","Sırtını düz tut."],
+["Sırt","Tek Kol Dambıl Row","Dambıl","12","Kanat, Biceps","Tek kol row.","Dirseği kalçaya doğru çek."],
+["Sırt","Dambıl Row","Dambıl","12","Sırt","Çift dambıl row.","Omuzları kulaklara kaldırma."],
+["Sırt","Resistance Band Row","Direnç Bandı","15","Sırt","Band row.","Kürek kemiklerini birbirine yaklaştır."],
+["Sırt","Barfiks","Barfiks Barı","6","Sırt, Biceps","Vücut ağırlığı barfiks.","Çeneyi bara doğru getir."],
+["Sırt","Chin Up","Barfiks Barı","6","Biceps, Sırt","Ters tutuş barfiks.","Kontrollü şekilde yüksel."],
+["Sırt","Dambıl Pullover","Dambıl","12","Sırt, Göğüs","Baş üzerinden dambıl.","Hareketi yavaş yap."],
+["Sırt","Band Face Pull","Direnç Bandı","15","Arka Omuz, Sırt","Bandı yüze doğru çek.","Dirsekleri dışarı aç."],
 
- {
-  name:"Dumbbell Press",
-  emoji:"🏋️",
-  part:"Göğüs",
-  sets:3,
-  reps:10,
-  equipment:"Dambıl",
-  desc:"Dambıl ile göğüs"
- },
+/* BICEPS */
+["Biceps","Dambıl Curl","Dambıl","12","Biceps","Klasik curl.","Dirsekleri sabit tut."],
+["Biceps","Hammer Curl","Dambıl","12","Biceps, Ön Kol","Nötr tutuş.","Dambılı omuza doğru kaldır."],
+["Biceps","Concentration Curl","Dambıl","10","Biceps","Tek kol konsantrasyon curl.","Dirseği bacağın içine sabitle."],
+["Biceps","Alternating Curl","Dambıl","12","Biceps","Sıralı curl.","Belini kullanmadan kaldır."],
+["Biceps","Band Curl","Direnç Bandı","15","Biceps","Band ile curl.","Dirsekleri gövdeye yakın tut."],
+["Biceps","Reverse Curl","Dambıl","12","Biceps, Ön Kol","Ters tutuş curl.","Bilekleri düz tut."],
+["Biceps","Zottman Curl","Dambıl","10","Biceps, Ön Kol","Yukarı normal, aşağı ters.","İnişi yavaş gerçekleştir."],
 
- {
-  name:"Bent Over Row",
-  emoji:"🪽",
-  part:"Sırt",
-  sets:3,
-  reps:12,
-  equipment:"Dambıl",
-  desc:"Sırt kasları"
- },
+/* TRICEPS */
+["Triceps","Bench Dip","Sehpa","10","Triceps","Sehpa dips.","Omuzları zorlamadan kontrollü in."],
+["Triceps","Dambıl Overhead Extension","Dambıl","12","Triceps","Baş üstü extension.","Dirsekleri içeri yakın tut."],
+["Triceps","Dambıl Kickback","Dambıl","12","Triceps","Kickback.","Üst kolu sabit tut."],
+["Triceps","Close Grip Şınav","Ekipmansız","10","Triceps, Göğüs","Dar şınav.","Dirsekleri gövdeye yakın tut."],
+["Triceps","Diamond Şınav","Ekipmansız","8","Triceps","Elmas tutuş.","Core'u sıkı tut."],
+["Triceps","Band Pushdown","Direnç Bandı","15","Triceps","Band pushdown.","Sadece dirsekten hareket et."],
+["Triceps","Lying Dumbbell Extension","Dambıl","10","Triceps","Yatarak extension.","Dambılları kontrollü indir."],
 
- {
-  name:"Band Row",
-  emoji:"🪽",
-  part:"Sırt",
-  sets:3,
-  reps:12,
-  equipment:"Direnç Bandı",
-  desc:"Lastik ile sırt"
- },
+/* OMUZ */
+["Omuz","Shoulder Press","Dambıl","10","Omuz","Dambıl omuz press.","Dambılları baş üstüne kontrollü it."],
+["Omuz","Arnold Press","Dambıl","10","Omuz","Arnold press.","Hareket boyunca kontrolü koru."],
+["Omuz","Lateral Raise","Dambıl","12","Yan Omuz","Yana açış.","Omuz hizasına kadar kaldır."],
+["Omuz","Front Raise","Dambıl","12","Ön Omuz","Öne açış.","Belden destek alma."],
+["Omuz","Rear Delt Fly","Dambıl","12","Arka Omuz","Öne eğilerek açış.","Kürek kemiklerini kontrollü hareket ettir."],
+["Omuz","Upright Row","Dambıl","10","Omuz, Trapez","Dambılları yukarı çek.","Omuzda ağrı olursa hareketi bırak."],
+["Omuz","Pike Push-up","Ekipmansız","8","Omuz, Triceps","Kalçayı yukarı kaldır.","Başını ellerin arasına doğru indir."],
 
- {
-  name:"Barfiks",
-  emoji:"🪽",
-  part:"Sırt",
-  sets:3,
-  reps:6,
-  equipment:"Barfiks",
-  desc:"Sırt ve kol"
- },
+/* BACAK */
+["Bacak","Squat","Ekipmansız","15","Quadriceps, Kalça","Temel squat.","Dizleri ayak yönünde takip ettir."],
+["Bacak","Sumo Squat","Ekipmansız","15","İç Bacak, Kalça","Geniş duruş.","Dizleri dışa doğru takip ettir."],
+["Bacak","Jump Squat","Ekipmansız","10","Bacak, Kondisyon","Sıçramalı squat.","Yumuşak iniş yap."],
+["Bacak","Bulgarian Split Squat","Sehpa","10","Quadriceps, Kalça","Tek bacak squat.","Ön ayağın topuğunu yere bas."],
+["Bacak","Lunge","Ekipmansız","12","Bacak, Kalça","Öne lunge.","Dizini kontrollü indir."],
+["Bacak","Reverse Lunge","Ekipmansız","12","Bacak, Kalça","Geri adım lunge.","Dengeyi koru."],
+["Bacak","Walking Lunge","Ekipmansız","12","Bacak","Yürüyüş lunge.","Adımları kontrollü at."],
+["Bacak","Side Lunge","Ekipmansız","10","İç Bacak, Kalça","Yana lunge.","Kalçayı geriye gönder."],
+["Bacak","Step Up","Sehpa","12","Bacak, Kalça","Yükseltiye çıkış.","Öndeki bacakla kontrollü yüksel."],
+["Bacak","Goblet Squat","Dambıl","12","Bacak, Kalça","Göğüs önünde dambıl.","Dik gövdeyi koru."],
+["Bacak","Romanian Deadlift","Dambıl","12","Hamstring, Kalça","Kalça menteşesi.","Sırtı düz tut."],
+["Bacak","Calf Raise","Ekipmansız","20","Baldır","Parmak ucuna yüksel.","Üst noktada kısa sıkıştır."],
+["Bacak","Single Leg Calf Raise","Ekipmansız","15","Baldır","Tek bacak baldır.","Destek alabilirsin."],
+["Bacak","Wall Sit","Ekipmansız","30","Quadriceps","Duvara oturuş.","Dizleri yaklaşık 90 derece tut."],
+["Bacak","Kettlebell Swing","Kettlebell","15","Kalça, Bacak","Kettlebell swing.","Hareketi kalçadan başlat."],
 
- {
-  name:"Biceps Curl",
-  emoji:"💪",
-  part:"Kollar",
-  sets:3,
-  reps:12,
-  equipment:"Dambıl",
-  desc:"Biceps"
- },
+/* KARIN */
+["Karın","Crunch","Ekipmansız","15","Karın","Temel karın.","Boynu çekmeden gövdeyi kaldır."],
+["Karın","Mekik","Ekipmansız","15","Karın","Klasik mekik.","Kontrollü kalk ve in."],
+["Karın","Reverse Crunch","Ekipmansız","12","Alt Karın","Kalçayı kaldır.","Belini kontrollü kullan."],
+["Karın","Leg Raise","Ekipmansız","10","Alt Karın","Bacak kaldırma.","Belin yerden aşırı kalkmasın."],
+["Karın","Bicycle Crunch","Ekipmansız","20","Karın, Oblik","Bisiklet mekik.","Karşı dirsek-diz yaklaşsın."],
+["Karın","Russian Twist","Ekipmansız","20","Oblik, Core","Gövde rotasyonu.","Belini kontrollü döndür."],
+["Karın","Plank","Ekipmansız","30","Core","Statik plank.","Kalça ne çok yukarı ne çok aşağı."],
+["Karın","Side Plank","Ekipmansız","20","Oblik","Yan plank.","Vücudu düz tut."],
+["Karın","Mountain Climber","Ekipmansız","20","Karın, Kardiyo","Dizleri göğse çek.","Kalçayı fazla kaldırma."],
+["Karın","Plank Shoulder Tap","Ekipmansız","20","Core","Plankte omuz dokunuşu.","Kalçayı mümkün olduğunca sabit tut."],
+["Karın","Dead Bug","Ekipmansız","12","Core","Kontrollü core.","Belini zemine yakın tut."],
+["Karın","Flutter Kicks","Ekipmansız","20","Alt Karın","Bacak çırpma.","Hareketi kontrollü yap."],
+["Karın","V-Ups","Ekipmansız","10","Karın","V mekik.","Gövde ve bacakları birlikte kaldır."],
+["Karın","Heel Touch","Ekipmansız","20","Oblik","Topuk dokunuşu.","Gövdeyi yana doğru bük."],
 
- {
-  name:"Triceps Extension",
-  emoji:"💪",
-  part:"Kollar",
-  sets:3,
-  reps:12,
-  equipment:"Dambıl",
-  desc:"Arka kol"
- },
+/* FULL BODY */
+["Full Body","Burpee","Ekipmansız","10","Tüm Vücut","Kardiyo + güç.","Hareketleri kontrollü birleştir."],
+["Full Body","Jumping Jack","Ekipmansız","30","Tüm Vücut","Isınma/kardiyo.","Ritmi koru."],
+["Full Body","High Knees","Ekipmansız","30","Kardiyo","Dizleri yukarı çek.","Gövdeyi dik tut."],
+["Full Body","Skater","Ekipmansız","20","Bacak, Kardiyo","Yanal sıçrama.","Yumuşak iniş yap."],
+["Full Body","Bear Crawl","Ekipmansız","20","Tüm Vücut","Ayı yürüyüşü.","Dizleri yere yaklaştır."],
+["Full Body","Inchworm","Ekipmansız","8","Core, Omuz","Öne yürüme.","Kalçadan kontrollü eğil."],
+["Full Body","Thruster","Dambıl","10","Bacak, Omuz","Squat + press.","Hareketi tek akışta yap."],
+["Full Body","Squat + Press","Dambıl","10","Tüm Vücut","Squat ve press.","Önce squat sonra press."],
+["Full Body","Kettlebell Swing","Kettlebell","15","Kalça, Core","Patlayıcı kalça hareketi.","Belden değil kalçadan güç üret."],
 
- {
-  name:"Squat",
-  emoji:"🦵",
-  part:"Bacak",
-  sets:3,
-  reps:15,
-  equipment:"Ekipmansız",
-  desc:"Bacak ve kalça"
- },
+/* ISINMA */
+["Isınma","Arm Circles","Ekipmansız","30","Omuz","Kol çevirme.","Omuzları rahat hareket ettir."],
+["Isınma","March in Place","Ekipmansız","60","Kardiyo","Yerinde yürüme.","Ritmi yavaşça artır."],
+["Isınma","Hip Circles","Ekipmansız","30","Kalça","Kalça çevirme.","Hareket alanını kontrollü tut."],
+["Isınma","Torso Rotation","Ekipmansız","30","Gövde","Gövde rotasyonu.","Belini zorlamadan dön."],
 
- {
-  name:"Lunge",
-  emoji:"🏃",
-  part:"Bacak",
-  sets:3,
-  reps:10,
-  equipment:"Ekipmansız",
-  desc:"Bacak ve kalça"
- },
-
- {
-  name:"Goblet Squat",
-  emoji:"🏋️",
-  part:"Bacak",
-  sets:3,
-  reps:12,
-  equipment:"Kettlebell",
-  desc:"Kettlebell squat"
- },
-
- {
-  name:"Shoulder Press",
-  emoji:"🏋️",
-  part:"Omuz",
-  sets:3,
-  reps:10,
-  equipment:"Dambıl",
-  desc:"Omuz kasları"
- },
-
- {
-  name:"Lateral Raise",
-  emoji:"🏋️",
-  part:"Omuz",
-  sets:3,
-  reps:12,
-  equipment:"Dambıl",
-  desc:"Yan omuz"
- },
-
- {
-  name:"Mekik",
-  emoji:"🔥",
-  part:"Karın",
-  sets:3,
-  reps:15,
-  equipment:"Ekipmansız",
-  desc:"Karın kasları"
- },
-
- {
-  name:"Plank",
-  emoji:"🔥",
-  part:"Karın",
-  sets:3,
-  reps:30,
-  equipment:"Ekipmansız",
-  desc:"Core bölgesi"
- }
-
+/* ESNEME */
+["Esneme","Göğüs Esnetme","Ekipmansız","30","Göğüs","Göğüs açma.","Ağrı noktasına gitme."],
+["Esneme","Omuz Esnetme","Ekipmansız","30","Omuz","Omuz esnetme.","Nazikçe ger."],
+["Esneme","Quadriceps Esnetme","Ekipmansız","30","Bacak","Ön bacak esnetme.","Dizleri yan yana tut."],
+["Esneme","Hamstring Esnetme","Ekipmansız","30","Arka Bacak","Arka bacak esnetme.","Belden aşırı yuvarlanma."],
+["Esneme","Baldır Esnetme","Ekipmansız","30","Baldır","Baldır esnetme.","Topuğu yere doğru uzat."]
 ];
 
+/* =========================================================
+   SAYFA SİSTEMİ
+   ========================================================= */
+
+function showPage(id){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  const page=$(id);
+  if(page) page.classList.add("active");
+
+  document.querySelectorAll(".navbtn").forEach(b=>{
+    b.classList.toggle("active",b.dataset.page===id);
+  });
+
+  window.scrollTo({top:0,behavior:"smooth"});
+  updateAll();
+}
+
+/* =========================================================
+   VÜCUT BÖLGESİ
+   ========================================================= */
+
+let currentPart="Göğüs";
+
+function openPart(part){
+  currentPart=part;
+  $("bodyTitle").textContent=part;
+  $("exerciseSearch").value="";
+  $("equipmentFilter").value="Tümü";
+  renderExercises();
+  showPage("bodypart");
+}
+
+function renderExercises(){
+  const list=$("exerciseList");
+  const search=$("exerciseSearch").value.toLowerCase();
+  const filter=$("equipmentFilter").value;
+
+  list.innerHTML="";
+
+  let arr=exercises.filter(x=>x[0]===currentPart);
+
+  if(search){
+    arr=arr.filter(x=>
+      x[1].toLowerCase().includes(search) ||
+      x[4].toLowerCase().includes(search)
+    );
+  }
+
+  if(filter!=="Tümü"){
+    arr=arr.filter(x=>x[2]===filter);
+  }
+
+  if(!arr.length){
+    list.innerHTML='<div class="card"><b>Hareket bulunamadı.</b></div>';
+    return;
+  }
+
+  arr.forEach((ex,index)=>{
+    const fav=state.favorites.includes(ex[1]);
+
+    const div=document.createElement("div");
+    div.className="exercise";
+
+    div.innerHTML=`
+      <div class="exerciseIcon">💪</div>
+      <div class="exerciseInfo">
+        <b>${ex[1]}</b>
+        <small>${ex[2]} • ${ex[4]}</small>
+      </div>
+      <div class="exerciseActions">
+        <button class="circle star" data-fav="${escapeHtml(ex[1])}">
+          ${fav?"⭐":"☆"}
+        </button>
+        <button class="circle" data-open="${index}">▶</button>
+      </div>
+    `;
+
+    div.querySelector("[data-fav]").addEventListener("click",()=>{
+      toggleFavorite(ex[1]);
+    });
+
+    div.querySelector("[data-open]").addEventListener("click",()=>{
+      openExercise(ex);
+    });
+
+    list.appendChild(div);
+  });
+}
+
+function escapeHtml(str){
+  return String(str).replace(/"/g,"&quot;");
+}
+
+function toggleFavorite(name){
+  if(state.favorites.includes(name)){
+    state.favorites=state.favorites.filter(x=>x!==name);
+    toast("Favorilerden çıkarıldı");
+  }else{
+    state.favorites.push(name);
+    toast("⭐ Favorilere eklendi");
+  }
+
+  save();
+  renderExercises();
+  renderFavorites();
+}
+
+function renderFavorites(){
+  const box=$("favoritesList");
+
+  if(!state.favorites.length){
+    box.innerHTML='<p class="mini">Henüz favori hareket eklemedin.</p>';
+    return;
+  }
+
+  box.innerHTML="";
+
+  state.favorites.forEach(name=>{
+    const ex=exercises.find(x=>x[1]===name);
+    if(!ex)return;
+
+    const b=document.createElement("button");
+    b.className="secondary";
+    b.style.width="100%";
+    b.style.marginBottom="8px";
+    b.textContent="⭐ "+name;
+    b.onclick=()=>openExercise(ex);
+    box.appendChild(b);
+  });
+}
+
+/* =========================================================
+   HAREKET DETAYI
+   ========================================================= */
+
+function openExercise(ex){
+  const fav=state.favorites.includes(ex[1]);
+
+  $("modalContent").innerHTML=`
+    <span class="badge">${ex[0]}</span>
+    <span class="badge">${ex[2]}</span>
+
+    <h1>${ex[1]}</h1>
+
+    <p><b>🎯 Hedef:</b> ${ex[4]}</p>
+    <p><b>🔢 Önerilen tekrar:</b> ${ex[3]}</p>
+
+    <div class="card">
+      <h3>📖 Nasıl Yapılır?</h3>
+      <p>${ex[6]}</p>
+    </div>
+
+    <div class="card">
+      <h3>⚠️ Dikkat</h3>
+      <p>Hareketi kontrollü yap. Ağrı hissedersen hareketi bırak.</p>
+    </div>
+
+    <button class="primary" id="modalStart">
+      ANTRENMANA EKLE
+    </button>
+
+    <button class="secondary" style="width:100%;margin-top:10px" id="modalFav">
+      ${fav?"⭐ Favoriden Çıkar":"☆ Favoriye Ekle"}
+    </button>
+
+    <button class="secondary" style="width:100%;margin-top:10px" id="modalReplace">
+      🔄 BENZER HAREKET BUL
+    </button>
+  `;
+
+  $("exerciseModal").classList.add("show");
+
+  $("modalStart").onclick=()=>{
+    closeModal();
+    startSingle(ex);
+  };
+
+  $("modalFav").onclick=()=>{
+    toggleFavorite(ex[1]);
+    openExercise(ex);
+  };
+
+  $("modalReplace").onclick=()=>{
+    const alternatives=exercises.filter(x=>
+      x[0]===ex[0] && x[1]!==ex[1]
+    );
+
+    if(!alternatives.length){
+      toast("Alternatif bulunamadı");
+      return;
+    }
+
+    const alt=alternatives[Math.floor(Math.random()*alternatives.length)];
+    openExercise(alt);
+    toast("🔄 Alternatif hareket seçildi");
+  };
+}
+
+function closeModal(){
+  $("exerciseModal").classList.remove("show");
+}
+
+/* =========================================================
+   ANTRENMAN
+   ========================================================= */
 
 let workoutExercises=[];
 let workoutIndex=0;
-let currentSet=1;
-let timer=30;
+let timerSeconds=30;
 let timerInterval=null;
-let running=false;
-let restMode=false;
-
-
-/* =========================
-   KAYDET
-========================= */
-
-function saveState(){
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(state)
-  );
-}
-
-
-/* =========================
-   TOAST
-========================= */
-
-function showToast(message){
-
-  const toast=document.getElementById("toast");
-
-  toast.textContent=message;
-  toast.classList.add("show");
-
-  setTimeout(()=>{
-    toast.classList.remove("show");
-  },2200);
-}
-
-
-/* =========================
-   SAYFA DEĞİŞTİR
-========================= */
-
-function showPage(pageId){
-
-  document.querySelectorAll(".page")
-    .forEach(page=>{
-      page.classList.remove("active");
-    });
-
-  const target=document.getElementById(pageId);
-
-  if(!target){
-    console.error("Sayfa bulunamadı:",pageId);
-    return;
-  }
-
-  target.classList.add("active");
-
-  window.scrollTo({
-    top:0,
-    behavior:"smooth"
-  });
-
-  update();
-
-}
-
-
-/* =========================
-   BÖLGE AÇ
-========================= */
-
-function openPart(part){
-
-  const title=document.getElementById("partTitle");
-  const list=document.getElementById("exerciseList");
-
-  title.textContent=part;
-  list.innerHTML="";
-
-  const selected=exercises.filter(
-    ex=>ex.part===part
-  );
-
-  if(selected.length===0){
-
-    list.innerHTML=`
-      <div class="card">
-        <h3>Bu bölge için hareket bulunamadı.</h3>
-      </div>
-    `;
-
-    showPage("part");
-    return;
-  }
-
-
-  selected.forEach(ex=>{
-
-    const card=document.createElement("div");
-
-    card.className="exercise-card";
-
-    card.innerHTML=`
-
-      <div class="exercise-emoji">
-        ${ex.emoji}
-      </div>
-
-      <div class="exercise-main">
-
-        <h3>${ex.name}</h3>
-
-        <p>
-          ${ex.sets} set × ${ex.reps}
-          • ${ex.equipment}
-        </p>
-
-      </div>
-
-      <button
-        class="circle-btn"
-        type="button">
-        ▶️
-      </button>
-    `;
-
-
-    card.querySelector(".circle-btn")
-      .addEventListener("click",function(){
-
-        startSingle(ex);
-
-      });
-
-
-    list.appendChild(card);
-
-  });
-
-
-  showPage("part");
-
-}
-
-
-/* =========================
-   TEK HAREKET
-========================= */
+let paused=false;
+let currentSets=3;
+let completedSets=0;
 
 function startSingle(ex){
-
   workoutExercises=[ex];
-
   workoutIndex=0;
-
-  currentSet=1;
-
-  openWorkout();
-
+  currentSets=3;
+  completedSets=0;
+  startWorkout();
 }
-
-
-/* =========================
-   BUGÜN
-========================= */
 
 function startToday(){
-
-  workoutExercises=[
-
-    exercises[0],
-    exercises[3],
-    exercises[8],
-    exercises[11],
-    exercises[13]
-
-  ];
+  workoutExercises=shuffle(
+    exercises.filter(x=>
+      ["Göğüs","Sırt","Bacak","Omuz","Karın"].includes(x[0]) &&
+      x[2]==="Ekipmansız"
+    )
+  ).slice(0,8);
 
   workoutIndex=0;
-  currentSet=1;
-
-  openWorkout();
-
+  currentSets=3;
+  completedSets=0;
+  startWorkout();
 }
 
+function createProgram(){
+  const min=Number($("timeSelect").value);
+  const equipment=$("equipmentSelect").value;
 
-/* =========================
-   PROGRAM OLUŞTUR
-========================= */
+  let arr=exercises.filter(x=>{
+    if(equipment==="Ekipmansız") return x[2]==="Ekipmansız";
+    return x[2]===equipment;
+  });
 
-function createWorkout(){
-
-  const equipment=
-    document.getElementById("equipment").value;
-
-  let list=exercises.filter(ex=>
-    ex.equipment==="Ekipmansız" ||
-    ex.equipment===equipment
-  );
-
-  if(list.length<3){
-
-    list=exercises.filter(
-      ex=>ex.equipment==="Ekipmansız"
-    );
-
+  if(!arr.length){
+    arr=exercises.filter(x=>x[2]==="Ekipmansız");
   }
 
-  workoutExercises=list.slice(0,6);
+  const count=Math.max(3,Math.min(10,Math.round(min/3)));
+
+  workoutExercises=shuffle(arr).slice(0,count);
+  workoutIndex=0;
+  completedSets=0;
+  startWorkout();
+}
+
+function quickWorkout(min){
+  const count=Math.max(3,Math.min(8,Math.round(min/3)));
+
+  workoutExercises=shuffle(
+    exercises.filter(x=>x[2]==="Ekipmansız")
+  ).slice(0,count);
 
   workoutIndex=0;
-  currentSet=1;
-
-  showToast("⚡ Program hazır");
-
-  setTimeout(()=>{
-    openWorkout();
-  },300);
-
+  completedSets=0;
+  startWorkout();
 }
 
-
-/* =========================
-   HIZLI ANTRENMAN
-========================= */
-
-function quickWorkout(minutes){
-
-  if(minutes===10){
-
-    workoutExercises=[
-      exercises[0],
-      exercises[8],
-      exercises[13]
-    ];
-
-  }else if(minutes===20){
-
-    workoutExercises=[
-      exercises[0],
-      exercises[3],
-      exercises[8],
-      exercises[13]
-    ];
-
-  }else{
-
-    workoutExercises=[
-      exercises[0],
-      exercises[3],
-      exercises[6],
-      exercises[8],
-      exercises[11],
-      exercises[13]
-    ];
-
-  }
-
-  workoutIndex=0;
-  currentSet=1;
-
-  openWorkout();
-
+function shuffle(arr){
+  return [...arr].sort(()=>Math.random()-0.5);
 }
 
-
-/* =========================
-   AKILLI KOÇ
-========================= */
-
-function smartCoach(){
-
-  const goal=
-    state.profile.goal ||
-    "Formda kalmak";
-
-
-  let selected=[];
-
-
-  if(goal.includes("Kas")){
-
-    selected=[
-      exercises[0],
-      exercises[6],
-      exercises[11],
-      exercises[8]
-    ];
-
-  }else if(goal.includes("Kilo")){
-
-    selected=[
-      exercises[0],
-      exercises[8],
-      exercises[9],
-      exercises[13]
-    ];
-
-  }else if(goal.includes("Güç")){
-
-    selected=[
-      exercises[0],
-      exercises[8],
-      exercises[11],
-      exercises[5]
-    ];
-
-  }else{
-
-    selected=[
-      exercises[0],
-      exercises[8],
-      exercises[13],
-      exercises[14]
-    ];
-
-  }
-
-
-  workoutExercises=selected;
-
-  workoutIndex=0;
-
-  currentSet=1;
-
-
-  document.getElementById("coachTitle")
-    .textContent=
-    "Programın hazır! 🔥";
-
-
-  document.getElementById("coachText")
-    .textContent=
-    `${goal} hedefine göre ${selected.length} hareket seçildi.`;
-
-
-  showToast("🧠 Akıllı program hazır");
-
-
-  setTimeout(()=>{
-    openWorkout();
-  },400);
-
-}
-
-
-/* =========================
-   ANTRENMAN EKRANI
-========================= */
-
-function openWorkout(){
-
-  clearInterval(timerInterval);
-
-  running=false;
-  restMode=false;
-  timer=30;
-
-
-  const ex=
-    workoutExercises[workoutIndex];
-
-
-  if(!ex){
-
-    finishWorkout();
-    return;
-
-  }
-
-
-  document.getElementById("workoutName")
-    .textContent=ex.name;
-
-
-  document.getElementById("workoutEmoji")
-    .textContent=ex.emoji;
-
-
-  document.getElementById("workoutDesc")
-    .textContent=
-    `${ex.desc} • ${ex.reps} tekrar`;
-
-
-  document.getElementById("workoutProgress")
-    .textContent=
-    `${workoutIndex+1} / ${workoutExercises.length}`;
-
-
-  document.getElementById("setInfo")
-    .textContent=
-    `Set ${currentSet} / ${ex.sets}`;
-
-
-  document.getElementById("pauseBtn")
-    .textContent="⏸️ Duraklat";
-
-
-  updateTimer();
-  updateWorkoutBar();
+function startWorkout(){
+  if(!workoutExercises.length)return;
 
   showPage("workout");
-
+  paused=false;
+  renderWorkoutExercise();
 }
 
-
-/* =========================
-   SET TAMAMLA
-========================= */
-
-function completeSet(){
-
-  const ex=
-    workoutExercises[workoutIndex];
-
-
-  if(!ex)return;
-
-
-  if(currentSet<ex.sets){
-
-    currentSet++;
-
-    startRest();
-
-  }else{
-
-    workoutIndex++;
-
-    currentSet=1;
-
-
-    if(
-      workoutIndex>=
-      workoutExercises.length
-    ){
-
-      finishWorkout();
-
-    }else{
-
-      openWorkout();
-
-    }
-
-  }
-
-}
-
-
-/* =========================
-   DİNLENME
-========================= */
-
-function startRest(){
-
+function renderWorkoutExercise(){
   clearInterval(timerInterval);
 
-  restMode=true;
-  running=true;
-  timer=30;
+  const ex=workoutExercises[workoutIndex];
 
+  $("workoutExercise").textContent=ex[1];
+  $("workoutMeta").textContent=
+    `${currentSets} set • ${ex[3]} tekrar • ${ex[2]}`;
 
-  document.getElementById("workoutName")
-    .textContent="Dinlenme";
+  $("workoutCount").textContent=
+    `${workoutIndex+1} / ${workoutExercises.length}`;
 
+  $("workoutProgress").style.width=
+    `${(workoutIndex/workoutExercises.length)*100}%`;
 
-  document.getElementById("workoutEmoji")
-    .textContent="😮‍💨";
+  timerSeconds=Number(ex[3])>=25 ? Number(ex[3]) : 30;
 
+  $("timer").textContent=timerSeconds;
+  $("pauseBtn").textContent="⏸ Duraklat";
 
-  document.getElementById("workoutDesc")
-    .textContent=
-    "Sonraki sete hazırlan.";
+  startTimer();
+}
 
-
-  document.getElementById("setInfo")
-    .textContent=
-    `Sonraki set: ${currentSet}`;
-
-
-  updateTimer();
-
+function startTimer(){
+  clearInterval(timerInterval);
 
   timerInterval=setInterval(()=>{
+    if(paused)return;
 
-    timer--;
+    timerSeconds--;
 
-    updateTimer();
-
-
-    if(timer<=0){
-
+    if(timerSeconds<0){
       clearInterval(timerInterval);
-
-      running=false;
-
-      if(navigator.vibrate){
-        navigator.vibrate([200,100,200]);
-      }
-
-      openWorkout();
-
+      timerSeconds=0;
+      toast("⏱️ Süre tamamlandı!");
+      return;
     }
 
+    $("timer").textContent=timerSeconds;
   },1000);
-
 }
 
+function completeSet(){
+  completedSets++;
 
-/* =========================
-   TIMER
-========================= */
-
-function updateTimer(){
-
-  const minutes=
-    String(Math.floor(timer/60))
-    .padStart(2,"0");
-
-  const seconds=
-    String(timer%60)
-    .padStart(2,"0");
-
-
-  document.getElementById("timer")
-    .textContent=
-    `${minutes}:${seconds}`;
-
-}
-
-
-function pauseTimer(){
-
-  if(running){
-
-    clearInterval(timerInterval);
-
-    running=false;
-
-    document.getElementById("pauseBtn")
-      .textContent="▶️ Devam";
-
-  }else{
-
-    running=true;
-
-    document.getElementById("pauseBtn")
-      .textContent="⏸️ Duraklat";
-
-
-    timerInterval=setInterval(()=>{
-
-      timer--;
-
-      updateTimer();
-
-
-      if(timer<=0){
-
-        clearInterval(timerInterval);
-
-        running=false;
-
-
-        if(restMode){
-
-          openWorkout();
-
-        }else{
-
-          completeSet();
-
-        }
-
-      }
-
-    },1000);
-
+  if(completedSets<currentSets){
+    toast(`✓ Set ${completedSets}/${currentSets} tamamlandı`);
+    timerSeconds=30;
+    $("timer").textContent=30;
+    return;
   }
 
-}
+  completedSets=0;
 
-
-function skipExercise(){
-
-  clearInterval(timerInterval);
-
-  workoutIndex++;
-  currentSet=1;
-
-  if(
-    workoutIndex>=
-    workoutExercises.length
-  ){
-
+  if(workoutIndex<workoutExercises.length-1){
+    workoutIndex++;
+    toast("🔥 Sonraki harekete geç!");
+    renderWorkoutExercise();
+  }else{
     finishWorkout();
-
-  }else{
-
-    openWorkout();
-
   }
-
 }
-
-
-/* =========================
-   ANTRENMAN İLERLEMESİ
-========================= */
-
-function updateWorkoutBar(){
-
-  const percent=
-    (workoutIndex/
-    workoutExercises.length)*100;
-
-  document.getElementById("workoutBar")
-    .style.width=
-    percent+"%";
-
-}
-
-
-/* =========================
-   ANTRENMAN BİTİŞİ
-========================= */
 
 function finishWorkout(){
-
   clearInterval(timerInterval);
 
-  const today=
-    new Date()
-    .toISOString()
-    .slice(0,10);
-
-
   state.workouts++;
-  state.minutes+=25;
-  state.calories+=180;
+  state.minutes+=Math.max(5,workoutExercises.length*3);
+  state.calories+=Math.max(40,workoutExercises.length*18);
   state.xp+=50;
 
+  const today=new Date().toISOString().slice(0,10);
 
   if(state.lastWorkout!==today){
-
     state.streak++;
-
     state.lastWorkout=today;
 
-    if(!state.history.includes(today)){
-      state.history.push(today);
+    if(!state.workoutDays.includes(today)){
+      state.workoutDays.push(today);
     }
-
   }
 
+  save();
+  toast("🎉 Antrenman tamamlandı!");
 
-  state.challengeDay=
-    Math.min(
-      30,
-      state.challengeDay+1
-    );
-
-
-  state.tasks[today]=
-    state.tasks[today]||{};
-
-
-  state.tasks[today].workout=true;
-
-
-  saveState();
-
-  update();
-
-
-  if(navigator.vibrate){
-
-    navigator.vibrate([
-      200,100,200,100,400
-    ]);
-
-  }
-
-
-  alert(
-    "🎉 ANTRENMAN TAMAMLANDI!\n\n"+
-    "+50 XP\n"+
-    "+180 kcal\n"+
-    "🔥 Seri: "+
-    state.streak+
-    " gün"
-  );
-
-
-  showPage("home");
-
+  setTimeout(()=>{
+    showPage("home");
+  },1000);
 }
 
+function pauseWorkout(){
+  paused=!paused;
+  $("pauseBtn").textContent=paused?"▶ Devam Et":"⏸ Duraklat";
+}
 
-/* =========================
+function skipExercise(){
+  if(workoutIndex<workoutExercises.length-1){
+    workoutIndex++;
+    completedSets=0;
+    renderWorkoutExercise();
+    toast("⏭ Hareket atlandı");
+  }else{
+    finishWorkout();
+  }
+}
+
+/* =========================================================
    SU
-========================= */
+   ========================================================= */
 
-function addWater(amount){
-
-  state.water=
-    Math.min(
-      5000,
-      state.water+amount
-    );
-
-  saveState();
-  update();
-
-  showToast(`💧 +${amount} ml`);
-
+function addWater(){
+  state.water=Math.min(8,state.water+1);
+  save();
+  updateWater();
+  toast("💧 Su eklendi");
 }
 
-
-function resetWater(){
-
-  state.water=0;
-
-  saveState();
-  update();
-
-  showToast("💧 Su sıfırlandı");
-
+function removeWater(){
+  state.water=Math.max(0,state.water-1);
+  save();
+  updateWater();
 }
 
+function updateWater(){
+  $("waterCount").textContent=`${state.water} / 8`;
+  $("waterProgress").style.width=`${state.water/8*100}%`;
+  $("waterHome").textContent=state.water;
+}
 
-/* =========================
+/* =========================================================
    PROFİL
-========================= */
+   ========================================================= */
+
+function loadProfile(){
+  const p=state.profile||{};
+
+  $("profileName").value=p.name||"";
+  $("profileAge").value=p.age||"";
+  $("profileHeight").value=p.height||"";
+  $("profileWeight").value=p.weight||"";
+  $("profileGoal").value=p.goal||"Kas Geliştirme";
+  $("profileLevel").value=p.level||"Başlangıç";
+
+  calculateBMI();
+}
 
 function saveProfile(){
-
   state.profile={
-    name:
-      document.getElementById("profileName").value.trim(),
-
-    age:
-      document.getElementById("profileAge").value,
-
-    height:
-      document.getElementById("profileHeight").value,
-
-    weight:
-      document.getElementById("profileWeight").value,
-
-    goal:
-      document.getElementById("profileGoal").value
+    name:$("profileName").value.trim(),
+    age:$("profileAge").value,
+    height:$("profileHeight").value,
+    weight:$("profileWeight").value,
+    goal:$("profileGoal").value,
+    level:$("profileLevel").value
   };
 
+  save();
+  calculateBMI();
+  updateAll();
 
-  saveState();
-
-  document.getElementById("saveMessage")
-    .textContent=
-    "✓ Profil başarıyla kaydedildi.";
-
-  update();
-
-  showToast("👤 Profil kaydedildi");
-
+  $("profileMessage").textContent="✓ Profil başarıyla kaydedildi.";
+  toast("👤 Profil kaydedildi");
 }
-
-
-/* =========================
-   BMI
-========================= */
 
 function calculateBMI(){
+  const h=Number($("profileHeight").value)/100;
+  const w=Number($("profileWeight").value);
 
-  const height=
-    parseFloat(state.profile.height);
-
-  const weight=
-    parseFloat(state.profile.weight);
-
-
-  const box=
-    document.getElementById("bmiResult");
-
-
-  if(!height||!weight){
-
-    box.textContent=
-      "Boy ve kilo bilgilerini gir.";
-
+  if(!h||!w){
+    $("bmiResult").textContent="Boy ve kilo bilgilerini gir.";
     return;
-
   }
 
+  const bmi=w/(h*h);
 
-  const bmi=
-    weight/
-    Math.pow(height/100,2);
+  let text="";
 
+  if(bmi<18.5)text="Düşük";
+  else if(bmi<25)text="Normal";
+  else if(bmi<30)text="Yüksek";
+  else text="Çok yüksek";
 
-  let text;
-
-
-  if(bmi<18.5){
-
-    text="Düşük aralık";
-
-  }else if(bmi<25){
-
-    text="Normal aralık";
-
-  }else if(bmi<30){
-
-    text="Yüksek aralık";
-
-  }else{
-
-    text="30 ve üzeri";
-
-  }
-
-
-  box.innerHTML=
-    `BMI: <b>${bmi.toFixed(1)}</b><br>
-     <span class="muted">${text}</span>`;
-
+  $("bmiResult").innerHTML=
+    `<b>BMI: ${bmi.toFixed(1)}</b><br>Değer: ${text}`;
 }
 
+/* =========================================================
+   İSTATİSTİK
+   ========================================================= */
 
-/* =========================
-   TAKVİM
-========================= */
+function updateStats(){
+  $("statWorkout").textContent=state.workouts;
+  $("statMinutes").textContent=state.minutes;
+  $("statCalories").textContent=state.calories;
+
+  $("xpHome").textContent=state.xp;
+
+  const level=Math.floor(state.xp/100)+1;
+  const current=state.xp%100;
+
+  $("levelText").textContent=`Seviye ${level}`;
+  $("xpProgress").style.width=current+"%";
+  $("xpText").textContent=`${current} / 100 XP`;
+
+  $("weightHome").textContent=
+    state.profile.weight ? state.profile.weight+" kg":"--";
+
+  $("streakHome").textContent=state.streak+" gün";
+
+  renderBadges();
+  renderCalendar();
+}
+
+function renderBadges(){
+  const b=$("badges");
+
+  const badges=[];
+
+  if(state.workouts>=1)badges.push("🏋️ İlk Antrenman");
+  if(state.workouts>=5)badges.push("🔥 5 Antrenman");
+  if(state.workouts>=10)badges.push("💪 10 Antrenman");
+  if(state.streak>=7)badges.push("🔥 7 Gün Seri");
+  if(state.streak>=30)badges.push("🏆 30 Gün Seri");
+  if(state.xp>=1000)badges.push("⭐ 1000 XP");
+
+  b.innerHTML=badges.length
+    ?badges.map(x=>`<span class="badge">${x}</span>`).join("")
+    :'<p class="mini">Henüz rozet kazanmadın. İlk antrenmanını yap! 💪</p>';
+}
 
 function renderCalendar(){
-
-  const calendar=
-    document.getElementById("calendar");
-
-  if(!calendar)return;
-
-  calendar.innerHTML="";
-
-
-  const today=new Date();
-
+  const c=$("calendar");
+  c.innerHTML="";
 
   for(let i=29;i>=0;i--){
+    const d=new Date();
+    d.setDate(d.getDate()-i);
 
-    const date=new Date();
+    const key=d.toISOString().slice(0,10);
+    const active=state.workoutDays.includes(key);
 
-    date.setDate(
-      today.getDate()-i
-    );
+    const b=document.createElement("button");
+    b.className=active?"primary":"secondary";
+    b.style.minHeight="50px";
+    b.textContent=d.getDate();
 
+    c.appendChild(b);
+  }
+}
 
-    const key=
-      date.toISOString()
-      .slice(0,10);
+/* =========================================================
+   CHALLENGE
+   ========================================================= */
 
-
-    const day=
-      document.createElement("div");
-
-
-    day.className="day";
-
-
-    if(state.history.includes(key)){
-      day.classList.add("done");
-    }
-
-
-    if(i===0){
-      day.classList.add("today");
-    }
-
-
-    day.innerHTML=`
-      <b>${date.getDate()}</b>
-      <small>
-        ${date.toLocaleDateString(
-          "tr-TR",
-          {weekday:"short"}
-        )}
-      </small>
-    `;
-
-
-    calendar.appendChild(day);
-
+function updateChallenge(){
+  if(!Array.isArray(state.challenge)){
+    state.challenge=[];
   }
 
+  const done=state.challenge.length;
+
+  $("challengeProgress").style.width=
+    Math.min(100,done/30*100)+"%";
+
+  $("challengeText").textContent=`${done} / 30 gün`;
+
+  const list=$("challengeList");
+  list.innerHTML="";
+
+  for(let i=1;i<=30;i++){
+    const row=document.createElement("label");
+    row.className="check";
+
+    const checked=state.challenge.includes(i);
+
+    row.innerHTML=`
+      <input type="checkbox" ${checked?"checked":""}>
+      <span>${i}. gün ${checked?"✓ Tamamlandı":"antrenmanını tamamla"}</span>
+    `;
+
+    row.querySelector("input").addEventListener("change",e=>{
+      if(e.target.checked){
+        if(!state.challenge.includes(i))state.challenge.push(i);
+      }else{
+        state.challenge=state.challenge.filter(x=>x!==i);
+      }
+
+      save();
+      updateChallenge();
+    });
+
+    list.appendChild(row);
+  }
 }
 
+/* =========================================================
+   SMART COACH
+   ========================================================= */
 
-/* =========================
-   GÖREVLER
-========================= */
+function smartCoach(){
+  const goal=state.profile.goal||"Kas Geliştirme";
 
-function saveTasks(){
+  let text="";
 
-  const today=
-    new Date()
-    .toISOString()
-    .slice(0,10);
+  if(state.streak===0){
+    text="Bugün başlangıç yapalım. 15-20 dakikalık Full Body antrenmanı öneriyorum. 🔥";
+  }else if(state.lastWorkout===new Date().toISOString().slice(0,10)){
+    text="Bugünkü antrenmanını tamamladın. Şimdi toparlanmaya ve su içmeye odaklan. 💧";
+  }else if(goal==="Kilo Verme"){
+    text="Bugün orta tempolu Full Body + kısa kardiyo yapabilirsin. ⚡";
+  }else if(goal==="Güç"){
+    text="Bugün temel kuvvet hareketlerine odaklan: squat, şınav ve row. 💪";
+  }else if(goal==="Kondisyon"){
+    text="Bugün HIIT tarzı kısa ve tempolu bir antrenman yapabilirsin. 🔥";
+  }else{
+    text="Bugün farklı kas gruplarını çalıştıran dengeli bir Full Body programı öneriyorum. 💪";
+  }
 
-
-  state.tasks[today]={
-
-    workout:
-      document.getElementById("taskWorkout").checked,
-
-    water:
-      document.getElementById("taskWater").checked,
-
-    protein:
-      document.getElementById("taskProtein").checked,
-
-    stretch:
-      document.getElementById("taskStretch").checked
-
-  };
-
-
-  saveState();
-
+  $("coachText").textContent=text;
+  toast("🧠 Programın hazır!");
 }
 
-
-/* =========================
-   GÖREVLERİ YÜKLE
-========================= */
-
-function loadTasks(){
-
-  const today=
-    new Date()
-    .toISOString()
-    .slice(0,10);
-
-
-  const tasks=
-    state.tasks[today]||{};
-
-
-  document.getElementById("taskWorkout")
-    .checked=!!tasks.workout;
-
-  document.getElementById("taskWater")
-    .checked=!!tasks.water;
-
-  document.getElementById("taskProtein")
-    .checked=!!tasks.protein;
-
-  document.getElementById("taskStretch")
-    .checked=!!tasks.stretch;
-
-}
-
-
-/* =========================
-   KARANLIK MOD
-========================= */
-
-function toggleDark(){
-
-  state.dark=!state.dark;
-
-  saveState();
-  update();
-
-  showToast(
-    state.dark?
-    "🌙 Karanlık mod":
-    "☀️ Aydınlık mod"
-  );
-
-}
-
-
-/* =========================
-   YEDEKLE
-========================= */
+/* =========================================================
+   YEDEK
+   ========================================================= */
 
 function exportData(){
+  const blob=new Blob(
+    [JSON.stringify(state,null,2)],
+    {type:"application/json"}
+  );
 
-  const blob=
-    new Blob(
-      [JSON.stringify(state,null,2)],
-      {type:"application/json"}
-    );
-
-
-  const url=
-    URL.createObjectURL(blob);
-
-
-  const a=
-    document.createElement("a");
-
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
 
   a.href=url;
-
-  a.download=
-    "demirkapi-fit-yedek.json";
-
-
-  document.body.appendChild(a);
-
+  a.download="demirkapi-fit-yedek.json";
   a.click();
-
-  a.remove();
 
   URL.revokeObjectURL(url);
 
-  showToast("💾 Yedek oluşturuldu");
-
+  toast("💾 Yedek oluşturuldu");
 }
-
-
-/* =========================
-   YEDEK YÜKLE
-========================= */
 
 function importData(){
+  $("importFile").click();
+}
 
-  const input=
-    document.createElement("input");
+function handleImport(e){
+  const file=e.target.files[0];
+  if(!file)return;
 
-  input.type="file";
-  input.accept=".json";
+  const reader=new FileReader();
 
-
-  input.addEventListener(
-    "change",
-    function(){
-
-      const file=
-        this.files[0];
-
-      if(!file)return;
-
-
-      const reader=
-        new FileReader();
-
-
-      reader.onload=function(e){
-
-        try{
-
-          state=
-            JSON.parse(e.target.result);
-
-          saveState();
-
-          update();
-
-          showToast(
-            "📥 Yedek geri yüklendi"
-          );
-
-        }catch(error){
-
-          alert(
-            "Yedek dosyası okunamadı."
-          );
-
-        }
-
-      };
-
-
-      reader.readAsText(file);
-
+  reader.onload=()=>{
+    try{
+      const data=JSON.parse(reader.result);
+      state={...state,...data};
+      save();
+      location.reload();
+    }catch(err){
+      toast("❌ Yedek okunamadı");
     }
-  );
+  };
 
-
-  input.click();
-
+  reader.readAsText(file);
 }
 
+function resetData(){
+  if(!confirm("Tüm Demirkapı Fit verileri silinsin mi?"))return;
 
-/* =========================
-   SIFIRLA
-========================= */
-
-function resetApp(){
-
-  const answer=
-    confirm(
-      "Demirkapı Fit'teki bütün kayıtlar silinsin mi?"
-    );
-
-
-  if(!answer)return;
-
-
-  localStorage.removeItem(
-    STORAGE_KEY
-  );
-
-
+  localStorage.removeItem(KEY);
   location.reload();
-
 }
 
+/* =========================================================
+   AYARLAR
+   ========================================================= */
 
-/* =========================
-   TÜM EKRANI GÜNCELLE
-========================= */
-
-function update(){
-
-  document.body.classList.toggle(
-    "dark",
-    state.dark
-  );
-
-
-  document.getElementById("homeWater")
-    .textContent=state.water;
-
-
-  document.getElementById("waterValue")
-    .textContent=state.water;
-
-
-  document.getElementById("homeWeight")
-    .textContent=
-    state.profile.weight||"-";
-
-
-  document.getElementById("homeXP")
-    .textContent=state.xp;
-
-
-  document.getElementById("totalWorkouts")
-    .textContent=state.workouts;
-
-
-  document.getElementById("totalMinutes")
-    .textContent=state.minutes;
-
-
-  document.getElementById("totalCalories")
-    .textContent=state.calories;
-
-
-  document.getElementById("totalXP")
-    .textContent=state.xp;
-
-
-  document.getElementById("streakText")
-    .textContent=
-    `🔥 ${state.streak} günlük seri`;
-
-
-  const waterPercent=
-    Math.min(
-      100,
-      state.water/2500*100
-    );
-
-
-  document.getElementById("waterBar")
-    .style.width=
-    waterPercent+"%";
-
-
-  const level=
-    Math.floor(state.xp/100)+1;
-
-
-  const levelXP=
-    state.xp%100;
-
-
-  document.getElementById("levelNumber")
-    .textContent=
-    `Seviye ${level}`;
-
-
-  document.getElementById("xpText")
-    .textContent=
-    `${levelXP} / 100 XP`;
-
-
-  document.getElementById("xpBar")
-    .style.width=
-    levelXP+"%";
-
-
-  document.getElementById("challengeDay")
-    .textContent=
-    state.challengeDay;
-
-
-  document.getElementById("challengeBar")
-    .style.width=
-    ((state.challengeDay-1)/30*100)+"%";
-
-
-  document.getElementById("profileName")
-    .value=
-    state.profile.name||"";
-
-
-  document.getElementById("profileAge")
-    .value=
-    state.profile.age||"";
-
-
-  document.getElementById("profileHeight")
-    .value=
-    state.profile.height||"";
-
-
-  document.getElementById("profileWeight")
-    .value=
-    state.profile.weight||"";
-
-
-  document.getElementById("profileGoal")
-    .value=
-    state.profile.goal||
-    "Formda kalmak";
-
-
-  calculateBMI();
-  renderCalendar();
-  loadTasks();
-
+function applyTheme(){
+  document.body.classList.toggle("dark",!!state.dark);
+  $("darkMode").checked=!!state.dark;
 }
 
+function toggleDark(){
+  state.dark=$("darkMode").checked;
+  save();
+  applyTheme();
+}
 
-/* =========================
+/* =========================================================
+   GENEL GÜNCELLEME
+   ========================================================= */
+
+function updateAll(){
+  updateWater();
+  updateStats();
+  updateChallenge();
+  renderFavorites();
+}
+
+/* =========================================================
    BUTONLAR
-   BURASI ÖNEMLİ
-========================= */
+   ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function(){
+document.addEventListener("DOMContentLoaded",()=>{
 
-    /* VÜCUT BÖLGELERİ */
+  /* NAV */
+  document.querySelectorAll("[data-page]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      showPage(btn.dataset.page);
+    });
+  });
 
-    document
-      .querySelectorAll("[data-part]")
-      .forEach(button=>{
+  /* VÜCUT */
+  document.querySelectorAll("[data-part]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      openPart(btn.dataset.part);
+    });
+  });
 
-        button.addEventListener(
-          "click",
-          function(e){
+  $("settingsBtn").onclick=()=>{
+    showPage("settings");
+  };
 
-            e.preventDefault();
+  $("todayBtn").onclick=startToday;
 
-            e.stopPropagation();
+  $("coachBtn").onclick=smartCoach;
 
-            const part=
-              this.getAttribute("data-part");
+  $("createProgramBtn").onclick=createProgram;
 
-            openPart(part);
+  document.querySelectorAll(".quick").forEach(btn=>{
+    btn.onclick=()=>quickWorkout(Number(btn.dataset.min));
+  });
 
-          }
-        );
+  $("backBody").onclick=()=>{
+    showPage("home");
+  };
 
-      });
+  $("exerciseSearch").addEventListener("input",renderExercises);
+  $("equipmentFilter").addEventListener("change",renderExercises);
 
+  $("closeModal").onclick=closeModal;
 
-    /* ALT MENÜ */
+  $("exerciseModal").addEventListener("click",e=>{
+    if(e.target===$("exerciseModal"))closeModal();
+  });
 
-    document
-      .querySelectorAll("[data-page]")
-      .forEach(button=>{
+  $("completeSetBtn").onclick=completeSet;
+  $("pauseBtn").onclick=pauseWorkout;
+  $("skipBtn").onclick=skipExercise;
 
-        button.addEventListener(
-          "click",
-          function(){
+  $("addWater").onclick=addWater;
+  $("removeWater").onclick=removeWater;
 
-            showPage(
-              this.getAttribute("data-page")
-            );
+  $("saveProfile").onclick=saveProfile;
 
-          }
-        );
+  $("profileHeight").addEventListener("input",calculateBMI);
+  $("profileWeight").addEventListener("input",calculateBMI);
 
-      });
+  $("darkMode").onchange=toggleDark;
 
+  $("exportBtn").onclick=exportData;
+  $("importBtn").onclick=importData;
+  $("importFile").addEventListener("change",handleImport);
+  $("resetBtn").onclick=resetData;
 
-    /* AYARLAR */
+  loadProfile();
+  applyTheme();
+  updateAll();
 
-    document
-      .getElementById("settingsBtn")
-      .addEventListener(
-        "click",
-        ()=>showPage("settings")
-      );
-
-
-    /* BUGÜN */
-
-    document
-      .getElementById("todayWorkoutBtn")
-      .addEventListener(
-        "click",
-        startToday
-      );
-
-
-    /* AKILLI KOÇ */
-
-    document
-      .getElementById("coachBtn")
-      .addEventListener(
-        "click",
-        smartCoach
-      );
-
-
-    /* PROGRAM */
-
-    document
-      .getElementById("createWorkoutBtn")
-      .addEventListener(
-        "click",
-        createWorkout
-      );
-
-
-    /* HIZLI PROGRAM */
-
-    document
-      .querySelectorAll("[data-quick]")
-      .forEach(button=>{
-
-        button.addEventListener(
-          "click",
-          function(){
-
-            quickWorkout(
-              Number(
-                this.getAttribute("data-quick")
-              )
-            );
-
-          }
-        );
-
-      });
-
-
-    /* GERİ */
-
-    document
-      .getElementById("backHomeBtn")
-      .addEventListener(
-        "click",
-        ()=>showPage("home")
-      );
-
-
-    document
-      .getElementById("workoutBackBtn")
-      .addEventListener(
-        "click",
-        ()=>{
-          clearInterval(timerInterval);
-          showPage("home");
-        }
-      );
-
-
-    /* SET */
-
-    document
-      .getElementById("completeSetBtn")
-      .addEventListener(
-        "click",
-        completeSet
-      );
-
-
-    /* DURAKLAT */
-
-    document
-      .getElementById("pauseBtn")
-      .addEventListener(
-        "click",
-        pauseTimer
-      );
-
-
-    /* GEÇ */
-
-    document
-      .getElementById("skipBtn")
-      .addEventListener(
-        "click",
-        skipExercise
-      );
-
-
-    /* SU */
-
-    document
-      .querySelectorAll("[data-water]")
-      .forEach(button=>{
-
-        button.addEventListener(
-          "click",
-          function(){
-
-            addWater(
-              Number(
-                this.getAttribute("data-water")
-              )
-            );
-
-          }
-        );
-
-      });
-
-
-    document
-      .getElementById("resetWaterBtn")
-      .addEventListener(
-        "click",
-        resetWater
-      );
-
-
-    /* PROFİL */
-
-    document
-      .getElementById("saveProfileBtn")
-      .addEventListener(
-        "click",
-        saveProfile
-      );
-
-
-    /* GÖREVLER */
-
-    document
-      .querySelectorAll(".check input")
-      .forEach(input=>{
-
-        input.addEventListener(
-          "change",
-          saveTasks
-        );
-
-      });
-
-
-    /* AYARLAR */
-
-    document
-      .getElementById("darkBtn")
-      .addEventListener(
-        "click",
-        toggleDark
-      );
-
-
-    document
-      .getElementById("exportBtn")
-      .addEventListener(
-        "click",
-        exportData
-      );
-
-
-    document
-      .getElementById("importBtn")
-      .addEventListener(
-        "click",
-        importData
-      );
-
-
-    document
-      .getElementById("resetBtn")
-      .addEventListener(
-        "click",
-        resetApp
-      );
-
-
-    update();
-
-  }
-);
-
+});
 </script>
 
 </body>
- </html>
+  </html>
