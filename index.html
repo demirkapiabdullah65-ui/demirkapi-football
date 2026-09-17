@@ -3,642 +3,335 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#176b3a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>Demirkapı Çiftliği - Süt Takip</title>
-
+  <meta name="theme-color" content="#111827">
+  <title>Demirkapı Fit</title>
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- ÜST BAR -->
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-icon">🐄</div>
+<header class="topbar">
+  <div>
+    <div class="logo">💪 Demirkapı Fit</div>
+    <div class="subtitle">Evde Fitness & Antrenman</div>
+  </div>
+  <button class="theme-btn" onclick="toggleTheme()">🌙</button>
+</header>
+
+<main>
+
+  <!-- ANA SAYFA -->
+  <section id="home" class="page active">
+
+    <div class="hero">
       <div>
-        <h1>Demirkapı Çiftliği</h1>
-        <span>Süt Takip Sistemi</span>
+        <span class="small-title">BUGÜNÜN ANTRENMANI</span>
+        <h1>Hazır mısın? 🔥</h1>
+        <p>Bugün kendin için bir adım daha at.</p>
+      </div>
+      <div class="hero-icon">🏋️</div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>🔥</span>
+        <strong id="streak">0</strong>
+        <small>Gün serisi</small>
+      </div>
+
+      <div class="stat-card">
+        <span>🏆</span>
+        <strong id="completed">0</strong>
+        <small>Tamamlanan</small>
+      </div>
+
+      <div class="stat-card">
+        <span>⏱️</span>
+        <strong id="minutes">0</strong>
+        <small>Dakika</small>
+      </div>
+
+      <div class="stat-card">
+        <span>💪</span>
+        <strong id="workouts">0</strong>
+        <small>Antrenman</small>
       </div>
     </div>
 
-    <button class="menu-btn" onclick="toggleMenu()">☰</button>
-  </header>
+    <div class="section-title">
+      <h2>Bugünkü Program</h2>
+      <span id="todayName"></span>
+    </div>
 
+    <div class="today-card">
+      <div class="today-left">
+        <div class="workout-badge">BUGÜN</div>
+        <h2 id="todayWorkout">Tüm Vücut</h2>
+        <p id="todayDescription">Evde ekipmansız antrenman</p>
 
-  <!-- MOBİL MENÜ -->
-  <nav id="sideMenu" class="side-menu">
+        <div class="mini-info">
+          <span>⏱️ 25 dk</span>
+          <span>🔥 Orta</span>
+          <span>🏠 Ev</span>
+        </div>
+      </div>
 
-    <button onclick="showPage('dashboard')">
-      🏠 Ana Sayfa
-    </button>
+      <button class="start-btn" onclick="openWorkout('bodyweight')">
+        ▶ Başla
+      </button>
+    </div>
 
-    <button onclick="showPage('animals')">
-      🐄 Hayvanlar
-    </button>
+    <div class="section-title">
+      <h2>Program Seç</h2>
+    </div>
 
-    <button onclick="showPage('milk')">
-      🥛 Süt Kayıtları
-    </button>
+    <div class="program-grid">
 
-    <button onclick="showPage('sales')">
-      💰 Süt Satışı
-    </button>
-
-    <button onclick="showPage('reports')">
-      📊 Raporlar
-    </button>
-
-    <button onclick="showPage('settings')">
-      ⚙️ Ayarlar
-    </button>
-
-  </nav>
-
-
-  <!-- ANA İÇERİK -->
-  <main class="container">
-
-
-    <!-- ================= ANA SAYFA ================= -->
-
-    <section id="dashboard" class="page active">
-
-      <div class="welcome">
+      <div class="program-card body" onclick="openWorkout('bodyweight')">
+        <div class="program-icon">🏠</div>
         <div>
-          <p class="small-title">HOŞ GELDİN</p>
-          <h2>Demirkapı Çiftliği</h2>
-          <p>Bugünkü süt durumunu buradan takip edebilirsin.</p>
+          <h3>Aletsiz</h3>
+          <p>Evde ekipmansız</p>
         </div>
-
-        <div class="cow-big">🐄</div>
+        <span>›</span>
       </div>
 
-
-      <div class="stats-grid">
-
-        <div class="stat-card">
-          <div class="stat-icon">🥛</div>
-          <div>
-            <span>Bugünkü Süt</span>
-            <strong id="todayMilk">0 L</strong>
-          </div>
-        </div>
-
-
-        <div class="stat-card">
-          <div class="stat-icon">🌅</div>
-          <div>
-            <span>Sabah</span>
-            <strong id="morningMilk">0 L</strong>
-          </div>
-        </div>
-
-
-        <div class="stat-card">
-          <div class="stat-icon">🌙</div>
-          <div>
-            <span>Akşam</span>
-            <strong id="eveningMilk">0 L</strong>
-          </div>
-        </div>
-
-
-        <div class="stat-card">
-          <div class="stat-icon">🐄</div>
-          <div>
-            <span>Hayvan Sayısı</span>
-            <strong id="animalCount">0</strong>
-          </div>
-        </div>
-
-
-        <div class="stat-card">
-          <div class="stat-icon">📅</div>
-          <div>
-            <span>Bu Ay</span>
-            <strong id="monthMilk">0 L</strong>
-          </div>
-        </div>
-
-
-        <div class="stat-card">
-          <div class="stat-icon">💰</div>
-          <div>
-            <span>Bu Ay Gelir</span>
-            <strong id="monthIncome">0 ₺</strong>
-          </div>
-        </div>
-
-      </div>
-
-
-      <div class="section-header">
+      <div class="program-card equipment" onclick="openWorkout('equipment')">
+        <div class="program-icon">🏋️</div>
         <div>
-          <h3>Son Süt Kayıtları</h3>
-          <p>En son eklenen kayıtlar</p>
+          <h3>Aletli</h3>
+          <p>Dambıl & ekipman</p>
         </div>
-
-        <button class="primary-btn" onclick="showPage('milk')">
-          + Süt Ekle
-        </button>
+        <span>›</span>
       </div>
 
-      <div id="recentMilk" class="records-list">
-        <div class="empty">
-          Henüz süt kaydı bulunmuyor.
-        </div>
+    </div>
+
+    <div class="quote-card">
+      <span>💬</span>
+      <div>
+        <strong>Bugünün sözü</strong>
+        <p>Küçük adımlar, büyük değişimler oluşturur.</p>
       </div>
+    </div>
 
-    </section>
+  </section>
 
 
+  <!-- PROGRAMLAR -->
+  <section id="programs" class="page">
 
-    <!-- ================= HAYVANLAR ================= -->
-
-    <section id="animals" class="page">
-
-      <div class="page-title">
-        <div>
-          <span class="small-title">HAYVAN TAKİBİ</span>
-          <h2>🐄 Hayvanlar</h2>
-          <p>Çiftlikteki hayvanlarını buradan yönet.</p>
-        </div>
-
-        <button class="primary-btn" onclick="openAnimalForm()">
-          + Hayvan Ekle
-        </button>
+    <div class="page-header">
+      <span>🏋️</span>
+      <div>
+        <h1>Programlar</h1>
+        <p>Kendine uygun antrenmanı seç.</p>
       </div>
+    </div>
 
-
-      <div id="animalForm" class="form-card hidden">
-
-        <h3>Yeni Hayvan</h3>
-
-        <div class="form-grid">
-
-          <div class="input-group">
-            <label>Küpe No</label>
-            <input id="animalTag" type="text" placeholder="Örn: TR123456">
-          </div>
-
-          <div class="input-group">
-            <label>Hayvan Adı</label>
-            <input id="animalName" type="text" placeholder="Örn: Sarıkız">
-          </div>
-
-          <div class="input-group">
-            <label>Irk</label>
-            <input id="animalBreed" type="text" placeholder="Örn: Simental">
-          </div>
-
-          <div class="input-group">
-            <label>Doğum Tarihi</label>
-            <input id="animalBirth" type="date">
-          </div>
-
-        </div>
-
-        <div class="form-buttons">
-          <button class="secondary-btn" onclick="closeAnimalForm()">
-            Vazgeç
-          </button>
-
-          <button class="primary-btn" onclick="addAnimal()">
-            Kaydet
-          </button>
-        </div>
-
+    <div class="program-large" onclick="openWorkout('bodyweight')">
+      <div class="large-icon">🏠</div>
+      <div>
+        <span class="tag">EKİPMANSIZ</span>
+        <h2>Aletsiz Ev Programı</h2>
+        <p>Şınav, squat, plank ve daha fazlası.</p>
+        <div class="large-info">⏱️ 25 dk &nbsp; • &nbsp; 🔥 Orta</div>
       </div>
+      <span class="arrow">›</span>
+    </div>
 
-
-      <div id="animalList" class="animal-grid">
-
-        <div class="empty">
-          Henüz hayvan eklenmedi.
-        </div>
-
+    <div class="program-large" onclick="openWorkout('equipment')">
+      <div class="large-icon">🏋️</div>
+      <div>
+        <span class="tag orange">EKİPMANLI</span>
+        <h2>Aletli Ev Programı</h2>
+        <p>Dambıl ve ev ekipmanlarıyla çalış.</p>
+        <div class="large-info">⏱️ 40 dk &nbsp; • &nbsp; 🔥 Orta</div>
       </div>
+      <span class="arrow">›</span>
+    </div>
 
-    </section>
+    <div class="difficulty-title">Zorluk Seviyesi</div>
+
+    <div class="difficulty-grid">
+      <button onclick="setDifficulty('Başlangıç')" class="difficulty active-difficulty">🌱 Başlangıç</button>
+      <button onclick="setDifficulty('Orta')" class="difficulty">🔥 Orta</button>
+      <button onclick="setDifficulty('İleri')" class="difficulty">⚡ İleri</button>
+    </div>
+
+  </section>
 
 
+  <!-- ANTRENMAN -->
+  <section id="workout" class="page">
 
-    <!-- ================= SÜT KAYITLARI ================= -->
-
-    <section id="milk" class="page">
-
-      <div class="page-title">
-
-        <div>
-          <span class="small-title">SÜT TAKİBİ</span>
-          <h2>🥛 Süt Kayıtları</h2>
-          <p>Sabah ve akşam sağım kayıtlarını gir.</p>
-        </div>
-
+    <div class="workout-header">
+      <button class="back-btn" onclick="showPage('home')">‹</button>
+      <div>
+        <span id="workoutType">ALETSİZ ANTRENMAN</span>
+        <h1 id="workoutTitle">Tüm Vücut</h1>
       </div>
+    </div>
 
-
-      <div class="form-card">
-
-        <h3>Yeni Süt Kaydı</h3>
-
-        <div class="form-grid">
-
-          <div class="input-group">
-            <label>Tarih</label>
-            <input id="milkDate" type="date">
-          </div>
-
-
-          <div class="input-group">
-            <label>Sağım</label>
-
-            <select id="milkSession">
-
-              <option value="Sabah">
-                🌅 Sabah
-              </option>
-
-              <option value="Akşam">
-                🌙 Akşam
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="input-group">
-            <label>Hayvan</label>
-
-            <select id="milkAnimal">
-
-              <option value="">
-                Genel Süt Kaydı
-              </option>
-
-            </select>
-
-          </div>
-
-
-          <div class="input-group">
-            <label>Süt Miktarı (Litre)</label>
-            <input id="milkAmount" type="number" step="0.1" placeholder="Örn: 18.5">
-          </div>
-
-
-          <div class="input-group">
-            <label>Yağ Oranı (%)</label>
-            <input id="milkFat" type="number" step="0.1" placeholder="Örn: 3.8">
-          </div>
-
-
-          <div class="input-group">
-            <label>Protein (%)</label>
-            <input id="milkProtein" type="number" step="0.1" placeholder="Örn: 3.2">
-          </div>
-
-        </div>
-
-
-        <div class="input-group">
-          <label>Açıklama</label>
-
-          <textarea
-            id="milkNote"
-            placeholder="İsteğe bağlı açıklama..."
-          ></textarea>
-
-        </div>
-
-
-        <button class="primary-btn full" onclick="addMilkRecord()">
-          🥛 Süt Kaydını Kaydet
-        </button>
-
+    <div class="progress-box">
+      <div class="progress-top">
+        <span>İlerleme</span>
+        <strong id="progressText">0 / 6</strong>
       </div>
-
-
-      <div class="section-header">
-
-        <div>
-          <h3>Süt Geçmişi</h3>
-          <p>Kaydedilen tüm süt kayıtları</p>
-        </div>
-
-        <button class="danger-btn" onclick="clearMilkRecords()">
-          Kayıtları Temizle
-        </button>
-
+      <div class="progress-bar">
+        <div id="progressFill"></div>
       </div>
+    </div>
 
+    <div id="exerciseList" class="exercise-list"></div>
 
-      <div id="milkList" class="table-container">
-
-        <div class="empty">
-          Henüz süt kaydı bulunmuyor.
-        </div>
-
+    <div class="rest-box">
+      <div>
+        <strong>⏱️ Dinlenme</strong>
+        <p>Setler arasında dinlen.</p>
       </div>
-
-    </section>
-
-
-
-    <!-- ================= SATIŞ ================= -->
-
-    <section id="sales" class="page">
-
-      <div class="page-title">
-
-        <div>
-          <span class="small-title">SATIŞ</span>
-          <h2>💰 Süt Satışı</h2>
-          <p>Satılan sütleri ve gelirlerini takip et.</p>
-        </div>
-
-      </div>
-
-
-      <div class="form-card">
-
-        <h3>Yeni Süt Satışı</h3>
-
-        <div class="form-grid">
-
-          <div class="input-group">
-            <label>Tarih</label>
-            <input id="saleDate" type="date">
-          </div>
-
-          <div class="input-group">
-            <label>Alıcı</label>
-            <input id="saleCustomer" type="text" placeholder="Alıcı adı">
-          </div>
-
-          <div class="input-group">
-            <label>Süt Miktarı (L)</label>
-            <input id="saleAmount" type="number" step="0.1" placeholder="Örn: 500">
-          </div>
-
-          <div class="input-group">
-            <label>Litre Fiyatı (₺)</label>
-            <input id="salePrice" type="number" step="0.01" placeholder="Örn: 18.50">
-          </div>
-
-        </div>
-
-
-        <div class="sale-preview">
-
-          <span>Toplam Tutar</span>
-
-          <strong id="saleTotal">
-            0,00 ₺
-          </strong>
-
-        </div>
-
-
-        <div class="input-group">
-          <label>Açıklama</label>
-
-          <textarea
-            id="saleNote"
-            placeholder="İsteğe bağlı açıklama..."
-          ></textarea>
-
-        </div>
-
-
-        <button class="primary-btn full" onclick="addSale()">
-          💰 Satışı Kaydet
-        </button>
-
-      </div>
-
-
-      <div class="section-header">
-
-        <div>
-          <h3>Satış Geçmişi</h3>
-        </div>
-
-      </div>
-
-
-      <div id="salesList" class="table-container">
-
-        <div class="empty">
-          Henüz satış kaydı bulunmuyor.
-        </div>
-
-      </div>
-
-    </section>
-
-
-
-    <!-- ================= RAPORLAR ================= -->
-
-    <section id="reports" class="page">
-
-      <div class="page-title">
-
-        <div>
-          <span class="small-title">ANALİZ</span>
-          <h2>📊 Raporlar</h2>
-          <p>Süt üretimini ve satışlarını incele.</p>
-        </div>
-
-      </div>
-
-
-      <div class="report-cards">
-
-        <div class="report-card">
-          <span>Toplam Süt</span>
-          <strong id="reportTotalMilk">0 L</strong>
-        </div>
-
-        <div class="report-card">
-          <span>Ortalama Günlük Süt</span>
-          <strong id="reportAverageMilk">0 L</strong>
-        </div>
-
-        <div class="report-card">
-          <span>Toplam Satış</span>
-          <strong id="reportTotalSales">0 ₺</strong>
-        </div>
-
-        <div class="report-card">
-          <span>Satılan Süt</span>
-          <strong id="reportSoldMilk">0 L</strong>
-        </div>
-
-      </div>
-
-
-      <div class="form-card">
-
-        <h3>📅 Tarih Aralığı</h3>
-
-        <div class="form-grid">
-
-          <div class="input-group">
-            <label>Başlangıç</label>
-            <input id="reportStart" type="date">
-          </div>
-
-          <div class="input-group">
-            <label>Bitiş</label>
-            <input id="reportEnd" type="date">
-          </div>
-
-        </div>
-
-        <button class="primary-btn full" onclick="generateReport()">
-          Raporu Hesapla
-        </button>
-
-      </div>
-
-
-      <div id="reportResult" class="report-result"></div>
-
-    </section>
-
-
-
-    <!-- ================= AYARLAR ================= -->
-
-    <section id="settings" class="page">
-
-      <div class="page-title">
-
-        <div>
-          <span class="small-title">SİSTEM</span>
-          <h2>⚙️ Ayarlar</h2>
-          <p>Uygulama ayarlarını yönet.</p>
-        </div>
-
-      </div>
-
-
-      <div class="form-card">
-
-        <h3>Çiftlik Bilgileri</h3>
-
-        <div class="input-group">
-
-          <label>Çiftlik Adı</label>
-
-          <input
-            id="farmName"
-            type="text"
-            value="Demirkapı Çiftliği"
-          >
-
-        </div>
-
-
-        <div class="input-group">
-
-          <label>Varsayılan Litre Fiyatı (₺)</label>
-
-          <input
-            id="defaultPrice"
-            type="number"
-            step="0.01"
-            placeholder="0.00"
-          >
-
-        </div>
-
-
-        <button class="primary-btn full" onclick="saveSettings()">
-          Ayarları Kaydet
-        </button>
-
-      </div>
-
-
-      <div class="form-card">
-
-        <h3>💾 Veri Yönetimi</h3>
-
-        <p class="settings-info">
-          Kayıtların bu cihazın tarayıcısında saklanır.
-          İnternet olmasa da kayıt ekleyebilirsin.
-        </p>
-
-
-        <div class="settings-buttons">
-
-          <button class="secondary-btn" onclick="exportData()">
-            📥 Verileri Yedekle
-          </button>
-
-          <button class="secondary-btn" onclick="document.getElementById('importFile').click()">
-            📤 Yedek Geri Yükle
-          </button>
-
-          <input
-            id="importFile"
-            type="file"
-            accept=".json"
-            hidden
-            onchange="importData(event)"
-          >
-
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-
-  <!-- ALT MENÜ -->
-  <nav class="bottom-nav">
-
-    <button onclick="showPage('dashboard')">
-      <span>🏠</span>
-      <small>Ana Sayfa</small>
+      <button onclick="startRest()">60 sn</button>
+    </div>
+
+    <button class="finish-btn" onclick="finishWorkout()">
+      ✅ Antrenmanı Tamamla
     </button>
 
-    <button onclick="showPage('animals')">
-      <span>🐄</span>
-      <small>Hayvanlar</small>
-    </button>
+  </section>
 
-    <button onclick="showPage('milk')">
-      <span>🥛</span>
-      <small>Süt</small>
-    </button>
 
-    <button onclick="showPage('sales')">
-      <span>💰</span>
-      <small>Satış</small>
-    </button>
+  <!-- İSTATİSTİK -->
+  <section id="stats" class="page">
 
-    <button onclick="showPage('reports')">
+    <div class="page-header">
       <span>📊</span>
-      <small>Rapor</small>
-    </button>
+      <div>
+        <h1>İstatistikler</h1>
+        <p>Gelişimini takip et.</p>
+      </div>
+    </div>
 
-  </nav>
+    <div class="big-stat">
+      <span>🔥</span>
+      <div>
+        <strong id="statStreak">0</strong>
+        <p>Günlük seri</p>
+      </div>
+    </div>
+
+    <div class="stats-list">
+
+      <div class="stat-row">
+        <span>🏆</span>
+        <div>
+          <strong id="statCompleted">0</strong>
+          <small>Tamamlanan antrenman</small>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <span>⏱️</span>
+        <div>
+          <strong id="statMinutes">0 dk</strong>
+          <small>Toplam antrenman süresi</small>
+        </div>
+      </div>
+
+      <div class="stat-row">
+        <span>💪</span>
+        <div>
+          <strong id="statExercises">0</strong>
+          <small>Tamamlanan hareket</small>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="weekly-card">
+      <h2>Bu Hafta</h2>
+      <div class="week-days">
+        <div><span>Pzt</span><i id="day1"></i></div>
+        <div><span>Sal</span><i id="day2"></i></div>
+        <div><span>Çar</span><i id="day3"></i></div>
+        <div><span>Per</span><i id="day4"></i></div>
+        <div><span>Cum</span><i id="day5"></i></div>
+        <div><span>Cmt</span><i id="day6"></i></div>
+        <div><span>Paz</span><i id="day7"></i></div>
+      </div>
+    </div>
+
+  </section>
 
 
-  <!-- BİLDİRİM -->
-  <div id="toast" class="toast"></div>
+  <!-- AYARLAR -->
+  <section id="settings" class="page">
+
+    <div class="page-header">
+      <span>⚙️</span>
+      <div>
+        <h1>Ayarlar</h1>
+        <p>Uygulamayı kişiselleştir.</p>
+      </div>
+    </div>
+
+    <div class="settings-card">
+
+      <label>Adın</label>
+      <input id="userName" type="text" placeholder="Adını yaz">
+
+      <label>Hedef</label>
+      <select id="goal">
+        <option>Kas geliştirme</option>
+        <option>Kilo verme</option>
+        <option>Kondisyon</option>
+        <option>Genel fitness</option>
+      </select>
+
+      <button class="save-btn" onclick="saveSettings()">
+        💾 Kaydet
+      </button>
+
+    </div>
+
+    <div class="danger-card">
+      <h3>Verileri Sıfırla</h3>
+      <p>Tüm antrenman geçmişini ve istatistikleri siler.</p>
+      <button onclick="resetData()">Verileri Sıfırla</button>
+    </div>
+
+  </section>
+
+</main>
 
 
-  <script src="script.js"></script>
+<!-- ALT MENÜ -->
+<nav class="bottom-nav">
+
+  <button class="nav-item active" onclick="showPage('home', this)">
+    <span>🏠</span>
+    <small>Ana Sayfa</small>
+  </button>
+
+  <button class="nav-item" onclick="showPage('programs', this)">
+    <span>🏋️</span>
+    <small>Programlar</small>
+  </button>
+
+  <button class="nav-item" onclick="showPage('stats', this)">
+    <span>📊</span>
+    <small>İstatistik</small>
+  </button>
+
+  <button class="nav-item" onclick="showPage('settings', this)">
+    <span>⚙️</span>
+    <small>Ayarlar</small>
+  </button>
+
+</nav>
+
+<div id="toast"></div>
+
+<script src="script.js"></script>
 
 </body>
 </html>
